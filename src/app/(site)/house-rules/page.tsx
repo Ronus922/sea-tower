@@ -3,19 +3,20 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
-import { openSans } from "@/lib/fonts";
+import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 import { HOUSE_RULES, HrIcon } from "./house-rules-data";
 
 /* עמוד חוקי הבית — נבנה 1:1 לפי design-reference/exports/House-rules.html.
-   גופן Open Sans (כמו ברפרנס) מוגבל לעמוד; תוכן סטטי מונע-נתונים. השלד
+   גופן Open Sans גלובלי (‎--font-sans‎); תוכן סטטי מונע-נתונים. השלד
    (Hero + גל + TOC דביק + כרטיס) והתנועה (חשיפת Hero + כרטיס כיחידה + זוהר
    נושם) משותפים עם /terms ו-/faq. */
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "חוקי הבית | מגדל הים",
   description:
     "תנאי אירוח והוראות שימוש בדירה במגדל הים — אורחים ומסיבות, עישון וניקיון, ציוד וטקסטיל, שעות מנוחה, פינוי הנכס ואחריות לנזקים ופיקדון. כדי שכולם ייהנו משהות נעימה ובטוחה.",
-};
+  path: "/house-rules",
+});
 
 const TOC = [
   { id: "h1", label: "כללי ואחריות" },
@@ -28,11 +29,22 @@ const TOC = [
 
 export default function HouseRules() {
   return (
-    <div className={openSans.className}>
+    <>
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה */}
       <script
         dangerouslySetInnerHTML={{
           __html: "document.documentElement.classList.add('stm-js')",
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "חוקי הבית", path: "/house-rules" },
+            ])
+          ),
         }}
       />
       <MotionEngine />
@@ -150,6 +162,6 @@ export default function HouseRules() {
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 }

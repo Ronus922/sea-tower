@@ -8,14 +8,16 @@ import { IconTile } from "@/components/ui/IconTile";
 import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 
 /* עמוד פתרונות — נבנה 1:1 לפי design-reference/exports/Solutions.html */
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "פתרונות אירוח — מגדל הים | דירות בוטיק מול הים בחיפה",
   description:
     "פתרון אירוח לכל צורך במגדל הים: נופש מול הים, אירוח לעסקים, רילוקיישן, השכרה לטווח קצר וארוך וניהול דירות — דירות בוטיק 50 מ׳ מהטיילת בחיפה, ללא בירוקרטיה.",
-};
+  path: "/solutions",
+});
 
 /* ---------- תוכן ---------- */
 
@@ -200,6 +202,17 @@ export default function Solutions() {
       <script
         dangerouslySetInnerHTML={{
           __html: "document.documentElement.classList.add('stm-js')",
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "פתרונות", path: "/solutions" },
+            ])
+          ),
         }}
       />
       <MotionEngine />

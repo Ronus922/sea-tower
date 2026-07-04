@@ -3,18 +3,18 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
-import { openSans } from "@/lib/fonts";
+import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 
 /* עמוד תקנון — נבנה 1:1 לפי design-reference/exports/regulations.html.
-   הגופן הנראה ברפרנס הוא Open Sans (לא Frank Ruhl / לא Rubik הגלובלי) —
-   נטען דרך @/lib/fonts ומוגבל לעמוד זה בלבד. התנועה: מנוע התנועה המשותף
+   הגופן Open Sans גלובלי (‎--font-sans‎). התנועה: מנוע התנועה המשותף
    (חשיפת Hero + כרטיס המסמך כיחידה אחת + זוהר נושם) — ללא מצב PLUS. */
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "תקנון — תנאי הזמנה וביטול | מגדל הים",
   description:
     "תנאי ההזמנה, הביטול והשימוש בשירותי מגדל הים. השימוש באתר ו/או ביצוע הזמנה דרכו מהווים אישור והסכמה מלאה לתנאים אלו.",
-};
+  path: "/terms",
+});
 
 /* תוכן עניינים — 22 פריטים, טקסט קישור מדויק מהרפרנס (שים לב: פריט 9 קצר
    מכותרת ה-h2 המלאה בכוונה, כפי שבמקור) */
@@ -45,7 +45,18 @@ const TOC = [
 
 export default function Terms() {
   return (
-    <div className={openSans.className}>
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "תקנון", path: "/terms" },
+            ])
+          ),
+        }}
+      />
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה.
           רשת ביטוחון של המנוע + no-JS (המחלקה לא נוספת) מבטיחים שהטקסט לעולם
           לא יישאר מוסתר */}
@@ -378,6 +389,6 @@ export default function Terms() {
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 }

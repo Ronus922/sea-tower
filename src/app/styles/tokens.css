@@ -50,7 +50,9 @@
   --color-error-line: #f3cfcf;
 
   /* --- גופנים --- */
-  --font-sans: var(--font-rubik), system-ui, sans-serif;
+  /* Open Sans הוא הגופן הראשי בכל האתר (מקור: כל רפרנסי העמודים).
+     --font-serif (Frank Ruhl) נשמר לעמוד design-system הפנימי בלבד */
+  --font-sans: var(--font-open-sans), system-ui, sans-serif;
   --font-serif: var(--font-frank), serif;
 
   /* --- סולם טיפוגרפי (ספר מותג, פרק 05) --- */

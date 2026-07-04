@@ -4,19 +4,20 @@ import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { FaqEnhancer } from "@/components/site/FaqEnhancer";
-import { openSans } from "@/lib/fonts";
+import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 import { FAQ_CATEGORIES, FaqAnswer, FaqPlusIcon, buildFaqJsonLd } from "./faq-data";
 
 /* עמוד שאלות ותשובות — נבנה 1:1 לפי design-reference/exports/Faq.html.
-   גופן Open Sans (כמו ברפרנס) מוגבל לעמוד. השלד (Hero + גל + כרטיס מסמך +
-   TOC דביק) והתנועה (חשיפת Hero + כרטיס כיחידה + זוהר נושם) משותפים עם /terms;
+   גופן Open Sans גלובלי (‎--font-sans‎). השלד (Hero + גל + כרטיס מסמך + TOC
+   דביק) והתנועה (חשיפת Hero + כרטיס כיחידה + זוהר נושם) משותפים עם /terms;
    האינטראקציה (אקורדיון details נייטיבי, חיפוש חי, singleOpen) ב-FaqEnhancer. */
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "שאלות ותשובות | מגדל הים",
   description:
     "כל מה שחשוב לדעת לפני ההגעה למגדל הים — צ׳ק-אין ושעות קבלה, חניה, בריכה, ציוד הדירות, שירותי אירוח, תשלומים וביטולים. חיפוש חכם בכל השאלות הנפוצות.",
-};
+  path: "/faq",
+});
 
 const TOC = [
   { id: "c1", label: "כללי — על המקום" },
@@ -28,7 +29,7 @@ const TOC = [
 
 export default function Faq() {
   return (
-    <div className={openSans.className}>
+    <>
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה */}
       <script
         dangerouslySetInnerHTML={{
@@ -38,6 +39,17 @@ export default function Faq() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(buildFaqJsonLd()) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "שאלות נפוצות", path: "/faq" },
+            ])
+          ),
+        }}
       />
       <MotionEngine />
       <FaqEnhancer />
@@ -180,6 +192,6 @@ export default function Faq() {
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 }

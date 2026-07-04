@@ -10,6 +10,7 @@ import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { Testimonials } from "@/components/site/Testimonials";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { buildSiteJsonLd } from "@/lib/seo";
 
 /* עמוד הבית — נבנה לפי design-reference (Home.html / Home.png) */
 
@@ -389,6 +390,11 @@ export default function Home() {
         dangerouslySetInnerHTML={{
           __html: "document.documentElement.classList.add('stm-js')",
         }}
+      />
+      {/* JSON-LD: WebSite + LodgingBusiness — בסיס לפאנל הידע ולמנועי חיפוש/AI */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(buildSiteJsonLd()) }}
       />
       <MotionEngine />
       {/* Hero */}

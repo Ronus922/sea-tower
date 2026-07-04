@@ -7,14 +7,16 @@ import { SectionKicker } from "@/components/ui/SectionHeading";
 import { IconTile } from "@/components/ui/IconTile";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 
 /* עמוד אודות — נבנה 1:1 לפי design-reference/exports/About.html */
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "אודות — מגדל הים | מלון דירות בוטיק מול הים בחיפה",
   description:
     "הסיפור של מגדל הים — מלון דירות בוטיק בבניין אלמוג, מגדלי חוף הכרמל בחיפה, 50 מטר מקו המים. אירוח שמרגיש כמו בית, ברמה של מלון: שירות אישי, נוף לים וזמינות 24/7.",
-};
+  path: "/about",
+});
 
 /* ---------- תוכן ---------- */
 
@@ -147,6 +149,17 @@ export default function About() {
       <script
         dangerouslySetInnerHTML={{
           __html: "document.documentElement.classList.add('stm-js')",
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "אודות", path: "/about" },
+            ])
+          ),
         }}
       />
       <MotionEngine />
