@@ -16,6 +16,7 @@ const NAV = [
   { href: "/#contact", label: "בדיקת זמינות" },
   { href: "/articles", label: "מאמרים" },
   { href: "/contact", label: "צור קשר" },
+  { href: "/terms", label: "תקנון" },
 ];
 
 function CtaLink({ className }: { className?: string }) {
