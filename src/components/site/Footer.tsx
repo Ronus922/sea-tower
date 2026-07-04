@@ -122,7 +122,9 @@ export function Footer() {
         <div className="mx-auto mt-[18px] flex max-w-[1160px] flex-wrap items-center justify-between gap-2.5 text-[13px] text-[#6c869a]">
           <span>© 2026 מגדל הים — כל הזכויות שמורות</span>
           <span className="flex gap-5">
-            <span>תקנון האתר</span>
+            <Link href="/terms" className="transition-colors hover:text-white">
+              תקנון האתר
+            </Link>
             <span>הצהרת נגישות</span>
             <span>מדיניות ביטולים</span>
           </span>

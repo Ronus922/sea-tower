@@ -1,0 +1,160 @@
+/* ============================================================
+   מגדל הים — תקנון (/terms)
+   ערכים מדויקים מהרפרנס design-reference/exports/regulations.html
+   (התאמות ריווח אופקי רספונסיבי דרך Container/px בעמוד עצמו)
+   ============================================================ */
+
+/* פריסת שתי עמודות: תוכן עניינים דביק מימין, כרטיס מסמך משמאל */
+.tk-grid {
+  max-width: 1140px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 36px;
+  align-items: start;
+}
+
+/* תוכן עניינים — דביק מתחת ל-header, גלילה פנימית לפי גובה החלון */
+.tk-toc {
+  position: sticky;
+  top: 96px;
+  background: #fff;
+  border-radius: 18px;
+  padding: 26px 24px;
+  box-shadow: 0 12px 34px rgba(14, 37, 64, 0.08);
+  max-height: calc(100vh - 120px);
+  overflow: auto;
+}
+.tk-toc-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: #2b7fb8;
+  margin-bottom: 14px;
+}
+.tk-toc ol {
+  margin: 0;
+  padding: 0 18px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+.tk-toc a {
+  color: #3c5468;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.tk-toc a:hover {
+  color: #2b7fb8;
+}
+
+/* כרטיס המסמך המשפטי */
+.tk-pad {
+  background: #fff;
+  border-radius: 18px;
+  padding: 46px 50px;
+  box-shadow: 0 12px 40px rgba(14, 37, 64, 0.08);
+}
+
+/* סעיף — offset גלילה כדי שה-header הדביק לא יכסה כותרות מעוגנות */
+.tk-sec {
+  scroll-margin-top: 100px;
+  margin-bottom: 34px;
+}
+.tk-h {
+  font-size: 21px;
+  font-weight: 800;
+  color: #0e2540;
+  margin: 0 0 16px;
+  padding-bottom: 11px;
+  border-bottom: 2px solid #eef2f6;
+}
+.tk-clause {
+  margin: 0 0 11px;
+  font-size: 15px;
+  line-height: 1.78;
+  color: #4a5d6f;
+  text-align: justify;
+}
+.tk-clause strong {
+  color: #1f4a6b;
+  font-weight: 700;
+}
+
+/* תיבת אזהרה (סוף פרק 20) */
+.tk-warn {
+  background: #fdf3f2;
+  border: 1px solid #f3d6d3;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-top: 8px;
+}
+.tk-warn p {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #a23b34;
+  font-weight: 600;
+}
+
+/* שורות וי — חוקי הבית (פרק 21) */
+.tk-checks {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.tk-check {
+  display: flex;
+  gap: 11px;
+  align-items: flex-start;
+}
+.tk-check-ic {
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: rgba(43, 127, 184, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.tk-check-tx {
+  font-size: 15px;
+  line-height: 1.6;
+  color: #3c4f63;
+  font-weight: 600;
+}
+
+/* פאנל מידע מסכם (פרטי חברה) */
+.tk-info {
+  margin-top: 14px;
+  padding: 22px 24px;
+  background: #f5f9fc;
+  border: 1px solid #e4eef5;
+  border-radius: 14px;
+  font-size: 14.5px;
+  line-height: 1.85;
+  color: #3c4f63;
+}
+.tk-info strong {
+  color: #0e2540;
+}
+
+/* רספונסיבי — נקודת השבירה של הרפרנס: 860px */
+@media (max-width: 860px) {
+  .tk-grid {
+    grid-template-columns: 1fr;
+  }
+  .tk-toc {
+    position: static;
+    max-height: none;
+    margin-bottom: 24px;
+  }
+  .tk-pad {
+    padding: 30px 24px;
+  }
+}
