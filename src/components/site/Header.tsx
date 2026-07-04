@@ -14,7 +14,7 @@ const NAV = [
   { href: "/solutions", label: "פתרונות" },
   { href: "/#apartments", label: "הדירות שלנו" },
   { href: "/#contact", label: "בדיקת זמינות" },
-  { href: "/#blog", label: "מאמרים" },
+  { href: "/articles", label: "מאמרים" },
   { href: "/contact", label: "צור קשר" },
 ];
 

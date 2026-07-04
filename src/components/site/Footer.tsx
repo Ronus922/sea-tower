@@ -9,7 +9,7 @@ const LINK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: s
       { label: "ראשי", href: "/" },
       { label: "אודות", href: "/about" },
       { label: "הדירות שלנו", href: "/#apartments" },
-      { label: "מאמרים", href: "/#blog" },
+      { label: "מאמרים", href: "/articles" },
       { label: "שאלות נפוצות", href: "/#process" },
       { label: "צור קשר", href: "/contact" },
     ],
