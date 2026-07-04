@@ -6,12 +6,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 
-/* קישורי הניווט מהרפרנס. יעדים שהם עמודים עתידיים (פתרונות, מנוע הזמנה)
+/* קישורי הניווט מהרפרנס. יעדים שהם עמודים עתידיים (מנוע הזמנה)
    מפנים בינתיים לעוגני הבית — יוחלפו כשהעמודים ייבנו */
 const NAV = [
   { href: "/", label: "ראשי" },
   { href: "/about", label: "אודות" },
-  { href: "/#solutions", label: "פתרונות" },
+  { href: "/solutions", label: "פתרונות" },
   { href: "/#apartments", label: "הדירות שלנו" },
   { href: "/#contact", label: "בדיקת זמינות" },
   { href: "/#blog", label: "מאמרים" },
