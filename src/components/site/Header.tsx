@@ -15,6 +15,8 @@ const NAV = [
   { href: "/#apartments", label: "הדירות שלנו" },
   { href: "/#contact", label: "בדיקת זמינות" },
   { href: "/articles", label: "מאמרים" },
+  { href: "/faq", label: "שאלות נפוצות" },
+  { href: "/house-rules", label: "חוקי הבית" },
   { href: "/contact", label: "צור קשר" },
   { href: "/terms", label: "תקנון" },
 ];
@@ -73,7 +75,7 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 text-[15px] font-medium text-ink-strong lg:flex">
+        <nav className="hidden items-center gap-x-4 text-[14px] font-medium text-ink-strong lg:flex xl:gap-x-5 xl:text-[15px]">
           {NAV.map((item) => (
             <Link
               key={item.label}
@@ -88,8 +90,9 @@ export function Header() {
           ))}
         </nav>
 
-        {/* עטיפה במקום className מתנגש — cn לא פותר קונפליקט hidden/inline-flex */}
-        <span className="hidden lg:block">
+        {/* עטיפה במקום className מתנגש — cn לא פותר קונפליקט hidden/inline-flex.
+           מוצג רק ב-xl: הניווט המורחב (10 פריטים) תופס את רוחב ה-lg */}
+        <span className="hidden xl:block">
           <CtaLink />
         </span>
 
