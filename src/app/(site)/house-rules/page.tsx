@@ -3,11 +3,13 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { openSans } from "@/lib/fonts";
 import { HOUSE_RULES, HrIcon } from "./house-rules-data";
 
 /* עמוד חוקי הבית — נבנה 1:1 לפי design-reference/exports/House-rules.html.
-   Server component: תוכן סטטי מונע-נתונים; השלד (Hero + גל + TOC דביק + כרטיס)
-   משותף עם /terms ו-/faq. */
+   גופן Open Sans (כמו ברפרנס) מוגבל לעמוד; תוכן סטטי מונע-נתונים. השלד
+   (Hero + גל + TOC דביק + כרטיס) והתנועה (חשיפת Hero + כרטיס כיחידה + זוהר
+   נושם) משותפים עם /terms ו-/faq. */
 
 export const metadata: Metadata = {
   title: "חוקי הבית | מגדל הים",
@@ -26,7 +28,7 @@ const TOC = [
 
 export default function HouseRules() {
   return (
-    <>
+    <div className={openSans.className}>
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה */}
       <script
         dangerouslySetInnerHTML={{
@@ -67,7 +69,7 @@ export default function HouseRules() {
             </span>
           </nav>
           <h1
-            data-ws=""
+            data-rev="up"
             className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
           >
             חוקי הבית
@@ -104,7 +106,7 @@ export default function HouseRules() {
             </div>
           </aside>
 
-          <div className="hr tk-pad">
+          <div className="hr tk-pad" data-rev="card">
             {HOUSE_RULES.map((sec, si) => (
               <div key={sec.id} id={sec.id} className="tk-sec">
                 <h2 className="tk-h">
@@ -148,6 +150,6 @@ export default function HouseRules() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

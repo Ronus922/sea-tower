@@ -4,11 +4,13 @@ import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { FaqEnhancer } from "@/components/site/FaqEnhancer";
+import { openSans } from "@/lib/fonts";
 import { FAQ_CATEGORIES, FaqAnswer, FaqPlusIcon, buildFaqJsonLd } from "./faq-data";
 
 /* עמוד שאלות ותשובות — נבנה 1:1 לפי design-reference/exports/Faq.html.
-   השלד (Hero + גל + כרטיס מסמך + TOC דביק) משותף עם /terms; האינטראקציה
-   (אקורדיון details נייטיבי, חיפוש חי, singleOpen) ב-FaqEnhancer. */
+   גופן Open Sans (כמו ברפרנס) מוגבל לעמוד. השלד (Hero + גל + כרטיס מסמך +
+   TOC דביק) והתנועה (חשיפת Hero + כרטיס כיחידה + זוהר נושם) משותפים עם /terms;
+   האינטראקציה (אקורדיון details נייטיבי, חיפוש חי, singleOpen) ב-FaqEnhancer. */
 
 export const metadata: Metadata = {
   title: "שאלות ותשובות | מגדל הים",
@@ -26,7 +28,7 @@ const TOC = [
 
 export default function Faq() {
   return (
-    <>
+    <div className={openSans.className}>
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה */}
       <script
         dangerouslySetInnerHTML={{
@@ -72,7 +74,7 @@ export default function Faq() {
             </span>
           </nav>
           <h1
-            data-ws=""
+            data-rev="up"
             className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
           >
             שאלות ותשובות
@@ -140,7 +142,7 @@ export default function Faq() {
             </div>
           </aside>
 
-          <div className="tk-pad">
+          <div className="tk-pad" data-rev="card">
             {FAQ_CATEGORIES.map((cat, ci) => (
               <div key={cat.id} id={cat.id} className="tk-sec faq-sec">
                 <h2 className="tk-h">
@@ -178,6 +180,6 @@ export default function Faq() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }

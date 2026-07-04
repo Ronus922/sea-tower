@@ -1,21 +1,14 @@
 import type { Metadata } from "next";
-import { Open_Sans } from "next/font/google";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { openSans } from "@/lib/fonts";
 
 /* עמוד תקנון — נבנה 1:1 לפי design-reference/exports/regulations.html.
    הגופן הנראה ברפרנס הוא Open Sans (לא Frank Ruhl / לא Rubik הגלובלי) —
-   נטען כאן דרך next/font ומוגבל לעמוד זה בלבד. התנועה: מנוע התנועה המשותף
+   נטען דרך @/lib/fonts ומוגבל לעמוד זה בלבד. התנועה: מנוע התנועה המשותף
    (חשיפת Hero + כרטיס המסמך כיחידה אחת + זוהר נושם) — ללא מצב PLUS. */
-
-/* Open Sans — משקלים 300–800, כולל עברית; מוגבל לעטיפת העמוד */
-const openSans = Open_Sans({
-  subsets: ["hebrew", "latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "תקנון — תנאי הזמנה וביטול | מגדל הים",
