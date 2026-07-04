@@ -1,0 +1,249 @@
+/* ============================================================
+   מגדל הים — אפקטי רקע "גלי הים" (אורבים ובועות מ-Home.html)
+   משמש במקטעי Hero ו"צור קשר" של עמוד הבית
+   ============================================================ */
+
+@keyframes st-drift-a {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  33% {
+    transform: translate(50px, -34px) scale(1.08);
+  }
+  66% {
+    transform: translate(-26px, 30px) scale(0.96);
+  }
+}
+@keyframes st-drift-b {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(-46px, 28px) scale(1.12);
+  }
+}
+@keyframes st-drift-c {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(34px, 40px);
+  }
+}
+/* שלושת וריאנטי עליית הבועה מהרפרנס (stRise/stRiseB/stRiseC) —
+   גבהים 320/234/400px עם "פקיעה" (scale) שונה בסוף כל מסלול */
+@keyframes st-rise {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.55;
+  }
+  80% {
+    transform: translateY(-280px) scale(1);
+    opacity: 0.5;
+  }
+  90% {
+    transform: translateY(-308px) scale(1.06);
+    opacity: 0.55;
+  }
+  95% {
+    transform: translateY(-316px) scale(1.55);
+    opacity: 0.45;
+  }
+  100% {
+    transform: translateY(-320px) scale(2);
+    opacity: 0;
+  }
+}
+@keyframes st-rise-b {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  12% {
+    opacity: 0.5;
+  }
+  78% {
+    transform: translateY(-200px) scale(1);
+    opacity: 0.48;
+  }
+  90% {
+    transform: translateY(-224px) scale(1.06);
+    opacity: 0.52;
+  }
+  95% {
+    transform: translateY(-230px) scale(1.5);
+    opacity: 0.4;
+  }
+  100% {
+    transform: translateY(-234px) scale(1.95);
+    opacity: 0;
+  }
+}
+@keyframes st-rise-c {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0;
+  }
+  14% {
+    opacity: 0.5;
+  }
+  76% {
+    transform: translateY(-360px) scale(1);
+    opacity: 0.46;
+  }
+  90% {
+    transform: translateY(-388px) scale(1.07);
+    opacity: 0.5;
+  }
+  95% {
+    transform: translateY(-396px) scale(1.6);
+    opacity: 0.42;
+  }
+  100% {
+    transform: translateY(-400px) scale(2.1);
+    opacity: 0;
+  }
+}
+
+.st-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+.st-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(34px);
+  will-change: transform;
+}
+.st-orb-a {
+  animation: st-drift-a 22s ease-in-out infinite;
+}
+.st-orb-b {
+  animation: st-drift-b 27s ease-in-out infinite;
+}
+.st-orb-c {
+  animation: st-drift-c 19s ease-in-out infinite;
+}
+.st-bub {
+  position: absolute;
+  bottom: -20px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 30%,
+    rgba(255, 255, 255, 0.5),
+    rgba(124, 208, 247, 0.16) 60%,
+    transparent 72%
+  );
+  box-shadow: 0 0 8px rgba(124, 208, 247, 0.18);
+  animation: st-rise linear infinite;
+  will-change: transform, opacity;
+}
+.st-bub-b {
+  animation-name: st-rise-b;
+}
+.st-bub-c {
+  animation-name: st-rise-c;
+}
+
+/* ---------- כניסת Hero (heroIn/heroImgIn מהרפרנס, עם ההשהיות המקוריות) ---------- */
+
+@keyframes hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(34px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes hero-img-in {
+  from {
+    opacity: 0;
+    transform: translateY(26px) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.hero-in-1 {
+  animation: hero-in 1s var(--ease-pop) 0.15s both;
+}
+.hero-in-2 {
+  animation: hero-in 1.1s var(--ease-pop) 0.35s both;
+}
+.hero-in-3 {
+  animation: hero-in 1.1s var(--ease-pop) 0.6s both;
+}
+.hero-in-4 {
+  animation: hero-in 1.1s var(--ease-pop) 0.85s both;
+}
+.hero-in-5 {
+  animation: hero-in 1.1s var(--ease-pop) 1.05s both;
+}
+.hero-img-in {
+  animation: hero-img-in 1.3s var(--ease-pop) 0.5s both;
+}
+
+/* מונה "50 מ׳" — ספירה 0→50 ב-CSS טהור (cnt50 מהרפרנס) */
+@property --n50 {
+  syntax: "<integer>";
+  initial-value: 0;
+  inherits: false;
+}
+@keyframes cnt50 {
+  from {
+    --n50: 0;
+  }
+  to {
+    --n50: 50;
+  }
+}
+.cnt50::after {
+  counter-reset: c50 var(--n50);
+  content: counter(c50);
+  animation: cnt50 1.8s cubic-bezier(0.2, 0.8, 0.3, 1) 1.1s both;
+}
+
+/* כרטיסי הפתרונות: העמקת צל ב-hover (0.55s, ease-pop — כמו sol-stack-card) */
+.sol-card {
+  transition: box-shadow 0.55s var(--ease-pop);
+}
+.sol-card:hover {
+  box-shadow: 0 42px 84px -30px rgba(14, 37, 64, 0.46);
+}
+
+/* מרקיזה: עצירה ב-hover (המהירות נקבעת ב-MotionEngine — ‎55px/s) */
+.mqq:hover .mqq-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .st-orb,
+  .st-bub,
+  .hero-in-1,
+  .hero-in-2,
+  .hero-in-3,
+  .hero-in-4,
+  .hero-in-5,
+  .hero-img-in {
+    animation: none !important;
+  }
+  .st-bub {
+    display: none;
+  }
+  .cnt50::after {
+    animation: none;
+    --n50: 50;
+  }
+}

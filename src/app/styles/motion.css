@@ -1,0 +1,359 @@
+/* ============================================================
+   מגדל הים — Motion (ספר מותג פרק 12 + מנוע התנועה של הרפרנס)
+   שפה: ריחוף −14px/+10px (stFloat/stFloat2) · hover lift · reveal 0.8s
+   transform + opacity בלבד
+   ============================================================ */
+
+@theme {
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-sm: float-sm 5s ease-in-out infinite;
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  @keyframes float-sm {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(10px);
+    }
+  }
+  /* המסלול dir=ltr עם שתי סדרות זהות (mqqScroll ברפרנס) — נע ל--50% */
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+/* ============================================================
+   מנוע החשיפה — פורט 1:1 מהמנוע של הרפרנס (מצב PLUS פעיל):
+   כותרות מילה-אחר-מילה · טקסט 46px/0.9s · מדיה scale 1.06/1s ·
+   כפתורים 20px/0.8s · כרטיסים 30px/0.8s · סטאגר 100ms לקבוצה.
+   שער: html.stm-js (סקריפט inline לפני ה-hydration) → אין הבזק.
+   MotionEngine.tsx מפעיל דרך IntersectionObserver (פעם אחת).
+   ============================================================ */
+
+html.stm-js [data-rev] {
+  opacity: 0;
+}
+/* !important: על ה-H1 של ה-Hero רצה גם אנימציית heroIn (שגוברת על הצהרה
+   רגילה בקסקדה) — השער חייב לנצח עד פיצול המילים. reduced-motion למטה גובר */
+html.stm-js [data-ws]:not(.stm-ws-ready) {
+  opacity: 0 !important;
+}
+[data-rev="card"].stm-in {
+  animation: stm-rev-card 0.8s var(--ease-brand) both;
+}
+[data-rev="up"].stm-in {
+  animation: stm-rev-up 0.9s var(--ease-brand) both;
+}
+[data-rev="media"].stm-in {
+  animation: stm-rev-media 1s var(--ease-brand) both;
+}
+[data-rev="sm"].stm-in {
+  animation: stm-rev-sm 0.8s var(--ease-brand) both;
+}
+@keyframes stm-rev-card {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes stm-rev-up {
+  from {
+    opacity: 0;
+    transform: translateY(46px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes stm-rev-media {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(1.06);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes stm-rev-sm {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* כותרות מילה-אחר-מילה: כל מילה עולה 0.6em עם blur, השהיה 68ms למילה */
+.stm-w {
+  display: inline-block;
+  opacity: 0;
+  will-change: transform, opacity, filter;
+}
+.stm-w.stm-win {
+  animation: stm-word 0.72s var(--ease-brand) both;
+}
+@keyframes stm-word {
+  0% {
+    opacity: 0;
+    transform: translateY(0.6em) scale(0.965);
+    filter: blur(5px);
+  }
+  62% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
+/* ---------- שפת hover (מהמנוע) ---------- */
+
+/* כפתור ראשי: התרוממות 3px + זוהר, חץ זז שמאלה */
+.stm-btn-primary {
+  transition:
+    transform 0.3s var(--ease-brand),
+    box-shadow 0.3s var(--ease-brand),
+    filter 0.3s var(--ease-brand);
+}
+.stm-btn-primary:hover {
+  transform: translateY(-3px);
+  filter: drop-shadow(0 14px 22px rgba(43, 127, 184, 0.4));
+}
+.stm-btn-primary:active {
+  transform: translateY(-1px);
+}
+.stm-btn-primary svg {
+  transition: transform 0.3s var(--ease-brand);
+}
+.stm-btn-primary:hover svg {
+  transform: translateX(-4px);
+}
+
+/* כפתור מתאר: מילוי עדין + התרוממות 2px */
+.stm-btn-outline {
+  transition:
+    background-color 0.3s var(--ease-brand),
+    transform 0.3s var(--ease-brand),
+    border-color 0.3s var(--ease-brand);
+}
+.stm-btn-outline:hover {
+  transform: translateY(-2px);
+}
+.stm-btn-outline.stm-on-dark:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+.stm-btn-outline:not(.stm-on-dark):hover {
+  background-color: rgba(43, 127, 184, 0.08);
+}
+.stm-btn-outline svg {
+  transition: transform 0.3s var(--ease-brand);
+}
+.stm-btn-outline:hover svg {
+  transform: translateX(-4px);
+}
+
+/* קישור טקסט: קו תחתון צומח מימין (RTL), חץ זז שמאלה */
+.stm-link {
+  position: relative;
+}
+.stm-link::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: -2px;
+  height: 1.5px;
+  width: 100%;
+  background: currentColor;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform 0.3s var(--ease-brand);
+  opacity: 0.8;
+  pointer-events: none;
+}
+.stm-link:hover::after {
+  transform: scaleX(1);
+}
+.stm-link svg {
+  transition: transform 0.3s var(--ease-brand);
+}
+.stm-link:hover svg {
+  transform: translateX(-4px);
+}
+
+/* כרטיס עם תמונה: התרוממות 6px + צל, זום פנימי 1.05 */
+.stm-card {
+  transition:
+    transform 0.4s var(--ease-brand),
+    box-shadow 0.4s var(--ease-brand);
+}
+.stm-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 30px 60px -20px rgba(14, 37, 64, 0.32);
+}
+.stm-card .stm-zoom {
+  transition: transform 0.6s var(--ease-brand);
+}
+.stm-card:hover .stm-zoom {
+  transform: scale(1.05);
+}
+@media (max-width: 768px) {
+  .stm-card:hover {
+    transform: translateY(-3px);
+  }
+}
+
+/* header: צל אחרי גלילה של 40px (MotionEngine) */
+header[data-site-header] {
+  transition:
+    box-shadow 0.4s var(--ease-brand),
+    background-color 0.4s var(--ease-brand);
+}
+header[data-site-header].stm-scrolled {
+  box-shadow: 0 8px 28px rgba(14, 37, 64, 0.14);
+}
+
+/* שדות טופס: טבעת פוקוס ממותגת + מצב שגוי */
+main input,
+main textarea,
+footer input {
+  transition:
+    border-color 0.3s var(--ease-brand),
+    box-shadow 0.3s var(--ease-brand),
+    background-color 0.3s var(--ease-brand);
+}
+main input:focus,
+main textarea:focus,
+footer input:focus {
+  outline: none;
+  border-color: var(--color-ocean-400);
+  box-shadow: 0 0 0 3px rgba(43, 127, 184, 0.16);
+}
+.stm-invalid {
+  border-color: #d9534f !important;
+  box-shadow: 0 0 0 3px rgba(217, 83, 79, 0.13) !important;
+}
+
+/* ספינר שליחה */
+@keyframes stm-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.stm-spin {
+  display: inline-block;
+  width: 17px;
+  height: 17px;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: stm-spin 0.7s linear infinite;
+}
+[data-stm-loading] {
+  pointer-events: none;
+  opacity: 0.9;
+}
+
+/* FAQ: התוכן נכנס עם fade+slide, ה"+" מסתובב 45° (transition בקומפוננטה) */
+details[open] > *:not(summary) {
+  animation: stm-acc 0.4s var(--ease-brand);
+}
+@keyframes stm-acc {
+  from {
+    opacity: 0;
+    transform: translateY(-7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* עיגולי הילה דקורטיביים "נושמים" */
+.stm-blob {
+  animation: stm-breathe 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes stm-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* פס התקדמות גלילה (מצב PLUS) — RTL: צומח מימין */
+#stm-prog {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  z-index: 9999;
+  transform-origin: right center;
+  transform: scaleX(0);
+  background: linear-gradient(
+    90deg,
+    var(--color-aqua),
+    var(--color-sea-500),
+    var(--color-ocean-400)
+  );
+  box-shadow: 0 1px 7px rgba(43, 127, 184, 0.45);
+  pointer-events: none;
+  transition: transform 0.12s linear;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-sm,
+  .animate-marquee,
+  .stm-in,
+  .stm-w.stm-win,
+  .stm-blob,
+  details[open] > *:not(summary) {
+    animation: none !important;
+  }
+  html.stm-js [data-rev],
+  html.stm-js [data-ws]:not(.stm-ws-ready),
+  .stm-w {
+    opacity: 1 !important;
+  }
+  .stm-btn-primary:hover,
+  .stm-btn-outline:hover,
+  .stm-card:hover {
+    transform: none;
+  }
+  #stm-prog {
+    display: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}

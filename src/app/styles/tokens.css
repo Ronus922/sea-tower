@@ -1,0 +1,103 @@
+/* ============================================================
+   מגדל הים — Design Tokens (Phase 2)
+   מקור: design-reference/exports/DesignSystem.html (ספר המותג)
+   ============================================================ */
+
+@theme {
+  /* --- ליבה · נייבי --- */
+  --color-navy-950: #081625; /* Deep Sea — פוטר, רקעים כהים */
+  --color-navy-900: #0a1d31; /* Midnight — בסיס Hero */
+  --color-navy-800: #0e2540; /* Primary Navy — כותרות, לוגו */
+  --color-navy-700: #102a44; /* Navy 700 — משטחים כהים */
+
+  /* --- כחולי ים --- */
+  --color-ocean-700: #143c61; /* Ocean Deep — גרדיאנט Hero */
+  --color-ocean-600: #1d5888; /* Ocean — אייקונים, גרדיאנט */
+  --color-ocean-500: #1f4a75; /* Ocean Slate — CTA חלופי */
+  --color-ocean-400: #2b7fb8; /* Ocean Bright — קישורים, מבטא */
+
+  /* --- מבטא · ציאן --- */
+  --color-sea-500: #3a9bd6; /* Sky — תחילת גרדיאנט כפתור */
+  --color-sea-400: #46a6dd; /* Sky Light — גרדיאנט כותרת */
+  --color-spark: #56c0f0;   /* Spark — נקודת סטטוס, זוהר */
+  --color-aqua: #7cd0f7;    /* Aqua Light — מבטא על רקע כהה */
+
+  /* --- נייטרלים --- */
+  --color-mist: #f5f9fc;  /* Card Mist — רקע כרטיס בהיר */
+  --color-cloud: #eaf0f6; /* Section Cloud — רקע מקטע */
+  --color-line: #e4eef5;  /* Border */
+  --color-field: #dbe5ee; /* מסגרת שדות טופס */
+  --color-edge: #c9d6e2;  /* מסגרת כפתור outline */
+  --color-chip: #eef4f9;  /* רקע צ'יפ */
+
+  /* --- טקסט --- */
+  --color-ink: #52677b;        /* Body Text */
+  --color-ink-strong: #3c4f63; /* ניווט, שורות וי (מ-Home.html) */
+  --color-ink-dim: #5f7589;    /* טקסט משני */
+  --color-ink-muted: #8497a8;  /* Muted — a11y: רק לטקסט גדול (18px+) או דקורטיבי */
+  --color-chip-ink: #3c5468;   /* טקסט צ'יפים */
+  --color-on-navy: #aec6d8;    /* טקסט משני על רקע כהה */
+  --color-kicker: #2a76a8;     /* תוויות מקדימות (מותג: #2F80B4, הוכהה מעט ל-AA 4.5:1) */
+
+  /* --- תומכים --- */
+  --color-gold: #f5b942; /* כוכבי דירוג */
+  --color-sand: #c2a16a; /* זהב־חול — יוקרה בלבד */
+  --color-success: #1f8a4d;
+  --color-success-bg: #f3faf5;
+  --color-success-line: #cdead6;
+  --color-error: #c0392b;
+  --color-error-bg: #fdf3f3;
+  --color-error-line: #f3cfcf;
+
+  /* --- גופנים --- */
+  --font-sans: var(--font-rubik), system-ui, sans-serif;
+  --font-serif: var(--font-frank), serif;
+
+  /* --- סולם טיפוגרפי (ספר מותג, פרק 05) --- */
+  --text-display: 62px;
+  --text-display--line-height: 1.04;
+  --text-display--font-weight: 800;
+  --text-display--letter-spacing: -0.01em;
+  --text-h1: 48px;
+  --text-h1--line-height: 1.1;
+  --text-h1--font-weight: 800;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h2: 42px;
+  --text-h2--line-height: 1.14;
+  --text-h2--font-weight: 800;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: 24px;
+  --text-h3--line-height: 1.3;
+  --text-h3--font-weight: 700;
+  --text-h4: 20px;
+  --text-h4--line-height: 1.35;
+  --text-h4--font-weight: 700;
+  --text-lead: 18.5px;
+  --text-lead--line-height: 1.62;
+  --text-lead--font-weight: 300;
+  --text-body: 17px;
+  --text-body--line-height: 1.7;
+
+  --tracking-heading: -0.01em;
+  --tracking-label: 0.04em;
+  --tracking-overline: 0.18em;
+
+  /* --- רדיוסים --- */
+  --radius-btn: 11px;   /* כפתורים, שדות */
+  --radius-tile: 14px;  /* אריחי אייקון, בלוקי נתון */
+  --radius-card: 18px;  /* כרטיסים */
+  --radius-card-lg: 20px;
+  --radius-img: 22px;   /* תמונות, מודאל */
+
+  /* --- צללים (E1–E4 + Glow) --- */
+  --shadow-e1: 0 6px 18px rgba(14, 37, 64, 0.06);
+  --shadow-e2: 0 10px 30px rgba(14, 37, 64, 0.08);
+  --shadow-e3: 0 12px 40px rgba(14, 37, 64, 0.14);
+  --shadow-e4: 0 20px 40px rgba(8, 22, 49, 0.24);
+  --shadow-glow: 0 12px 28px rgba(43, 127, 184, 0.4);
+  --shadow-float: 0 16px 30px rgba(14, 37, 64, 0.12); /* כרטיס צף */
+
+  /* --- תנועה --- */
+  --ease-brand: cubic-bezier(0.22, 0.61, 0.36, 1); /* מנוע התנועה הכללי */
+  --ease-pop: cubic-bezier(0.16, 1, 0.3, 1); /* כניסת Hero, קרוסלה, hover פתרונות */
+}

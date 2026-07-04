@@ -1,16 +1,23 @@
 import type { Metadata } from "next";
-import { Assistant } from "next/font/google";
+import { Rubik, Frank_Ruhl_Libre } from "next/font/google";
 import "./globals.css";
 
-const assistant = Assistant({
-  variable: "--font-assistant",
+const rubik = Rubik({
+  variable: "--font-rubik",
   subsets: ["hebrew", "latin"],
-  weight: ["400", "500", "700"],
+  display: "swap",
+});
+
+const frank = Frank_Ruhl_Libre({
+  variable: "--font-frank",
+  subsets: ["hebrew", "latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "סי טאואר — דירות נופש וסוויטות",
-  description: "אתר תדמית והזמנת חדרים לדירות נופש וסוויטות",
+  title: "מגדל הים — דירות בוטיק וסוויטות על הים בחיפה",
+  description:
+    "מלון דירות בוטיק בבניין אלמוג על חוף הכרמל בחיפה — דירות וסוויטות מאובזרות ברמה מלונאית, 50 מטר מקו המים. לנופש, לעסקים, לרילוקיישן ולכל תקופה.",
 };
 
 export default function RootLayout({
@@ -19,8 +26,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl">
-      <body className={`${assistant.variable} antialiased`}>{children}</body>
+    <html lang="he" dir="rtl" className={`${rubik.variable} ${frank.variable}`}>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

@@ -1,0 +1,69 @@
+/* ============================================================
+   מגדל הים — עמוד צור קשר
+   ============================================================ */
+
+/* חשיפה מצדדים מנוגדים (מפה מול פרטי הגעה) — מופעל ע"י MotionEngine */
+[data-rev="right"].stm-in {
+  animation: ctc-rev-right 0.9s var(--ease-brand) both;
+}
+[data-rev="left"].stm-in {
+  animation: ctc-rev-left 0.9s var(--ease-brand) both;
+}
+@keyframes ctc-rev-right {
+  from {
+    opacity: 0;
+    transform: translateX(46px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes ctc-rev-left {
+  from {
+    opacity: 0;
+    transform: translateX(-46px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* כרטיסי ערוצי קשר — התרוממות עדינה, אייקון גדל מעט */
+.ctc-card {
+  transition:
+    transform 0.3s var(--ease-brand),
+    box-shadow 0.3s var(--ease-brand),
+    border-color 0.3s var(--ease-brand);
+}
+.ctc-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-e2);
+  border-color: #d7e5f0;
+}
+.ctc-card svg {
+  transition: transform 0.3s var(--ease-brand);
+}
+.ctc-card:hover svg {
+  transform: scale(1.08);
+}
+
+/* select — אותה טבעת פוקוס כמו input/textarea (motion.css מכסה רק אותם) */
+main select {
+  transition:
+    border-color 0.3s var(--ease-brand),
+    box-shadow 0.3s var(--ease-brand);
+}
+main select:focus {
+  outline: none;
+  border-color: var(--color-ocean-400);
+  box-shadow: 0 0 0 3px rgba(43, 127, 184, 0.16);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ctc-card:hover,
+  .ctc-card:hover svg {
+    transform: none;
+  }
+}

@@ -1,0 +1,50 @@
+/* ============================================================
+   מגדל הים — עמוד אודות (design-reference/exports/About.html)
+   ============================================================ */
+
+/* כרטיסי הערכים — קסקדה איטית מלמטה (64px), הימני (הראשון ב-RTL) מוביל.
+   ה-!important נדרש כדי לגבור על ה-animation-delay הקבוצתי (inline)
+   שמציב MotionEngine — בדיוק כמו ברפרנס */
+.vcard {
+  transition:
+    transform 0.5s var(--ease-pop),
+    box-shadow 0.5s var(--ease-pop);
+}
+.vcard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 26px 56px rgba(14, 37, 64, 0.14);
+}
+.vcard.stm-in {
+  animation: ab-card-up 1.25s var(--ease-brand) both !important;
+}
+.vcard:nth-child(1).stm-in {
+  animation-delay: 0s !important;
+}
+.vcard:nth-child(2).stm-in {
+  animation-delay: 0.45s !important;
+}
+.vcard:nth-child(3).stm-in {
+  animation-delay: 0.9s !important;
+}
+.vcard:nth-child(4).stm-in {
+  animation-delay: 1.35s !important;
+}
+@keyframes ab-card-up {
+  from {
+    opacity: 0;
+    transform: translateY(64px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vcard.stm-in {
+    animation: none !important;
+  }
+  .vcard:hover {
+    transform: none;
+  }
+}

@@ -1,0 +1,34 @@
+/* ============================================================
+   מגדל הים — Base (selection, focus, defaults)
+   ============================================================ */
+
+::selection {
+  background: var(--color-aqua);
+  color: var(--color-navy-900);
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 92px; /* פיצוי header דביק */
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: #fff;
+}
+
+/* הרפרנס משתמש ב-outline:none בלי תחליף — אצלנו תמיד יש focus נראה */
+:focus-visible {
+  outline: 2px solid var(--color-sea-500);
+  outline-offset: 2px;
+}
+
+/* FAQ נבנה על <details> נייטיבי */
+summary {
+  list-style: none;
+  cursor: pointer;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
