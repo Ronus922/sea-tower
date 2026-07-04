@@ -502,12 +502,14 @@
 
 .ar-featsec {
   background: var(--color-cloud);
-  padding: 0 56px;
+  /* padding-top (ולא margin על הילד) — אחרת ה-margin "בורח" מהמקטע ומציג
+     את רקע ה-body הלבן כפס לבן מתחת לגל (ברפרנס ה-body היה cloud) */
+  padding: 28px 56px 0;
 }
 .ar-featwrap {
   position: relative;
   max-width: 1000px;
-  margin: 28px auto 0;
+  margin: 0 auto;
   aspect-ratio: 16 / 9;
   border-radius: 20px;
   overflow: hidden;
