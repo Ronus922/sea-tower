@@ -10,7 +10,7 @@ const LINK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: s
       { label: "אודות", href: "/about" },
       { label: "הדירות שלנו", href: "/#apartments" },
       { label: "מאמרים", href: "/articles" },
-      { label: "שאלות נפוצות", href: "/#process" },
+      { label: "שאלות נפוצות", href: "/faq" },
       { label: "צור קשר", href: "/contact" },
     ],
   },
@@ -124,6 +124,9 @@ export function Footer() {
           <span className="flex gap-5">
             <Link href="/terms" className="transition-colors hover:text-white">
               תקנון האתר
+            </Link>
+            <Link href="/house-rules" className="transition-colors hover:text-white">
+              חוקי הבית
             </Link>
             <span>הצהרת נגישות</span>
             <span>מדיניות ביטולים</span>

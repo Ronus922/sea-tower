@@ -1,7 +1,9 @@
 /* ============================================================
-   מגדל הים — תקנון (/terms)
-   ערכים מדויקים מהרפרנס design-reference/exports/regulations.html
-   (התאמות ריווח אופקי רספונסיבי דרך Container/px בעמוד עצמו)
+   מגדל הים — עמודי מסמך משותפים (/terms · /faq · /house-rules)
+   ערכים מדויקים מהרפרנס: regulations.html · Faq.html · House-rules.html
+   פרימיטיבים משותפים: .tk-grid · .tk-toc · .tk-pad · .tk-sec · .tk-h ·
+   .tk-num · .tk-clause · .tk-warn · .tk-info · .tk-toc-help
+   התאמות ספציפיות ל-FAQ/חוקי הבית: faq.css · house-rules.css
    ============================================================ */
 
 /* פריסת שתי עמודות: תוכן עניינים דביק מימין, כרטיס מסמך משמאל */
@@ -50,6 +52,24 @@
 .tk-toc a:hover {
   color: #2b7fb8;
 }
+/* בלוק עזרה מתחת לתוכן העניינים (FAQ + חוקי הבית) */
+.tk-toc-help {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid #eef2f6;
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #5d7184;
+}
+.tk-toc-help .tk-toc-help-title {
+  font-weight: 700;
+  color: #0e2540;
+  margin-bottom: 6px;
+}
+.tk-toc-help a {
+  color: #2b7fb8;
+  font-weight: 600;
+}
 
 /* כרטיס המסמך המשפטי */
 .tk-pad {
@@ -65,12 +85,28 @@
   margin-bottom: 34px;
 }
 .tk-h {
+  display: flex; /* תומך בתג מספר .tk-num בכותרות FAQ/חוקי הבית; לא משנה כותרת טקסט בודדת */
+  align-items: center;
+  gap: 11px;
   font-size: 21px;
   font-weight: 800;
   color: #0e2540;
   margin: 0 0 16px;
   padding-bottom: 11px;
   border-bottom: 2px solid #eef2f6;
+}
+/* תג מספר סעיף (FAQ + חוקי הבית) */
+.tk-num {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #eaf4fb, #d6e9f7);
+  color: #2b7fb8;
+  font-size: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 .tk-clause {
   margin: 0 0 11px;

@@ -1,0 +1,54 @@
+/* ============================================================
+   מגדל הים — חוקי הבית (/house-rules)
+   ערכים מדויקים מהרפרנס design-reference/exports/House-rules.html
+   השלד (grid/toc/pad/sec/h/num/clause/warn/info/toc-help) משותף — terms.css
+   כאן רק שורות הכללים עם אייקוני הסטטוס
+   ============================================================ */
+
+.hr .tk-h {
+  margin-bottom: 14px; /* מרווח הרפרנס לחוקי הבית */
+}
+
+.hr-rule {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 13px 0;
+  border-bottom: 1px solid #f0f4f8;
+}
+.hr-rule:last-child {
+  border-bottom: none;
+}
+.hr-ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1px;
+}
+.hr-ban {
+  background: rgba(192, 70, 61, 0.1);
+}
+.hr-check {
+  background: rgba(31, 138, 91, 0.12);
+}
+.hr-info {
+  background: rgba(43, 127, 184, 0.12);
+}
+.hr-warn {
+  background: rgba(207, 154, 42, 0.15);
+}
+.hr-rule p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.72;
+  color: #3c4f63;
+  text-align: justify;
+}
+.hr-rule strong {
+  color: #1f4a6b;
+  font-weight: 700;
+}
