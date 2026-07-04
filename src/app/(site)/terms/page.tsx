@@ -1,11 +1,21 @@
 import type { Metadata } from "next";
+import { Open_Sans } from "next/font/google";
 import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
+import { MotionEngine } from "@/components/site/MotionEngine";
 
 /* עמוד תקנון — נבנה 1:1 לפי design-reference/exports/regulations.html.
-   Server component: קישורי עוגן + גלילה חלקה נייטיבית (base.css) + sticky (terms.css)
-   בלבד — אין JS צד-לקוח ואין אנימציות כניסה שמעכבות טקסט משפטי. */
+   הגופן הנראה ברפרנס הוא Open Sans (לא Frank Ruhl / לא Rubik הגלובלי) —
+   נטען כאן דרך next/font ומוגבל לעמוד זה בלבד. התנועה: מנוע התנועה המשותף
+   (חשיפת Hero + כרטיס המסמך כיחידה אחת + זוהר נושם) — ללא מצב PLUS. */
+
+/* Open Sans — משקלים 300–800, כולל עברית; מוגבל לעטיפת העמוד */
+const openSans = Open_Sans({
+  subsets: ["hebrew", "latin"],
+  weight: ["300", "400", "500", "600", "700", "800"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "תקנון — תנאי הזמנה וביטול | מגדל הים",
@@ -42,17 +52,27 @@ const TOC = [
 
 export default function Terms() {
   return (
-    <>
+    <div className={openSans.className}>
+      {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה.
+          רשת ביטוחון של המנוע + no-JS (המחלקה לא נוספת) מבטיחים שהטקסט לעולם
+          לא יישאר מוסתר */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: "document.documentElement.classList.add('stm-js')",
+        }}
+      />
+      <MotionEngine />
+
       {/* Hero — גרדיאנט אלכסוני, זוהר כחול עליון-שמאלי ותחתון-ימני, פירורי לחם,
           כותרת ופסקת פתיחה, וגל תחתון הנמזג לרקע הבהיר של המקטע הבא */}
       <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-16 pb-[110px] text-center text-white md:pb-[140px]">
         <div
           aria-hidden="true"
-          className="absolute -top-[120px] -left-20 size-[420px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.35),transparent_68%)] blur-[10px]"
+          className="stm-blob absolute -top-[120px] -left-20 size-[420px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.35),transparent_68%)] blur-[10px]"
         />
         <div
           aria-hidden="true"
-          className="absolute -right-[60px] bottom-[60px] size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.18),transparent_70%)]"
+          className="stm-blob absolute -right-[60px] bottom-[60px] size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.18),transparent_70%)]"
         />
         <Container className="relative z-[2]">
           <nav
@@ -62,7 +82,7 @@ export default function Terms() {
             {/* min-h + margin שלילי: אזור מגע 44px בלי לשנות את הזרימה (Iron Rule #6) */}
             <Link
               href="/"
-              className="-my-2 inline-flex min-h-11 items-center py-2 transition-colors hover:text-white"
+              className="stm-link -my-2 inline-flex min-h-11 items-center py-2 transition-colors hover:text-white"
             >
               ראשי
             </Link>
@@ -77,10 +97,16 @@ export default function Terms() {
             </svg>
             <span className="font-semibold text-white">תקנון</span>
           </nav>
-          <h1 className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]">
+          <h1
+            data-rev="up"
+            className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
+          >
             תקנון — תנאי הזמנה וביטול
           </h1>
-          <p className="mx-auto max-w-[640px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]">
+          <p
+            data-rev="up"
+            className="mx-auto max-w-[640px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]"
+          >
             תנאי ההזמנה, הביטול והשימוש בשירותי מגדל הים. השימוש באתר ו/או ביצוע הזמנה דרכו
             מהווים אישור והסכמה מלאה לתנאים אלו.
           </p>
@@ -105,7 +131,7 @@ export default function Terms() {
             </nav>
           </aside>
 
-          <div className="tk-pad">
+          <div className="tk-pad" data-rev="card">
             <div id="s1" className="tk-sec">
               <h2 className="tk-h">1. מבוא</h2>
               <p className="tk-clause">תקנון זה מהווה הסכם מחייב בין <strong>דירות נופש מגדל הים</strong> (להלן: &quot;החברה&quot;) לבין כל אדם המשתמש באתר האינטרנט sea-tower.co.il (להלן: &quot;האתר&quot;) ו/או המזמין באמצעותו שירותי אירוח, לינה או חבילות נופש (להלן: &quot;השירותים&quot;). השימוש באתר מהווה אישור והסכמה לכל תנאי התקנון במלואם.</p>
@@ -359,6 +385,6 @@ export default function Terms() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   );
 }
