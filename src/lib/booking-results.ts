@@ -1,12 +1,6 @@
+import { buildApartmentView, hasSpec, type ApartmentView } from "./apartment-view";
 import type { AvailabilityResult, PublicRoom } from "./booking-api";
-import {
-  bedsLabel,
-  roomBlurb,
-  roomFacts,
-  roomGallery,
-  roomTypeBadge,
-  type RoomImage,
-} from "./rooms-view";
+import { roomGallery } from "./rooms-view";
 
 /* חיבור זמינות לתוכן — הלוגיקה שמאחורי כרטיסי /booking.
    פונקציה טהורה בכוונה: זו הנקודה שבה שני מקורות אמת נפגשים, ולכן זו הנקודה
@@ -19,18 +13,6 @@ import {
      ולא מיקום במערך: כל אחד מאלה משתנה, ושינוי כזה מדביק לדירה אחת את
      התמונות של אחרת. */
 
-export type BookingRoomsView = {
-  title: string;
-  roomNumber: string;
-  typeTag: string | null;
-  description: string | null;
-  guests: number | null;
-  sizeSqm: number | null;
-  bedsLabel: string | null;
-  amenities: string[];
-  images: RoomImage[];
-};
-
 export type BookingItem = {
   /** מפתח הכרטיס — מזהה החדר הפיזי, ייחודי לכל שורה */
   roomId: string;
@@ -40,7 +22,10 @@ export type BookingItem = {
   pricePerNight: number;
   totalPrice: number;
   checkoutHref: string;
-  room: BookingRoomsView;
+  /** מודל התצוגה המנורמל — אותו אובייקט לכרטיס, לאקורדיון ולמגירה */
+  apartment: ApartmentView;
+  /** יש מה לפתוח במפרט המורחב — נקבע בשרת כדי שהכרטיס לא יבטיח פאנל ריק */
+  hasSpec: boolean;
 };
 
 /* "no-public-profile" — הקטלוג הציבורי לא החזיר את החדר בכלל. מנקודת המבט
@@ -123,7 +108,7 @@ export function buildBookingResults({
         guests: guestsParam,
       });
 
-      const facts = roomFacts(room);
+      const apartment = buildApartmentView(room);
       items.push({
         roomId: room.id,
         roomTypeId: type.roomTypeId,
@@ -131,20 +116,8 @@ export function buildBookingResults({
         pricePerNight: Math.round(unit.totalPrice / nights),
         totalPrice: Math.round(stayTotal),
         checkoutHref: `/booking/checkout?${qs}`,
-        room: {
-          title: room.title,
-          roomNumber: room.roomNumber,
-          typeTag: roomTypeBadge(room),
-          description: roomBlurb(room),
-          guests: facts.guests,
-          sizeSqm: facts.sizeSqm,
-          /* אין ב-GuestHub שדה "מספר חדרים" נפרד: ההרכב מתואר בשם סוג החדר
-             ("2 חדרי שינה וסלון"), שכבר מוצג — כתג מעל התמונה או ככותרת
-             עצמה. צ'יפ נוסף היה חזרה על אותן מילים */
-          bedsLabel: facts.beds ? bedsLabel(facts.beds) : null,
-          amenities: room.amenities,
-          images,
-        },
+        apartment,
+        hasSpec: hasSpec(apartment),
       });
     }
   }
