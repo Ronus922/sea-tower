@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { fetchAvailability } from "@/lib/booking-api";
-import { apartmentFor } from "@/lib/apartments";
+import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
+import { roomCoverImage } from "@/lib/rooms-view";
 import {
   isDateOnly,
   nightsBetween,
@@ -51,7 +51,10 @@ export default async function Checkout({ searchParams }: { searchParams: SearchP
 
   const backHref = `/booking?checkin=${checkIn}&checkout=${checkOut}&guests=${guestsParam(rooms)}#results`;
 
-  const availability = await fetchAvailability(checkIn, checkOut);
+  const [availability, catalog] = await Promise.all([
+    fetchAvailability(checkIn, checkOut),
+    fetchWebsiteRooms(),
+  ]);
   if (!availability?.ok) redirect(backHref);
   const type = availability.roomTypes.find((t) => t.roomTypeId === roomTypeId);
   const maxParty = Math.max(...rooms.map((r) => r.adults + r.children));
@@ -69,12 +72,15 @@ export default async function Checkout({ searchParams }: { searchParams: SearchP
   const total = Math.round(picked.reduce((s, u) => s + u.totalPrice, 0));
   const nights = nightsBetween(checkIn, checkOut);
 
-  const cfg = apartmentFor(type.name);
+  /* שם ותמונה מקטלוג התוכן, מחוברים לפי מזהה החדר הפיזי — אותה דירה בדיוק
+     שהוצגה בתוצאות. אם הקטלוג לא נענה כאן, ההזמנה לא נעצרת: מוצג מספר
+     הדירה בלי תמונה, ולא תוכן של דירה אחרת */
+  const room = catalog?.find((r) => r.id === preferred.roomId) ?? null;
   const quote: CheckoutQuote = {
     roomTypeId,
     preferredUnitId: preferred.suId,
-    title: `${cfg.title} · דירה ${preferred.code}`,
-    image: cfg.images[0],
+    title: room ? `${room.title} · דירה ${room.roomNumber}` : `דירה ${preferred.code}`,
+    image: room ? roomCoverImage(room) : null,
     checkIn,
     checkOut,
     nights,
