@@ -247,3 +247,22 @@
     --n50: 50;
   }
 }
+
+/* ============================================================
+   קרוסלת החדרים (RoomsCarousel) — גלילת snap נטיבית (החלקה באצבע),
+   בלי פס גלילה גלוי; החיצים רק דוחפים את אותו scroller
+   ============================================================ */
+.rooms-scroller {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  scroll-behavior: smooth;
+}
+.rooms-scroller::-webkit-scrollbar {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rooms-scroller {
+    scroll-behavior: auto;
+  }
+}

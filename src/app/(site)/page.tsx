@@ -2,7 +2,6 @@ import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Chip, ImageBadge } from "@/components/ui/Chip";
 import { Stars } from "@/components/ui/Stars";
 import { StatCard } from "@/components/ui/StatCard";
 import { IconTile } from "@/components/ui/IconTile";
@@ -10,7 +9,9 @@ import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { Testimonials } from "@/components/site/Testimonials";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { RoomsCarousel } from "@/components/site/RoomsCarousel";
 import { buildSiteJsonLd } from "@/lib/seo";
+import { fetchWebsiteRooms } from "@/lib/booking-api";
 
 /* עמוד הבית — נבנה לפי design-reference (Home.html / Home.png) */
 
@@ -193,30 +194,6 @@ const SOLUTIONS = [
   },
 ];
 
-const APARTMENTS = [
-  {
-    title: "סוויטת רויאל קינג משפחתית",
-    badge: { label: "נוף חזיתי", variant: "light" as const },
-    chips: ["4 אורחים", "86 מ״ר", "2 חדרים"],
-    text: "אירוח משפחתי בנוחות מקסימלית מול הנוף המרהיב של הים התיכון, בהרגשה ביתית.",
-    img: { src: "/images/suite-royal.jpg", alt: "סוויטת רויאל קינג — חדר שינה עם נוף לים" },
-  },
-  {
-    title: "לאקצ׳רי סוויט קווין",
-    badge: { label: "ג׳קוזי", variant: "brand" as const },
-    chips: ["2 אורחים", "86 מ״ר", "לופט"],
-    text: "לופט ענק זוגי עם חדר שינה, מטבח מרווח וג׳קוזי — מול הנוף המרהיב של הים.",
-    img: { src: "/images/suite-jacuzzi.jpg", alt: "לאקצ׳רי סוויט עם ג׳קוזי מול הים" },
-  },
-  {
-    title: "סוויטה עם מרפסת פנורמית",
-    badge: { label: "מרפסת", variant: "light" as const },
-    chips: ["6 אורחים", "110 מ״ר", "3 חדרים"],
-    text: "דירת שלושה חדרים מרווחת עם מרפסת פנורמית — מושלמת לאירוח משפחתי גדול.",
-    img: { src: "/images/hero-terrace.jpg", alt: "מרפסת פנורמית מול מפרץ חיפה" },
-  },
-];
-
 /* כרטיסיות עם hidden:true מוסתרות מהאתר. להחזרה — הסירו את הדגל */
 const VISIBLE_SOLUTIONS = SOLUTIONS.filter((sol) => !sol.hidden);
 
@@ -387,7 +364,14 @@ const FORM_LABEL = "mb-[7px] block text-[13px] font-semibold text-ink-dim";
 
 /* ---------- העמוד ---------- */
 
-export default function Home() {
+/* קטלוג החדרים נמשך מ-GuestHub ומתרענן כל 5 דקות (ISR) — שאר העמוד סטטי */
+export const revalidate = 300;
+
+export default async function Home() {
+  /* GuestHub מחזיר רק חדרים שסומנו לאתר ויש להם גלריה. נפילת השירות מחזירה
+     null, ואז המקטע מציג הודעה במקום קרוסלה במקום להפיל את העמוד */
+  const rooms = (await fetchWebsiteRooms()) ?? [];
+
   return (
     <>
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה */}
@@ -605,49 +589,24 @@ export default function Home() {
         </Container>
       </section>
 
-      {/* הדירות שלנו */}
+      {/* הדירות שלנו — כרטיסים חיים מ-GuestHub */}
       <section id="apartments" className="bg-cloud py-14 md:py-20">
         <Container>
-          <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-            <SectionHeading ws kicker="הדירות שלנו" title="סוויטות נבחרות מול הים" />
-            <Button href="#contact" variant="link">
-              לכל הדירות
+          <SectionHeading ws kicker="הדירות שלנו" title="סוויטות נבחרות מול הים" className="mb-10" />
+          {rooms.length > 0 ? (
+            <RoomsCarousel rooms={rooms} />
+          ) : (
+            /* GuestHub לא זמין — העמוד לא נופל, והמבקר ממשיך למנוע ההזמנות */
+            <div className="rounded-card-lg border border-line bg-white p-6 text-center text-[15.5px] leading-relaxed text-ink-dim md:p-10">
+              רשימת הדירות מתעדכנת ברגעים אלה — אפשר לבדוק זמינות ומחירים ישירות במנוע
+              ההזמנות.
+            </div>
+          )}
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3.5">
+            <Button href="/rooms" variant="outline">
+              לכל החדרים שלנו
             </Button>
-          </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {APARTMENTS.map((apt) => (
-              <article
-                key={apt.title}
-                data-rev="card"
-                className="stm-card overflow-hidden rounded-card-lg bg-white shadow-e2"
-              >
-                <div className="relative">
-                  <Image
-                    src={apt.img.src}
-                    alt={apt.img.alt}
-                    width={800}
-                    height={440}
-                    sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-                    className="stm-zoom h-[220px] w-full object-cover"
-                  />
-                  <ImageBadge variant={apt.badge.variant} className="absolute top-3.5 right-3.5">
-                    {apt.badge.label}
-                  </ImageBadge>
-                </div>
-                <div className="p-6">
-                  <h3 className="mb-3 text-h4 text-navy-800">{apt.title}</h3>
-                  <div className="mb-3.5 flex flex-wrap gap-2">
-                    {apt.chips.map((c) => (
-                      <Chip key={c}>{c}</Chip>
-                    ))}
-                  </div>
-                  <p className="mb-4 text-[14.5px] leading-[1.6] text-ink-dim">{apt.text}</p>
-                  <Button href="#contact" variant="link">
-                    לפרטים והזמנה
-                  </Button>
-                </div>
-              </article>
-            ))}
+            <Button href="/booking">בדקו זמינות</Button>
           </div>
         </Container>
       </section>

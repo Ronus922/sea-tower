@@ -63,9 +63,39 @@ export type CreateBookingResult =
     }
   | { ok: false; code: string; message?: string; newTotal?: number };
 
+/* קטלוג החדרים לאתר — תוכן בלבד (שמות, קופי, מתקנים, גלריה). זמינות ומחיר
+   לעולם לא מגיעים מכאן אלא מ-fetchAvailability, שהוא לפי תאריכים */
+export type PublicRoom = {
+  id: string;
+  roomNumber: string;
+  slug: string | null;
+  title: string;
+  /* מאיזו חוליה בשרשרת הגיעה הכותרת — "type" אומר שאין לחדר שם עברי ב-GuestHub
+     ולכן הכותרת היא שם סוג החדר, ואין להדפיס אותו שוב כתג */
+  titleSource: "translation" | "room" | "type" | "number";
+  summary: string | null;
+  description: string | null;
+  floor: string | null;
+  sizeSqm: number | null;
+  maxOccupancy: number | null;
+  roomType: { id: string; name: string } | null;
+  beds: { single: number; double: number; queen: number; sofa: number; cribs: number };
+  amenities: string[];
+  images: Array<{ url: string; alt: string | null }>;
+};
+
+export type PublicRoomsResult =
+  | { ok: true; lang: string; rooms: PublicRoom[] }
+  | { ok: false; code: string; message?: string };
+
 const BASE = process.env.GUESTHUB_API_URL ?? "http://127.0.0.1:3007";
 
-async function guesthubFetch<T>(path: string, init?: RequestInit): Promise<T | null> {
+/* revalidate: מספר שניות ל-ISR (קטלוג החדרים), או no-store לנתונים חיים */
+async function guesthubFetch<T>(
+  path: string,
+  init?: RequestInit,
+  revalidate?: number,
+): Promise<T | null> {
   const secret = process.env.GUESTHUB_BOOKING_SECRET;
   if (!secret) return null;
   const controller = new AbortController();
@@ -73,7 +103,9 @@ async function guesthubFetch<T>(path: string, init?: RequestInit): Promise<T | n
   try {
     const res = await fetch(`${BASE}${path}`, {
       ...init,
-      cache: "no-store",
+      ...(revalidate === undefined
+        ? { cache: "no-store" as const }
+        : { next: { revalidate } }),
       signal: controller.signal,
       headers: {
         "x-booking-secret": secret,
@@ -96,6 +128,13 @@ export async function fetchAvailability(
 ): Promise<AvailabilityResult | null> {
   const qs = new URLSearchParams({ check_in: checkIn, check_out: checkOut });
   return guesthubFetch<AvailabilityResult>(`/api/public/availability?${qs}`);
+}
+
+/* קטלוג החדרים המסומנים "הצג באתר" ב-GuestHub. ISR של 5 דקות: התוכן משתנה
+   נדירות, ונפילה של guesthub לא מפילה את עמוד הבית — המתקשר מקבל null */
+export async function fetchWebsiteRooms(): Promise<PublicRoom[] | null> {
+  const res = await guesthubFetch<PublicRoomsResult>("/api/public/rooms?lang=he", undefined, 300);
+  return res?.ok ? res.rooms : null;
 }
 
 export async function createBooking(
