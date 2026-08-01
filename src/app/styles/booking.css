@@ -1,0 +1,320 @@
+/* ============================================================
+   מנוע ההזמנות (/booking) — בורר טווח התאריכים
+   פורט 1:1 של ה-CSS מ-sea-tower-datepicker.js (רפרנס Claude Design).
+   שאר העמוד ממומש ב-Tailwind בתוך הקומפוננטות.
+   ============================================================ */
+
+.stm-dp-back {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(10, 29, 49, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.25s var(--ease-brand);
+  direction: rtl;
+  font-family: inherit;
+}
+.stm-dp-back.stm-dp-show {
+  opacity: 1;
+}
+.stm-dp-card {
+  background: #fff;
+  border-radius: 22px;
+  box-shadow: 0 40px 90px rgba(10, 29, 49, 0.4);
+  width: 100%;
+  max-width: 720px;
+  max-height: 92vh;
+  overflow: auto;
+  padding: 28px 30px 22px;
+  transform: translateY(12px) scale(0.985);
+  transition: transform 0.3s var(--ease-brand);
+  color: #14283d;
+}
+.stm-dp-back.stm-dp-show .stm-dp-card {
+  transform: none;
+}
+.stm-dp-ey {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--color-ocean-400);
+  margin: 0 0 6px;
+}
+.stm-dp-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.stm-dp-title {
+  font-size: 25px;
+  font-weight: 800;
+  color: var(--color-navy-800);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.stm-dp-x {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-field);
+  background: #fff;
+  color: var(--color-navy-800);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s, transform 0.25s;
+}
+.stm-dp-x:hover {
+  background: var(--color-chip);
+  transform: rotate(90deg);
+}
+.stm-dp-segs {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.stm-dp-seg {
+  flex: 1;
+  border: 1.5px solid var(--color-field);
+  border-radius: 14px;
+  padding: 15px 18px;
+  cursor: pointer;
+  background: #fff;
+  transition: border-color 0.25s, background 0.25s, box-shadow 0.25s;
+  text-align: right;
+  font-family: inherit;
+}
+.stm-dp-seg.on {
+  border-color: var(--color-ocean-400);
+  background: rgba(43, 127, 184, 0.06);
+  box-shadow: 0 0 0 3px rgba(43, 127, 184, 0.12);
+}
+.stm-dp-seg .lab {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-ocean-400);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.stm-dp-seg .val {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-navy-800);
+  margin-top: 6px;
+  min-height: 24px;
+}
+.stm-dp-seg .val.ph {
+  color: #b9c5d1;
+  font-weight: 500;
+}
+.stm-dp-arrow {
+  align-self: center;
+  color: #9fb0c0;
+  flex-shrink: 0;
+}
+.stm-dp-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.stm-dp-navbtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--color-field);
+  background: #fff;
+  color: var(--color-navy-800);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.25s, opacity 0.25s;
+}
+.stm-dp-navbtn:hover:not(:disabled) {
+  background: var(--color-navy-800);
+  color: #fff;
+  border-color: var(--color-navy-800);
+}
+.stm-dp-navbtn:disabled {
+  opacity: 0.32;
+  cursor: default;
+}
+.stm-dp-months {
+  flex: 1;
+  display: flex;
+  gap: 30px;
+  min-width: 0;
+}
+.stm-dp-month {
+  flex: 1;
+  min-width: 0;
+}
+.stm-dp-mtitle {
+  text-align: center;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--color-navy-800);
+  margin: 0 0 12px;
+}
+.stm-dp-wd,
+.stm-dp-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  direction: rtl;
+}
+.stm-dp-wd span {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-ink-muted);
+  padding-bottom: 8px;
+}
+.stm-dp-grid {
+  gap: 2px 0;
+}
+.stm-dp-day {
+  position: relative;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14.5px;
+  font-weight: 600;
+  color: #33485d;
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+}
+.stm-dp-day::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  z-index: 0;
+  transition: background 0.15s;
+}
+.stm-dp-day span {
+  position: relative;
+  z-index: 1;
+}
+.stm-dp-day:hover:not(.off):not(.sel)::before {
+  background: rgba(43, 127, 184, 0.12);
+}
+.stm-dp-day.off {
+  color: #c5cfda;
+  cursor: default;
+}
+.stm-dp-day.today {
+  color: var(--color-ocean-400);
+  font-weight: 800;
+}
+.stm-dp-day.today::after {
+  content: "";
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--color-ocean-400);
+}
+.stm-dp-day.rng {
+  color: var(--color-navy-800);
+}
+.stm-dp-day.rng::before {
+  background: rgba(43, 127, 184, 0.14);
+  border-radius: 0;
+  inset: 3px 0;
+}
+.stm-dp-day.sel {
+  color: #fff;
+  font-weight: 800;
+}
+.stm-dp-day.sel::before {
+  background: var(--color-ocean-400);
+  inset: 3px;
+}
+.stm-dp-day.sel.today::after {
+  background: #fff;
+}
+.stm-dp-day.s-start::before {
+  border-top-right-radius: 50%;
+  border-bottom-right-radius: 50%;
+}
+.stm-dp-day.s-end::before {
+  border-top-left-radius: 50%;
+  border-bottom-left-radius: 50%;
+}
+.stm-dp-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid var(--color-chip);
+  margin-top: 18px;
+  padding-top: 16px;
+}
+.stm-dp-close {
+  background: none;
+  border: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--color-navy-800);
+  cursor: pointer;
+  border-bottom: 2px solid var(--color-navy-800);
+  padding: 0 0 2px;
+  min-height: 44px;
+}
+.stm-dp-clear {
+  background: none;
+  border: 0;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink-muted);
+  cursor: pointer;
+  transition: color 0.2s;
+  min-height: 44px;
+}
+.stm-dp-clear:hover {
+  color: var(--color-ocean-400);
+}
+
+@media (max-width: 640px) {
+  .stm-dp-months {
+    flex-direction: column;
+    gap: 22px;
+  }
+  .stm-dp-segs {
+    flex-direction: column;
+  }
+  .stm-dp-title {
+    font-size: 21px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stm-dp-back,
+  .stm-dp-card {
+    transition: none;
+  }
+  .stm-dp-x:hover {
+    transform: none;
+  }
+}

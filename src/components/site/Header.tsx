@@ -5,9 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { BUSINESS } from "@/lib/business";
 
-/* קישורי הניווט מהרפרנס. יעדים שהם עמודים עתידיים (מנוע הזמנה)
-   מפנים בינתיים לעוגני הבית — יוחלפו כשהעמודים ייבנו */
+/* קישורי הניווט מהרפרנס */
 const NAV = [
   { href: "/", label: "ראשי" },
   { href: "/about", label: "אודות" },
@@ -18,16 +18,71 @@ const NAV = [
   { href: "/contact", label: "צור קשר" },
 ];
 
+/* CTA יחיד ל-/booking — הטקסט מתחלף באפקט מכונת כתיבה בין "הזמינו עכשיו"
+   ל"בדיקת זמינות" (איחוד שני כפתורים שהובילו לאותו יעד): מחיקה אות-אות,
+   הקלדה אות-אות וסמן מהבהב. שני הטקסטים יושבים כרוחות-רפאים שקופות באותו תא
+   grid כדי שרוחב הכפתור יינעל על הארוך מביניהם — בלי קפיצת layout */
+const CTA_TEXTS = ["הזמינו עכשיו", "בדיקת זמינות"] as const;
+const TYPE_MS = 55; // הקלדת אות
+const DELETE_MS = 30; // מחיקת אות
+const HOLD_MS = 1300; // השהיה על טקסט מלא
+
 function CtaLink({ className }: { className?: string }) {
+  const [display, setDisplay] = useState<string>(CTA_TEXTS[0]);
+  useEffect(() => {
+    // prefers-reduced-motion: בלי הקלדה — החלפה שקטה של טקסט מלא
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      let idx = 0;
+      const id = setInterval(() => {
+        idx = (idx + 1) % CTA_TEXTS.length;
+        setDisplay(CTA_TEXTS[idx]);
+      }, 3000);
+      return () => clearInterval(id);
+    }
+    let idx = 0;
+    let pos = CTA_TEXTS[0].length;
+    let deleting = true; // מתחילים מטקסט מלא (כמו ה-SSR) → קודם מוחקים
+    let t: ReturnType<typeof setTimeout>;
+    const tick = () => {
+      const full = CTA_TEXTS[idx];
+      pos += deleting ? -1 : 1;
+      setDisplay(full.slice(0, pos));
+      let delay = deleting ? DELETE_MS : TYPE_MS;
+      if (deleting && pos === 0) {
+        deleting = false;
+        idx = (idx + 1) % CTA_TEXTS.length;
+        delay = 200; // נשימה קצרה לפני שמתחילים להקליד
+      } else if (!deleting && pos === full.length) {
+        deleting = true;
+        delay = HOLD_MS;
+      }
+      t = setTimeout(tick, delay);
+    };
+    t = setTimeout(tick, HOLD_MS);
+    return () => clearTimeout(t);
+  }, []);
   return (
     <Link
-      href="/#contact"
+      href="/booking"
+      aria-label="הזמינו עכשיו — בדיקת זמינות"
       className={cn(
         "stm-btn-primary inline-flex items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-[22px] py-3 text-[15px] font-bold whitespace-nowrap text-white shadow-[0_8px_20px_rgba(43,127,184,0.32)]",
         className
       )}
     >
-      הזמינו עכשיו
+      <span className="grid" aria-hidden="true">
+        {/* רוחות-רפאים לקיבוע הרוחב על הטקסט הרחב מבין השניים */}
+        {CTA_TEXTS.map((text) => (
+          <span key={text} className="invisible col-start-1 row-start-1">
+            {text}
+          </span>
+        ))}
+        {/* השורה החיה: הטקסט המוקלד + סמן מהבהב, מעוגן לימין (RTL) */}
+        <span className="col-start-1 row-start-1 flex items-center justify-start">
+          {display}
+          <span className="ms-0.5 inline-block h-[1.05em] w-px animate-pulse bg-white/90" />
+        </span>
+      </span>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
           d="M15 6l-6 6 6 6"
@@ -38,6 +93,49 @@ function CtaLink({ className }: { className?: string }) {
         />
       </svg>
     </Link>
+  );
+}
+
+/* וריאנט checkout — header לבן מינימלי (לוגו · תשלום מאובטח · טלפון),
+   לפי עיצוב "Sea Tower - תשלום". לא דביק: בר הסיכום של האשף הוא הדביק */
+function CheckoutHeader() {
+  return (
+    <header data-site-header="" className="border-b border-[#e3ebf2] bg-white">
+      <div className="mx-auto flex max-w-shell items-center justify-between gap-6 px-5 py-3.5 sm:px-8 lg:px-14">
+        <Link href="/" className="flex items-center gap-[11px]">
+          <Image src="/images/logo.png" alt="" width={40} height={40} className="object-contain" />
+          <span className="flex flex-col leading-[1.05]">
+            <span className="text-[22px] font-extrabold whitespace-nowrap text-[#385668] md:text-[26px]">
+              מגדל הים
+            </span>
+            <span className="hidden text-[12px] font-normal tracking-[0.12em] whitespace-nowrap text-[#395769] min-[420px]:block md:text-[13px]">
+              דירות בוטיק על הים
+            </span>
+          </span>
+        </Link>
+        <span className="flex items-center gap-2 rounded-full bg-success-bg px-4 py-2 text-[14px] font-semibold text-success">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="5" y="11" width="14" height="9" rx="2" stroke="currentColor" strokeWidth="1.7" />
+            <path d="M8 11V8a4 4 0 018 0v3" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+          </svg>
+          תשלום מאובטח · SSL
+        </span>
+        <a
+          href={BUSINESS.phones.office.tel}
+          className="hidden min-h-11 items-center gap-2 text-[15px] font-bold text-ink-strong sm:inline-flex"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M5 4h3l2 5-2.5 1.5a11 11 0 005 5L14 13l5 2v3a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinejoin="round"
+            />
+          </svg>
+          {BUSINESS.phones.office.label}
+        </a>
+      </div>
+    </header>
   );
 }
 
@@ -53,13 +151,15 @@ export function Header() {
     };
   }, [open]);
 
+  if (pathname.startsWith("/booking/checkout")) return <CheckoutHeader />;
+
   return (
     <>
     <header
       data-site-header=""
       className="sticky top-0 z-50 border-b border-[#e3ebf2] bg-white/94 backdrop-blur-[10px]"
     >
-      <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-6 px-5 py-3.5 sm:px-8 lg:px-14">
+      <div className="mx-auto flex max-w-shell items-center justify-between gap-6 px-5 py-3.5 sm:px-8 lg:px-14">
         <Link href="/" className="flex items-center gap-[11px]">
           <Image src="/images/logo.png" alt="" width={40} height={40} className="object-contain" />
           <span className="flex flex-col leading-[1.05]">
@@ -88,7 +188,7 @@ export function Header() {
         </nav>
 
         {/* עטיפה במקום className מתנגש — cn לא פותר קונפליקט hidden/inline-flex */}
-        <span className="hidden lg:block">
+        <span className="hidden items-center lg:flex">
           <CtaLink />
         </span>
 
