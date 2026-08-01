@@ -22,7 +22,6 @@ const LINK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: s
       { label: "אירוח לעסקים", href: "/#solutions" },
       { label: "רילוקיישן", href: "/#solutions" },
       { label: "השכרה לטווח קצר", href: "/#solutions" },
-      { label: "ניהול דירות", href: "/#solutions" },
       { label: "סוויטות מול הים", href: "/#apartments" },
     ],
   },

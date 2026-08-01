@@ -15,7 +15,7 @@ import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 export const metadata: Metadata = pageMeta({
   title: "פתרונות אירוח — מגדל הים | דירות בוטיק מול הים בחיפה",
   description:
-    "פתרון אירוח לכל צורך במגדל הים: נופש מול הים, אירוח לעסקים, רילוקיישן, השכרה לטווח קצר וארוך וניהול דירות — דירות בוטיק 50 מ׳ מהטיילת בחיפה, ללא בירוקרטיה.",
+    "פתרון אירוח לכל צורך במגדל הים: נופש מול הים, אירוח לעסקים, רילוקיישן והשכרה לטווח קצר — דירות בוטיק 50 מ׳ מהטיילת בחיפה, ללא בירוקרטיה.",
   path: "/solutions",
 });
 
@@ -29,8 +29,8 @@ const SOLUTIONS = [
     text: "חופשה זוגית או משפחתית בסוויטה מפנקת עם נוף לים, במרחק נגיעה מהטיילת. כל מה שצריך כדי להתנתק, מול הים התיכון.",
     checks: ["נוף חזיתי לים מכל דירה", "50 מ׳ מהטיילת והחוף", "מאובזר ברמה מלונאית"],
     img: {
-      src: "/images/hero-terrace.jpg",
-      alt: "מרפסת סלון פונה לשקיעה מעל הים במגדל הים",
+      src: "/images/vacation-sea-view.jpg",
+      alt: "זוג מטייל על חוף הים בשקיעה מול בניין אלמוג בחיפה",
       width: 1376,
       height: 768,
     },
@@ -53,10 +53,10 @@ const SOLUTIONS = [
     text: "מרחב עבודה שקט ומאובזר לצוותים ולשהייה ממושכת — שהעובדים יגיעו רעננים. פתרון אידאלי לחברות הייטק, רפואה וטכנולוגיה.",
     checks: ["מרחב עבודה שקט ואינטרנט מהיר", "חשבוניות וקבלות לחברה", "מתאים לצוותים ולשהייה ארוכה"],
     img: {
-      src: "/images/living-room.jpg",
-      alt: "סלון מעוצב עם ספה כחולה ופינת ישיבה שקטה לעבודה",
-      width: 1024,
-      height: 1024,
+      src: "/images/business-stay.jpg",
+      alt: "איש עסקים עובד מול מחשב נייד בדירה עם נוף לים",
+      width: 1376,
+      height: 768,
     },
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -76,10 +76,10 @@ const SOLUTIONS = [
     text: "נחיתה רכה בחיפה — דירה מרוהטת ומוכנה, כולל כל החשבונות, ללא התחייבות. הפתרון המושלם למעבר עיר חלק ונטול דאגות.",
     checks: ["דירה מרוהטת ומוכנה מהיום הראשון", "כל החשבונות כלולים", "ליווי אישי וגמישות מלאה"],
     img: {
-      src: "/images/bedroom-classic.jpg",
-      alt: "חדר שינה קלאסי עם דלתות למרפסת ונוף לים",
-      width: 928,
-      height: 1152,
+      src: "/images/relocation-stay.jpg",
+      alt: "זוג עם מזוודות נכנס לדירה מרוהטת עם נוף לים",
+      width: 1376,
+      height: 768,
     },
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -100,8 +100,8 @@ const SOLUTIONS = [
     text: "לילה, שבוע או חודש — גמישות מלאה ואישור מיידי, בלי בירוקרטיה מיותרת. מגיעים, נכנסים ונהנים.",
     checks: ["אישור מיידי, ללא בירוקרטיה", "מלילה בודד ועד חודש", "מדיניות ביטול גמישה"],
     img: {
-      src: "/images/suite-royal.jpg",
-      alt: "סוויטה מרווחת עם מיטה זוגית ונוף פתוח לחוף",
+      src: "/images/short-term-rental.jpg",
+      alt: "חדר שינה עם מיטה זוגית מול חלון פנורמי לים ולטיילת",
       width: 1376,
       height: 768,
     },
@@ -120,6 +120,7 @@ const SOLUTIONS = [
   {
     id: "sol-5",
     num: "05",
+    hidden: true,
     title: "השכרה לטווח ארוך",
     pill: "טווח ארוך",
     text: "מגורים זמניים בזמן שיפוץ, תיירות מרפא או תקופת מעבר — בנוחות של בית, בתנאים משתלמים ובשירות שוטף.",
@@ -152,6 +153,7 @@ const SOLUTIONS = [
   {
     id: "sol-6",
     num: "06",
+    hidden: true,
     title: "ניהול דירות",
     text: "בעלי נכסים? ננהל עבורכם את הדירה להשכרה — תפעול, אירוח ותחזוקה מקצה לקצה, עם שיווק חכם ודוחות שקופים.",
     checks: ["תפעול, אירוח ותחזוקה מקצה לקצה", "שיווק הנכס למקסום תפוסה", "דוחות הכנסה שקופים"],
@@ -174,6 +176,9 @@ const SOLUTIONS = [
     ),
   },
 ];
+
+/* כרטיסיות עם hidden:true מוסתרות מהאתר. להחזרה — הסירו את הדגל */
+const VISIBLE_SOLUTIONS = SOLUTIONS.filter((s) => !s.hidden);
 
 const STEPS = [
   {
@@ -267,7 +272,7 @@ export default function Solutions() {
             נתאים לכם בדיוק את מה שצריך, ללא בירוקרטיה.
           </p>
           <div data-rev="sm" className="flex flex-wrap justify-center gap-2.5">
-            {SOLUTIONS.map((s) => (
+            {VISIBLE_SOLUTIONS.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
@@ -281,10 +286,10 @@ export default function Solutions() {
         <WaveSeparator position="bottom" fill="var(--color-cloud)" />
       </section>
 
-      {/* ששת הפתרונות — שורות תמונה/טקסט מתחלפות */}
+      {/* הפתרונות — שורות תמונה/טקסט מתחלפות */}
       <section className="bg-cloud pt-14 pb-8 md:pt-20 md:pb-[30px]">
         <Container className="flex flex-col gap-14 md:gap-[72px]">
-          {SOLUTIONS.map((s, i) => (
+          {VISIBLE_SOLUTIONS.map((s, i) => (
             <div
               id={s.id}
               key={s.id}

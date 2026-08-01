@@ -75,7 +75,7 @@ const SOLUTIONS = [
     title: "נופש מול הים",
     text: "חופשה זוגית או משפחתית בסוויטה מפנקת עם נוף לים, במרחק נגיעה מהטיילת.",
     checks: ["נוף חזיתי לים מכל דירה", "50 מ׳ מהטיילת והחוף", "מאובזר ברמה מלונאית"],
-    img: { src: "/images/hero-terrace.jpg", alt: "מרפסת סוויטה מול הים" },
+    img: { src: "/images/vacation-sea-view.jpg", alt: "זוג מטייל על חוף הים בשקיעה מול בניין אלמוג בחיפה" },
     sticky: "lg:top-[90px]",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -94,7 +94,7 @@ const SOLUTIONS = [
     title: "אירוח לעסקים",
     text: "מרחב עבודה שקט ומאובזר לצוותים ולשהייה ממושכת — שהעובדים יגיעו רעננים.",
     checks: ["מרחב עבודה שקט ואינטרנט מהיר", "חשבוניות וקבלות לחברה", "מתאים לצוותים ולשהייה ארוכה"],
-    img: { src: "/images/living-room.jpg", alt: "סלון מרווח המתאים לעבודה" },
+    img: { src: "/images/business-stay.jpg", alt: "איש עסקים עובד מול מחשב נייד בדירה עם נוף לים" },
     sticky: "lg:top-[112px]",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -112,7 +112,7 @@ const SOLUTIONS = [
     title: "רילוקיישן",
     text: "נחיתה רכה בחיפה — דירה מרוהטת ומוכנה, כולל כל החשבונות, ללא התחייבות.",
     checks: ["דירה מרוהטת ומוכנה מהיום הראשון", "כל החשבונות כלולים", "ליווי אישי וגמישות מלאה"],
-    img: { src: "/images/bedroom-classic.jpg", alt: "חדר שינה עם יציאה למרפסת ונוף לים" },
+    img: { src: "/images/relocation-stay.jpg", alt: "זוג עם מזוודות נכנס לדירה מרוהטת עם נוף לים" },
     sticky: "lg:top-[134px]",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -130,7 +130,7 @@ const SOLUTIONS = [
     title: "השכרה לטווח קצר",
     text: "לילה, שבוע או חודש — גמישות מלאה ואישור מיידי, בלי בירוקרטיה מיותרת.",
     checks: ["אישור מיידי, ללא בירוקרטיה", "מלילה בודד ועד חודש", "מדיניות ביטול גמישה"],
-    img: { src: "/images/suite-royal.jpg", alt: "חדר שינה בסוויטה עם נוף פנורמי לים" },
+    img: { src: "/images/short-term-rental.jpg", alt: "חדר שינה עם מיטה זוגית מול חלון פנורמי לים ולטיילת" },
     sticky: "lg:top-[156px]",
     icon: (
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -146,6 +146,7 @@ const SOLUTIONS = [
   },
   {
     num: "05",
+    hidden: true,
     title: "השכרה לטווח ארוך",
     text: "מגורים זמניים בזמן שיפוץ, תיירות מרפא או תקופת מעבר — בנוחות של בית.",
     checks: ["תנאים משתלמים לטווח ארוך", "אחזקה ושירות שוטף", "פתרון מושלם לתקופת מעבר"],
@@ -172,6 +173,7 @@ const SOLUTIONS = [
   },
   {
     num: "06",
+    hidden: true,
     title: "ניהול דירות",
     text: "בעלי נכסים? ננהל עבורכם את הדירה להשכרה — תפעול, אירוח ותחזוקה מקצה לקצה.",
     checks: ["תפעול, אירוח ותחזוקה מקצה לקצה", "שיווק הנכס למקסום תפוסה", "דוחות הכנסה שקופים"],
@@ -214,6 +216,9 @@ const APARTMENTS = [
     img: { src: "/images/hero-terrace.jpg", alt: "מרפסת פנורמית מול מפרץ חיפה" },
   },
 ];
+
+/* כרטיסיות עם hidden:true מוסתרות מהאתר. להחזרה — הסירו את הדגל */
+const VISIBLE_SOLUTIONS = SOLUTIONS.filter((sol) => !sol.hidden);
 
 const WHY_FEATURES = [
   {
@@ -451,14 +456,16 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-img-in relative w-full lg:flex-[0.95]">
-            <Image
-              src="/images/hero-terrace.jpg"
-              alt="מרפסת פנטהאוז מול מפרץ חיפה בשעת שקיעה"
-              width={1376}
-              height={768}
-              priority
+            <video
+              src="/videos/hero-sea.mp4"
+              poster="/videos/hero-sea-poster.jpg"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="auto"
+              aria-label="נוף לים התיכון ממגדלי חוף הכרמל"
               data-parallax=""
-              sizes="(min-width: 1024px) 45vw, 100vw"
               className="h-[280px] w-full rounded-img object-cover shadow-[0_30px_60px_rgba(0,0,0,0.4)] md:h-[460px]"
             />
             <div className="absolute -bottom-6 right-4 animate-float rounded-card bg-white px-5 py-4 shadow-e4 md:-right-5">
@@ -468,7 +475,7 @@ export default function Home() {
               </div>
               <div className="mt-1 text-[13px] font-semibold text-ink-dim">מקו המים והטיילת</div>
             </div>
-            <div className="absolute -top-5 left-4 animate-float-sm rounded-tile border border-white/25 bg-white/14 px-4 py-3 backdrop-blur-[6px] md:-left-4">
+            <div className="absolute -top-5 left-4 animate-float-sm rounded-tile border border-white/20 bg-navy-900/60 px-4 py-3 shadow-e3 backdrop-blur-[6px] md:-left-4">
               <div className="flex items-center gap-[7px] text-[13px] font-semibold text-white">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                   <path
@@ -497,10 +504,10 @@ export default function Home() {
         <Container className="flex flex-col items-center gap-12 lg:flex-row lg:gap-14">
           <div className="relative w-full lg:flex-1">
             <Image
-              src="/images/living-room.jpg"
-              alt="סלון מעוצב עם ספה כחולה ונוף לים"
-              width={1024}
-              height={1024}
+              src="/images/sea-view-sunset.jpg"
+              alt="נוף שקיעה על הים והחוף ממרפסת מגדל הים"
+              width={1600}
+              height={1200}
               data-rev="media"
               sizes="(min-width: 1024px) 45vw, 100vw"
               className="h-[300px] w-full rounded-card-lg object-cover md:h-[420px]"
@@ -548,7 +555,7 @@ export default function Home() {
             className="mb-12"
           />
           <div className="relative mx-auto flex max-w-[1040px] flex-col gap-9">
-            {SOLUTIONS.map((sol) => (
+            {VISIBLE_SOLUTIONS.map((sol) => (
               <div
                 key={sol.num}
                 className={`sol-card flex flex-col-reverse overflow-hidden rounded-[26px] border border-[#ecf1f6] bg-white shadow-[0_28px_60px_-26px_rgba(14,37,64,0.36)] lg:sticky lg:min-h-[336px] lg:flex-row ${sol.sticky}`}
@@ -683,10 +690,10 @@ export default function Home() {
           </div>
           <div className="relative w-full lg:flex-[0.95]">
             <Image
-              src="/images/bedroom-classic.jpg"
-              alt="חדר שינה קלאסי עם דלתות למרפסת ונוף לים"
-              width={928}
-              height={1152}
+              src="/images/suite-details.jpg"
+              alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
+              width={1376}
+              height={768}
               data-rev="media"
               sizes="(min-width: 1024px) 45vw, 100vw"
               className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"

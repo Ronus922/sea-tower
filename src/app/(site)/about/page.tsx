@@ -369,10 +369,10 @@ export default function About() {
           </div>
           <div className="relative w-full lg:flex-[0.95]">
             <Image
-              src="/images/bedroom-classic.jpg"
-              alt="חדר שינה קלאסי עם דלתות למרפסת ונוף לים"
-              width={928}
-              height={1152}
+              src="/images/suite-details.jpg"
+              alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
+              width={1376}
+              height={768}
               data-rev="media"
               sizes="(min-width: 1024px) 45vw, 100vw"
               className="h-[320px] w-full rounded-card-lg object-cover md:h-[460px]"
