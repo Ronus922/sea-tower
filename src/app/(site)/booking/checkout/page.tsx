@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
+import { apartmentTitle } from "@/lib/apartment-view";
 import { roomCoverImage } from "@/lib/rooms-view";
 import {
   isDateOnly,
@@ -53,7 +54,7 @@ export default async function Checkout({ searchParams }: { searchParams: SearchP
 
   const [availability, catalog] = await Promise.all([
     fetchAvailability(checkIn, checkOut),
-    fetchWebsiteRooms(),
+    fetchWebsiteRooms(true),
   ]);
   if (!availability?.ok) redirect(backHref);
   const type = availability.roomTypes.find((t) => t.roomTypeId === roomTypeId);
@@ -79,7 +80,7 @@ export default async function Checkout({ searchParams }: { searchParams: SearchP
   const quote: CheckoutQuote = {
     roomTypeId,
     preferredUnitId: preferred.suId,
-    title: room ? `${room.title} · דירה ${room.roomNumber}` : `דירה ${preferred.code}`,
+    title: room ? apartmentTitle(room) : `דירה ${preferred.code}`,
     image: room ? roomCoverImage(room) : null,
     checkIn,
     checkOut,

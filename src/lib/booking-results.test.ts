@@ -109,21 +109,21 @@ describe("החיבור בין זמינות לתוכן", () => {
     );
     const a = items.find((i) => i.roomId === ROOM_A)!;
     const b = items.find((i) => i.roomId === ROOM_B)!;
-    expect(a.room.title).toBe("סוויטת הים");
-    expect(a.room.roomNumber).toBe("1102");
-    expect(b.room.title).toBe("סוויטה משפחתית");
-    expect(b.room.roomNumber).toBe("1237");
+    expect(a.apartment.title).toBe("דירה 1102 · סוויטת הים");
+    expect(a.apartment.roomNumber).toBe("1102");
+    expect(b.apartment.title).toBe("דירה 1237 · סוויטה משפחתית");
+    expect(b.apartment.roomNumber).toBe("1237");
   });
 
   it("לא מדביק לדירה אחת את הפרופיל של אחרת", () => {
     const { items } = build(
       availability([unit("su-a", ROOM_A, "1102", 1400), unit("su-b", ROOM_B, "1237", 1600)]),
     );
-    const titles = items.map((i) => i.room.title);
-    const images = items.map((i) => i.room.images[0].src);
+    const titles = items.map((i) => i.apartment.title);
+    const images = items.map((i) => i.apartment.images[0].src);
     expect(new Set(titles).size).toBe(items.length);
     expect(new Set(images).size).toBe(items.length);
-    expect(items.find((i) => i.roomId === ROOM_A)!.room.description).toBe("מרפסת פונה לים");
+    expect(items.find((i) => i.roomId === ROOM_A)!.apartment.shortDescription).toBe("מרפסת פונה לים");
   });
 
   it("מזהה חדר שאין לו התאמה בקטלוג — ולא ממציא לו תוכן", () => {
@@ -151,36 +151,36 @@ describe("סמכות הנתונים", () => {
 
   it("תמונות ותיאור לעולם לא מגיעים מהזמינות או מקטלוג סטטי", () => {
     const { items } = build(availability([unit("su-a", ROOM_A, "1102", 1400)]));
-    const srcs = items[0].room.images.map((i) => i.src);
+    const srcs = items[0].apartment.images.map((i) => i.src);
     /* כל תמונה חייבת להיות נתיב GuestHub. תמונות האתר הסטטיות פסולות */
     expect(srcs.every((s) => s.startsWith("/room-images/"))).toBe(true);
     expect(srcs.some((s) => s.includes("/images/"))).toBe(false);
-    expect(items[0].room.description).toBe("מרפסת פונה לים");
+    expect(items[0].apartment.shortDescription).toBe("מרפסת פונה לים");
     /* שם סוג החדר מהזמינות אינו הכותרת */
-    expect(items[0].room.title).not.toBe("חדר שינה וסלון");
+    expect(items[0].apartment.title).not.toBe("חדר שינה וסלון");
   });
 
   it("מסנן כתובת תמונה שאינה תואמת את תבנית GuestHub", () => {
     const { items } = build(availability([unit("su-a", ROOM_A, "1102", 1400)]));
-    expect(items[0].room.images).toHaveLength(1);
-    expect(items[0].room.images[0].src).not.toContain("..");
+    expect(items[0].apartment.images).toHaveLength(1);
+    expect(items[0].apartment.images[0].src).not.toContain("..");
   });
 
   it("מתקנים וגודל מגיעים מהקטלוג", () => {
     const { items } = build(availability([unit("su-a", ROOM_A, "1102", 1400)]));
-    expect(items[0].room.amenities).toEqual(["מטבחון", "מיזוג"]);
-    expect(items[0].room.sizeSqm).toBe(55);
-    expect(items[0].room.guests).toBe(4);
-    expect(items[0].room.bedsLabel).toBe("2 מיטות");
+    expect(items[0].apartment.amenities).toEqual(["מטבחון", "מיזוג"]);
+    expect(items[0].apartment.sqm).toBe(55);
+    expect(items[0].apartment.guestsMax).toBe(4);
+    expect(items[0].apartment.beds).toBe("2 מיטות");
   });
 
   it("שדה שלא הוגדר ב-GuestHub לא מייצר תווית ריקה", () => {
     const bare = room({ id: ROOM_A, roomNumber: "1102", title: "דירה חשופה" });
     const { items } = build(availability([unit("su-a", ROOM_A, "1102", 1400)]), [bare]);
-    expect(items[0].room.sizeSqm).toBeNull();
-    expect(items[0].room.bedsLabel).toBeNull();
-    expect(items[0].room.description).toBeNull();
-    expect(items[0].room.amenities).toEqual([]);
+    expect(items[0].apartment.sqm).toBeNull();
+    expect(items[0].apartment.beds).toBeNull();
+    expect(items[0].apartment.shortDescription).toBeNull();
+    expect(items[0].apartment.amenities).toEqual([]);
   });
 });
 

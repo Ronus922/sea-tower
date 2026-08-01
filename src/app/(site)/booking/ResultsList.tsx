@@ -1,58 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import type { ApartmentView } from "@/lib/apartment-view";
 import type { BookingItem } from "@/lib/booking-results";
-import type { RoomImage } from "@/lib/rooms-view";
+import { CANCELLATION_NOTE } from "@/lib/stay-terms";
+import {
+  BaseChips,
+  ImagePlaceholder,
+  SpecAccordion,
+  SpecDrawer,
+  SpecHint,
+  useNarrowViewport,
+} from "./ApartmentSpec";
 
-/* רשימת התוצאות — כרטיסי דירות בתצוגת שורות/גריד עם קרוסלת תמונות, לפי
-   עיצוב מנוע ההזמנה. כל כרטיס הוא דירה פיזית אחת: המחיר והזמינות מגיעים
-   מ-availability, והשם, הקופי, התמונות והמתקנים מקטלוג החדרים — מחוברים
-   בשרת לפי roomId (ראו lib/booking-results.ts). */
+/* רשימת התוצאות — כרטיס לכל דירה פיזית, לפי "כרטיס דירה ומפרט מורחב"
+   (design-reference/assets/ExtendedSpecifications).
 
-const LOCATION_LINE = "בניין אלמוג · נוף חזיתי לים · 50 מ׳ מהחוף";
+   הכרטיס מוכר, המפרט משכנע (§1): בכרטיס יש מידע כללי בלבד — תמונה, תגית,
+   שם, מיקום, ארבעה נתוני יסוד, עד ארבעה מתקנים, משפט אחד ומחיר. התיאור
+   המלא, קבוצות הציוד ותנאי השהייה נפתחים באקורדיון או במגירה, לעולם לא
+   בתוך הכרטיס.
 
-/* מדיניות ביטול של האתר, לא נתון של דירה — לא מגיעה מקטלוג התוכן */
-const CANCELLATION = "ביטול חינם עד 48 שעות";
+   כל התוכן מגיע מ-ApartmentView שנבנה בשרת (lib/apartment-view.ts) —
+   הקומפוננטה לא חותכת טקסט, לא מקבצת מתקנים ולא ממציאה ברירות מחדל. */
 
 const fmt = (n: number) => `₪${n.toLocaleString("en-US")}`;
 
 /* ---------- קרוסלה ---------- */
 
+/* התמונה תמיד לרוחב: יחס 4:3 קבוע (§2). בלי היחס הקבוע גובה מסגרת התמונה
+   נגזר מגובה עמודת הטקסט, ותמונת נוף רחבה נחתכת לרצועה אנכית */
 function Carousel({
-  images,
-  tag,
+  apartment,
   sizes,
-  heightClass,
+  className,
 }: {
-  images: RoomImage[];
-  tag: string | null;
+  apartment: ApartmentView;
   sizes: string;
-  heightClass: string;
+  className: string;
 }) {
   const [idx, setIdx] = useState(0);
+  const images = apartment.images;
   const count = images.length;
-  const step = (n: number) => setIdx((idx + n + count) % count);
+  /* הגלריה מתרעננת בכל חיפוש; אינדקס שנשאר מגלריה קודמת לא ישאיר מסגרת ריקה */
+  const current = count > 0 ? idx % count : 0;
+  const step = (n: number) => setIdx((v) => (v + n + count) % count);
 
   return (
-    <div className={`relative overflow-hidden bg-[#dfe9f1] ${heightClass}`}>
-      {images.map((im, i) => (
-        <Image
-          key={im.src + i}
-          src={im.src}
-          alt={im.alt}
-          fill
-          sizes={sizes}
-          className={`object-cover transition-opacity duration-[400ms] ${i === idx ? "opacity-100" : "opacity-0"}`}
-        />
-      ))}
+    <div className={`relative overflow-hidden bg-[#dfe9f1] ${className}`}>
+      {count === 0 ? (
+        <ImagePlaceholder title={apartment.title} />
+      ) : (
+        images.map((im, i) => (
+          <Image
+            key={im.src}
+            src={im.src}
+            alt={im.alt}
+            fill
+            sizes={sizes}
+            className={`object-cover object-center transition-opacity duration-[400ms] ${
+              i === current ? "opacity-100" : "opacity-0"
+            }`}
+          />
+        ))
+      )}
       {count > 1 && (
         <>
           <button
             type="button"
             aria-label="תמונה קודמת"
-            onClick={() => step(-1)}
+            onClick={(e) => {
+              e.stopPropagation();
+              step(-1);
+            }}
             className="absolute top-1/2 right-3 z-[6] flex size-[38px] -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-navy-800 shadow-[0_4px_12px_rgba(14,37,64,0.22)]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -62,7 +84,10 @@ function Carousel({
           <button
             type="button"
             aria-label="תמונה הבאה"
-            onClick={() => step(1)}
+            onClick={(e) => {
+              e.stopPropagation();
+              step(1);
+            }}
             className="absolute top-1/2 left-3 z-[6] flex size-[38px] -translate-y-1/2 items-center justify-center rounded-full bg-white/95 text-navy-800 shadow-[0_4px_12px_rgba(14,37,64,0.22)]"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -70,92 +95,66 @@ function Carousel({
             </svg>
           </button>
           <div className="absolute inset-x-0 bottom-3 z-[6] flex justify-center gap-1.5">
-            {images.map((_, i) => (
+            {images.map((im, i) => (
               <span
-                key={i}
-                className={`size-[7px] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] ${i === idx ? "bg-white" : "bg-white/50"}`}
+                key={im.src}
+                className={`size-[7px] rounded-full shadow-[0_1px_3px_rgba(0,0,0,0.3)] ${
+                  i === current ? "bg-white" : "bg-white/50"
+                }`}
               />
             ))}
           </div>
         </>
       )}
-      {/* סוג החדר מ-GuestHub. אין סוג להציג (הוא כבר הכותרת) — אין תג ריק */}
-      {tag && (
+      {/* מאפיין מבדל אחד, עד 18 תווים. אין מאפיין — אין תגית ריקה */}
+      {apartment.tag && (
         <span className="absolute top-3.5 right-3.5 z-[6] rounded-full bg-white px-3 py-1.5 text-[12.5px] font-bold text-navy-800 shadow-[0_4px_10px_rgba(0,0,0,0.14)]">
-          {tag}
+          {apartment.tag}
         </span>
       )}
     </div>
   );
 }
 
-/* ---------- אייקוני צ'יפים (מהעיצוב) ---------- */
+/* ---------- חלקים משותפים לשתי התצוגות ---------- */
 
-function ChipIcon({ kind }: { kind: "guests" | "sqm" | "beds" }) {
-  const paths: Record<typeof kind, React.ReactNode> = {
-    guests: (
-      <>
-        <circle cx="9" cy="8" r="3" stroke="currentColor" strokeWidth="1.6" />
-        <path
-          d="M3.5 18c0-2.8 2.5-4.5 5.5-4.5s5.5 1.7 5.5 4.5M16 6a2.6 2.6 0 010 5M20 18c0-2-.9-3.4-2.3-4.2"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </>
-    ),
-    sqm: (
-      <path
-        d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-    beds: (
-      <path
-        d="M3 18v-5a2 2 0 012-2h14a2 2 0 012 2v5M3 18h18M3 18v2M21 18v2M6 11V8a2 2 0 012-2h8a2 2 0 012 2v3"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-  };
+function LocationLine({ text }: { text: string }) {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-      {paths[kind]}
-    </svg>
-  );
-}
-
-function FeatureChip({ kind, children }: { kind: "guests" | "sqm" | "beds"; children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center gap-1.5 rounded-lg bg-chip px-3 py-1.5 text-[13px] font-semibold text-chip-ink">
-      <ChipIcon kind={kind} />
-      {children}
-    </span>
-  );
-}
-
-function Amenity({ children, small }: { children: React.ReactNode; small?: boolean }) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 font-semibold text-[#4a6076] ${small ? "text-[12px]" : "text-[12.5px]"}`}
-    >
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" stroke="var(--color-sea-500)" strokeWidth="1.5" />
-        <path
-          d="M8.3 12.2l2.4 2.4 4.8-5"
-          stroke="var(--color-sea-500)"
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
+    <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-ink-dim">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+        <path d="M12 21c4-4 7-7.4 7-11a7 7 0 10-14 0c0 3.6 3 7 7 11z" stroke="var(--color-sea-500)" strokeWidth="1.6" />
+        <circle cx="12" cy="10" r="2.4" stroke="var(--color-sea-500)" strokeWidth="1.6" />
       </svg>
-      {children}
-    </span>
+      {text}
+    </div>
+  );
+}
+
+/* ארבעת המתקנים המובילים + "‎+N מתקנים" — שניהם נגזרו מהרשימה המלאה בשרת */
+function TopAmenities({ apartment, small }: { apartment: ApartmentView; small?: boolean }) {
+  if (apartment.topAmenities.length === 0) return null;
+  return (
+    <div className={`flex flex-wrap ${small ? "gap-x-3.5 gap-y-[7px]" : "gap-x-4 gap-y-2"}`}>
+      {apartment.topAmenities.map((a) => (
+        <span
+          key={a}
+          className={`inline-flex items-center gap-1.5 font-semibold text-[#4a6076] ${
+            small ? "text-[12px]" : "text-[12.5px]"
+          }`}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true" className="shrink-0">
+            <circle cx="12" cy="12" r="9" stroke="var(--color-sea-500)" strokeWidth="1.5" />
+            <path d="M8.3 12.2l2.4 2.4 4.8-5" stroke="var(--color-sea-500)" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          {a}
+        </span>
+      ))}
+      {apartment.moreAmenities > 0 && (
+        <span className={`font-bold text-ocean-400 ${small ? "text-[12px]" : "text-[12.5px]"}`}>
+          +{apartment.moreAmenities} מתקנים
+        </span>
+      )}
+    </div>
   );
 }
 
@@ -163,6 +162,7 @@ function BookCta({ href, compact }: { href: string; compact?: boolean }) {
   return (
     <Link
       href={href}
+      onClick={(e) => e.stopPropagation()}
       className={`flex items-center justify-center gap-2 rounded-[11px] bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)] ${
         compact ? "px-4 py-2.5 text-[14px] whitespace-nowrap" : "px-[18px] py-3 text-[15px]"
       }`}
@@ -175,125 +175,108 @@ function BookCta({ href, compact }: { href: string; compact?: boolean }) {
   );
 }
 
-/* ---------- כרטיס שורה ---------- */
+/* ---------- תבנית A: כרטיס שורה + אקורדיון ---------- */
 
-/* בלי data-rev על הכרטיסים: הם נוצרים מחדש בהחלפת שורות/גריד, אחרי שמנוע
-   התנועה כבר רץ — אלמנט data-rev חדש לא נצפה לעולם ונשאר שקוף (הבאג שתקע
-   את תצוגת הגריד) */
-function RowCard({ item, nights }: { item: BookingItem; nights: number }) {
+function RowCard({
+  item,
+  nights,
+  open,
+  onToggle,
+}: {
+  item: BookingItem;
+  nights: number;
+  open: boolean;
+  onToggle: () => void;
+}) {
+  const a = item.apartment;
   return (
-    <article className="flex overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2 max-lg:flex-col">
-      <div className="relative shrink-0 basis-[320px] max-lg:basis-auto">
-        <Carousel
-          images={item.room.images}
-          tag={item.room.typeTag}
-          sizes="(max-width: 1024px) 100vw, 340px"
-          heightClass="h-full min-h-64 max-lg:h-[220px] max-lg:min-h-0"
-        />
+    <article className="overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2">
+      <div className="flex max-lg:flex-col">
+        <div className="shrink-0 basis-[320px] max-lg:basis-auto">
+          <Carousel
+            apartment={a}
+            sizes="(max-width: 1024px) 100vw, 340px"
+            className="aspect-[4/3] w-full"
+          />
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-[13px] p-6 md:px-7">
+          <div>
+            <h3 className="mb-1.5 text-[22px] font-extrabold text-navy-800">{a.title}</h3>
+            <LocationLine text={a.locationLine} />
+          </div>
+          <BaseChips apartment={a} />
+          <TopAmenities apartment={a} />
+          {/* משפט אחד, שתי שורות לכל היותר — המפרט המלא נמצא באקורדיון */}
+          {a.shortDescription && (
+            <p className="stm-clamp-2 mt-auto text-[14px]/[1.6] text-ink-dim">
+              {a.shortDescription}
+            </p>
+          )}
+        </div>
+
+        <div className="flex shrink-0 basis-[232px] flex-col justify-center gap-1 border-r border-chip bg-[#fbfdfe] px-6 py-[26px] max-lg:basis-auto max-lg:border-t max-lg:border-r-0">
+          <div className="text-[12.5px] font-semibold text-ink-muted">מחיר ללילה</div>
+          <div className="flex items-baseline gap-[5px]">
+            <span className="text-[32px] leading-none font-extrabold text-navy-800">
+              {fmt(item.pricePerNight)}
+            </span>
+            <span className="text-[13.5px] font-semibold text-ink-dim">/ לילה</span>
+          </div>
+          <div className="mt-2.5 border-t border-dashed border-[#dde6ee] pt-3">
+            <div className="mb-0.5 text-[12.5px] font-semibold text-ink-dim">
+              סה״כ ל־{nights} לילות
+            </div>
+            <div className="text-[19px] font-extrabold text-ocean-400">{fmt(item.totalPrice)}</div>
+          </div>
+          <div className="mt-4">
+            <BookCta href={item.checkoutHref} />
+          </div>
+          <div className="mt-[9px] text-center text-[12px] font-semibold text-[#7c93a6]">
+            {CANCELLATION_NOTE}
+          </div>
+        </div>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-[13px] p-6 md:px-7">
-        <div>
-          <h3 className="mb-1.5 text-[22px] font-extrabold text-navy-800">
-            {item.room.title} · דירה {item.room.roomNumber}
-          </h3>
-          <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-ink-dim">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M12 21c4-4 7-7.4 7-11a7 7 0 10-14 0c0 3.6 3 7 7 11z" stroke="var(--color-sea-500)" strokeWidth="1.6" />
-              <circle cx="12" cy="10" r="2.4" stroke="var(--color-sea-500)" strokeWidth="1.6" />
-            </svg>
-            {LOCATION_LINE}
-          </div>
-        </div>
-        {/* צ'יפ נוצר רק לשדה שמוגדר ב-GuestHub — אין צ'יפ ריק ואין מספר מומצא */}
-        {(item.room.guests || item.room.sizeSqm || item.room.bedsLabel) && (
-          <div className="flex flex-wrap gap-2">
-            {item.room.guests && <FeatureChip kind="guests">עד {item.room.guests} אורחים</FeatureChip>}
-            {item.room.sizeSqm && <FeatureChip kind="sqm">{item.room.sizeSqm} מ״ר</FeatureChip>}
-            {item.room.bedsLabel && <FeatureChip kind="beds">{item.room.bedsLabel}</FeatureChip>}
-          </div>
-        )}
-        {item.room.amenities.length > 0 && (
-          <div className="mt-px flex flex-wrap gap-x-4 gap-y-2">
-            {item.room.amenities.map((a) => (
-              <Amenity key={a}>{a}</Amenity>
-            ))}
-          </div>
-        )}
-        {item.room.description && (
-          <p className="mt-auto mb-0 text-[14px] leading-relaxed text-ink-dim">
-            {item.room.description}
-          </p>
-        )}
-      </div>
-
-      <div className="flex shrink-0 basis-[232px] flex-col justify-center gap-1 border-r border-chip bg-[#fbfdfe] px-6 py-[26px] max-lg:basis-auto max-lg:border-r-0 max-lg:border-t">
-        <div className="text-[12.5px] font-semibold text-ink-muted">מחיר ללילה</div>
-        <div className="flex items-baseline gap-[5px]">
-          <span className="text-[32px] leading-none font-extrabold text-navy-800">
-            {fmt(item.pricePerNight)}
-          </span>
-          <span className="text-[13.5px] font-semibold text-ink-dim">/ לילה</span>
-        </div>
-        <div className="mt-2.5 border-t border-dashed border-[#dde6ee] pt-3">
-          <div className="mb-0.5 text-[12.5px] font-semibold text-ink-dim">סה״כ ל־{nights} לילות</div>
-          <div className="text-[19px] font-extrabold text-ocean-400">{fmt(item.totalPrice)}</div>
-        </div>
-        <div className="mt-4">
-          <BookCta href={item.checkoutHref} />
-        </div>
-        <div className="mt-[9px] text-center text-[12px] font-semibold text-[#7c93a6]">
-          {CANCELLATION}
-        </div>
-      </div>
+      {item.hasSpec && <SpecAccordion apartment={a} open={open} onToggle={onToggle} />}
     </article>
   );
 }
 
-/* ---------- כרטיס גריד ---------- */
+/* ---------- תבנית B: כרטיס גריד + מגירה (אקורדיון מתחת ל-820px) ---------- */
 
-function GridCard({ item, nights }: { item: BookingItem; nights: number }) {
-  const extra = Math.max(0, item.room.amenities.length - 3);
-  const pills = [
-    item.room.guests ? `עד ${item.room.guests} אורחים` : null,
-    item.room.sizeSqm ? `${item.room.sizeSqm} מ״ר` : null,
-    item.room.bedsLabel,
-  ].filter((p): p is string => Boolean(p));
+function GridCard({
+  item,
+  nights,
+  open,
+  onOpen,
+}: {
+  item: BookingItem;
+  nights: number;
+  /** אקורדיון פתוח — רלוונטי רק במסך צר, שבו אין מגירה */
+  open: boolean;
+  onOpen: () => void;
+}) {
+  const a = item.apartment;
   return (
-    <article className="flex flex-col overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2">
+    <article
+      onClick={item.hasSpec ? onOpen : undefined}
+      className={`flex flex-col overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2 ${
+        item.hasSpec ? "cursor-pointer" : ""
+      }`}
+    >
       <Carousel
-        images={item.room.images}
-        tag={item.room.typeTag}
+        apartment={a}
         sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
-        heightClass="h-[210px]"
+        className="aspect-[4/3] w-full"
       />
       <div className="flex flex-1 flex-col gap-[11px] px-[22px] py-5">
-        <h3 className="text-[19px] font-extrabold text-navy-800">
-          {item.room.title} · דירה {item.room.roomNumber}
-        </h3>
-        {pills.length > 0 && (
-          <div className="flex flex-wrap gap-[7px]">
-            {pills.map((p) => (
-              <span
-                key={p}
-                className="rounded-[7px] bg-chip px-2.5 py-[5px] text-[12px] font-semibold text-chip-ink"
-              >
-                {p}
-              </span>
-            ))}
-          </div>
-        )}
-        {item.room.amenities.length > 0 && (
-          <div className="flex flex-wrap gap-x-3.5 gap-y-[7px]">
-            {item.room.amenities.slice(0, 3).map((a) => (
-              <Amenity key={a} small>
-                {a}
-              </Amenity>
-            ))}
-            {extra > 0 && (
-              <span className="text-[12px] font-bold text-ocean-400">+{extra} מתקנים</span>
-            )}
-          </div>
+        <h3 className="text-[19px] font-extrabold text-navy-800">{a.title}</h3>
+        <LocationLine text={a.locationLine} />
+        <BaseChips apartment={a} small />
+        <TopAmenities apartment={a} small />
+        {a.shortDescription && (
+          <p className="stm-clamp-2 text-[13px]/[1.6] text-ink-dim">{a.shortDescription}</p>
         )}
         <div className="mt-auto flex items-end justify-between gap-2.5 border-t border-chip pt-3.5">
           <div>
@@ -307,9 +290,21 @@ function GridCard({ item, nights }: { item: BookingItem; nights: number }) {
               סה״כ ל־{nights} לילות · {fmt(item.totalPrice)}
             </div>
           </div>
-          <BookCta href={item.checkoutHref} compact />
+          <div className="flex flex-col items-end gap-[7px]">
+            {item.hasSpec && (
+              <SpecHint
+                apartmentId={a.id}
+                onOpen={onOpen}
+                expanded={open}
+                controls={`spec-${a.id}`}
+              />
+            )}
+            <BookCta href={item.checkoutHref} compact />
+          </div>
         </div>
       </div>
+      {/* מתחת ל-820px אין מגירה — אותו מפרט נפתח כאקורדיון מתחת לכרטיס */}
+      {item.hasSpec && open && <SpecAccordion apartment={a} open onToggle={onOpen} />}
     </article>
   );
 }
@@ -328,11 +323,50 @@ export function ResultsList({
   rangeLabel: string;
 }) {
   const [view, setView] = useState<"rows" | "grid">("rows");
+  /* אקורדיון אחד פתוח בכל רגע נתון (§3) */
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [drawerId, setDrawerId] = useState<string | null>(null);
+  const narrow = useNarrowViewport();
+  const openerRef = useRef<string | null>(null);
+
+  const toggleSpec = useCallback((id: string) => setOpenId((v) => (v === id ? null : id)), []);
+
+  /* גריד רחב → מגירה; מתחת ל-820px אותו לחיץ פותח אקורדיון (§8) */
+  const openSpec = useCallback(
+    (id: string) => {
+      if (view === "grid" && !narrow) {
+        openerRef.current = id;
+        setDrawerId(id);
+      } else {
+        toggleSpec(id);
+      }
+    },
+    [view, narrow, toggleSpec],
+  );
+
+  /* החזרת הפוקוס לכרטיס שממנו נפתחה המגירה (§9). העוגן הוא רמז "מפרט מלא"
+     של אותו כרטיס — הכרטיס עצמו אינו אלמנט ממוקד */
+  const closeDrawer = useCallback(() => {
+    const id = openerRef.current;
+    setDrawerId(null);
+    openerRef.current = null;
+    if (id) {
+      document.querySelector<HTMLElement>(`[data-spec-trigger="${CSS.escape(id)}"]`)?.focus();
+    }
+  }, []);
+
+  const switchView = (v: "rows" | "grid") => {
+    setView(v);
+    setOpenId(null);
+    setDrawerId(null);
+  };
+
+  const drawerItem = items.find((i) => i.roomId === drawerId) ?? null;
 
   const toggleBtn = (v: "rows" | "grid", label: string, icon: React.ReactNode) => (
     <button
       type="button"
-      onClick={() => setView(v)}
+      onClick={() => switchView(v)}
       aria-pressed={view === v}
       className={`flex min-h-11 items-center gap-[7px] rounded-[9px] px-4 py-2 text-[14px] font-bold transition-all ${
         view === v ? "bg-white text-navy-800 shadow-[0_2px_8px_rgba(14,37,64,0.12)]" : "text-ink-dim"
@@ -354,22 +388,22 @@ export function ResultsList({
         </div>
         <div className="flex items-center gap-1.5 rounded-xl border border-[#e3ebf2] bg-white p-[5px]">
           {toggleBtn(
-          "rows",
-          "שורות",
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="3" y="5" width="18" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-            <rect x="3" y="14" width="18" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-          </svg>,
-        )}
-        {toggleBtn(
-          "grid",
-          "גריד",
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-            <rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-            <rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-            <rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
-          </svg>,
+            "rows",
+            "שורות",
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="3" y="5" width="18" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+              <rect x="3" y="14" width="18" height="5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+            </svg>,
+          )}
+          {toggleBtn(
+            "grid",
+            "גריד",
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <rect x="4" y="4" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+              <rect x="13" y="4" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+              <rect x="4" y="13" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+              <rect x="13" y="13" width="7" height="7" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+            </svg>,
           )}
         </div>
       </div>
@@ -377,15 +411,38 @@ export function ResultsList({
       {view === "rows" ? (
         <div className="flex flex-col gap-5">
           {items.map((item) => (
-            <RowCard key={item.roomId} item={item} nights={nights} />
+            <RowCard
+              key={item.roomId}
+              item={item}
+              nights={nights}
+              open={openId === item.roomId}
+              onToggle={() => toggleSpec(item.roomId)}
+            />
           ))}
         </div>
       ) : (
         <div className="grid gap-[22px] md:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <GridCard key={item.roomId} item={item} nights={nights} />
+            <GridCard
+              key={item.roomId}
+              item={item}
+              nights={nights}
+              open={openId === item.roomId}
+              onOpen={() => openSpec(item.roomId)}
+            />
           ))}
         </div>
+      )}
+
+      {drawerItem && (
+        <SpecDrawer
+          apartment={drawerItem.apartment}
+          priceLabel={fmt(drawerItem.pricePerNight)}
+          totalLabel={`סה״כ ל־${nights} לילות · ${fmt(drawerItem.totalPrice)}`}
+          cancellation={CANCELLATION_NOTE}
+          checkoutHref={drawerItem.checkoutHref}
+          onClose={closeDrawer}
+        />
       )}
     </>
   );

@@ -131,10 +131,20 @@ export async function fetchAvailability(
   return guesthubFetch<AvailabilityResult>(`/api/public/availability?${qs}`);
 }
 
-/* קטלוג החדרים המסומנים "הצג באתר" ב-GuestHub. ISR של 5 דקות: התוכן משתנה
-   נדירות, ונפילה של guesthub לא מפילה את עמוד הבית — המתקשר מקבל null */
-export async function fetchWebsiteRooms(): Promise<PublicRoom[] | null> {
-  const res = await guesthubFetch<PublicRoomsResult>("/api/public/rooms?lang=he", undefined, 300);
+/* קטלוג החדרים המסומנים "הצג באתר" ב-GuestHub.
+
+   `live` קובע אם התשובה נשמרת ב-cache של Next:
+   • ‏/booking ו-/booking/checkout קוראים עם live=true → cache: "no-store".
+     מלאי, תמונות ומחיר חייבים להיות מה שיש עכשיו ב-GuestHub: מחיקת תמונות
+     במערכת הניהול חייבת להיעלם מהעמוד בחיפוש/רענון הבא, לא בעוד חמש דקות.
+   • עמוד הבית ו-/rooms נשארים ב-ISR של 5 דקות — שם התוכן שיווקי, והוא לא
+     יכול להציג "דירה שכבר נמכרה". */
+export async function fetchWebsiteRooms(live = false): Promise<PublicRoom[] | null> {
+  const res = await guesthubFetch<PublicRoomsResult>(
+    "/api/public/rooms?lang=he",
+    undefined,
+    live ? undefined : 300,
+  );
   return res?.ok ? res.rooms : null;
 }
 

@@ -71,11 +71,13 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
   const rooms = parseGuestsParam(one("guests"));
   const nights = nightsBetween(checkIn, checkOut);
 
-  /* שתי קריאות במקביל, פעם אחת לעמוד: זמינות לפי התאריכים (ללא cache) וקטלוג
-     התוכן (ISR 5 דקות, משותף עם עמוד הבית ו-/rooms) — לא קריאה לכל תוצאה */
+  /* שתי קריאות במקביל, פעם אחת לעמוד (לא קריאה לכל תוצאה), שתיהן ללא cache:
+     גם הזמינות וגם קטלוג התוכן חייבים להיות מה שיש עכשיו ב-GuestHub. מחיקת
+     תמונות או שינוי תיאור במערכת הניהול מופיעים כאן בחיפוש הבא — אין ISR,
+     אין קטלוג סטטי ואין נתוני דמו שמחליפים נתונים אמיתיים */
   const [availability, catalog] = await Promise.all([
     fetchAvailability(checkIn, checkOut),
-    fetchWebsiteRooms(),
+    fetchWebsiteRooms(true),
   ]);
 
   /* כרטיס לכל דירה פנויה (לא קטגוריות), ממוין מהזול ליקר */

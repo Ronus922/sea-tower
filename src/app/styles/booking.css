@@ -318,3 +318,78 @@
     transform: none;
   }
 }
+
+/* ============================================================
+   כרטיס דירה ומפרט מורחב
+   ערכי האנימציה והפריסה מ-design-reference/assets/ExtendedSpecifications
+   (‏§7 ו-§8). מה שאפשר לבטא ב-Tailwind נשאר בקומפוננטה; כאן רק מה שדורש
+   keyframes או media query על גריד מחושב.
+   ============================================================ */
+
+/* התיאור הקצר בכרטיס — שתי שורות לכל היותר. זו התצוגה בלבד: הטקסט עצמו
+   כבר קוצר בשרת למשפט אחד (lib/room-copy.ts), ולכן אין כאן הסתרה של גוש
+   טקסט ארוך אלא גדר ביטחון לשמות ארוכים במיוחד */
+.stm-clamp-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+
+/* תבנית A — פאנל האקורדיון */
+@keyframes stm-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.stm-spec-panel {
+  animation: stm-panel-in 0.3s ease both;
+}
+
+/* מתחת ל-820px הפאנל יורד לעמודה אחת בסדר: תיאור ← מה יש בדירה ← תנאי
+   שהייה. הגריד נבנה ב-inline style לפי העמודות שיש להן תוכן, ולכן האיפוס
+   כאן חייב לגבור עליו */
+@media (max-width: 819px) {
+  .stm-spec-panel > div {
+    grid-template-columns: 1fr !important;
+    gap: 26px;
+  }
+}
+
+/* תבנית B — המגירה */
+@keyframes stm-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes stm-drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+.stm-drawer-back {
+  animation: stm-fade-in 0.25s ease both;
+}
+.stm-drawer {
+  animation: stm-drawer-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stm-spec-panel,
+  .stm-drawer-back,
+  .stm-drawer {
+    animation: none;
+  }
+}

@@ -19,12 +19,18 @@ export type RoomImage = { src: string; alt: string };
 
 /* הגלריה המלאה, בסדר של GuestHub (is_main ואז sort_order), אחרי סינון
    כתובות שלא עברו את התבנית. חדר בלי אף תמונה תקפה מחזיר מערך ריק — הצרכן
-   מחליט מה לעשות, ולעולם לא שואל תמונה מדירה אחרת */
-export function roomGallery(room: PublicRoom): RoomImage[] {
+   מחליט מה לעשות, ולעולם לא שואל תמונה מדירה אחרת.
+
+   ‏altFallback מאפשר לצרכן לתת טקסט חלופי מדויק יותר כשאין alt ב-GuestHub
+   (למשל "דירה 1102 · חדר שינה וסלון — תמונה 2"); בלעדיו נופלים לשם החדר */
+export function roomGallery(
+  room: PublicRoom,
+  altFallback?: (index: number) => string,
+): RoomImage[] {
   const out: RoomImage[] = [];
   for (const image of room.images) {
     const src = roomImageSrc(image.url);
-    if (src) out.push({ src, alt: image.alt ?? room.title });
+    if (src) out.push({ src, alt: image.alt ?? altFallback?.(out.length) ?? room.title });
   }
   return out;
 }
