@@ -12,7 +12,7 @@
   padding: 46px 56px 204px; /* 84px מרווח + 120px גל פוטר */
 }
 .art-inner {
-  max-width: 1160px;
+  max-width: var(--container-shell);
   margin: 0 auto;
 }
 .art-controls {
@@ -671,7 +671,7 @@
   padding: 18px 56px 200px; /* 80px מרווח + 120px גל פוטר */
 }
 .rel-inner {
-  max-width: 1160px;
+  max-width: var(--container-shell);
   margin: 0 auto;
 }
 .rel-head {

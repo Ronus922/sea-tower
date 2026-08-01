@@ -8,7 +8,7 @@
 
 /* פריסת שתי עמודות: תוכן עניינים דביק מימין, כרטיס מסמך משמאל */
 .tk-grid {
-  max-width: 1140px;
+  max-width: var(--container-shell);
   margin: 0 auto;
   display: grid;
   grid-template-columns: 280px 1fr;

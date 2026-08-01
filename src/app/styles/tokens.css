@@ -99,6 +99,9 @@
   --shadow-glow: 0 12px 28px rgba(43, 127, 184, 0.4);
   --shadow-float: 0 16px 30px rgba(14, 37, 64, 0.12); /* כרטיס צף */
 
+  /* --- רוחב מעטפת האתר (max-w-shell) --- */
+  --container-shell: 1440px;
+
   /* --- תנועה --- */
   --ease-brand: cubic-bezier(0.22, 0.61, 0.36, 1); /* מנוע התנועה הכללי */
   --ease-pop: cubic-bezier(0.16, 1, 0.3, 1); /* כניסת Hero, קרוסלה, hover פתרונות */

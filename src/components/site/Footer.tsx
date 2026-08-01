@@ -44,7 +44,7 @@ export function Footer() {
     <footer className="-mt-[70px] text-[#9fb6c8] md:-mt-[120px]">
       <WaveSeparator flow position="bottom" fill="var(--color-navy-950)" />
       <div className="bg-navy-950 px-5 pt-14 pb-6 sm:px-8 lg:px-14">
-        <div className="mx-auto grid max-w-[1160px] grid-cols-1 gap-10 border-b border-white/8 pb-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.3fr]">
+        <div className="mx-auto grid max-w-shell grid-cols-1 gap-10 border-b border-white/8 pb-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.3fr]">
           <div>
             <div className="mb-4 flex items-center gap-[11px]">
               <Image
@@ -120,7 +120,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mx-auto mt-[18px] flex max-w-[1160px] flex-wrap items-center justify-between gap-2.5 text-[13px] text-[#6c869a]">
+        <div className="mx-auto mt-[18px] flex max-w-shell flex-wrap items-center justify-between gap-2.5 text-[13px] text-[#6c869a]">
           <span>© 2026 מגדל הים — כל הזכויות שמורות</span>
           <span className="flex gap-5">
             <Link href="/terms" className="transition-colors hover:text-white">
