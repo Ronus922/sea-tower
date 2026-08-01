@@ -3,49 +3,32 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import type { BookingItem } from "@/lib/booking-results";
+import type { RoomImage } from "@/lib/rooms-view";
 
-/* רשימת התוצאות — כרטיסי דירות בתצוגת שורות/גריד עם קרוסלת תמונות,
-   לפי עיצוב מנוע ההזמנה. הנתונים מגיעים מהשרת (זמינות חיה + קונפיג שיווקי). */
-
-/* כרטיס = דירה בודדת (sellable unit); roomTypeId משמש כמפתח ייחודי לכרטיס */
-export type BookingItem = {
-  roomTypeId: string;
-  title: string;
-  tag: string;
-  tagStyle: "light" | "sea" | "navy";
-  guestsMax: number;
-  sqm: string;
-  rooms: string;
-  beds: string;
-  amenities: string[];
-  description: string;
-  images: Array<{ src: string; alt: string }>;
-  pricePerNight: number;
-  totalPrice: number;
-  checkoutHref: string;
-};
+/* רשימת התוצאות — כרטיסי דירות בתצוגת שורות/גריד עם קרוסלת תמונות, לפי
+   עיצוב מנוע ההזמנה. כל כרטיס הוא דירה פיזית אחת: המחיר והזמינות מגיעים
+   מ-availability, והשם, הקופי, התמונות והמתקנים מקטלוג החדרים — מחוברים
+   בשרת לפי roomId (ראו lib/booking-results.ts). */
 
 const LOCATION_LINE = "בניין אלמוג · נוף חזיתי לים · 50 מ׳ מהחוף";
 
-const fmt = (n: number) => `₪${n.toLocaleString("en-US")}`;
+/* מדיניות ביטול של האתר, לא נתון של דירה — לא מגיעה מקטלוג התוכן */
+const CANCELLATION = "ביטול חינם עד 48 שעות";
 
-const TAG_CLS: Record<BookingItem["tagStyle"], string> = {
-  light: "bg-white text-navy-800",
-  sea: "bg-sea-500 text-white",
-  navy: "bg-navy-800 text-white",
-};
+const fmt = (n: number) => `₪${n.toLocaleString("en-US")}`;
 
 /* ---------- קרוסלה ---------- */
 
 function Carousel({
   images,
   tag,
-  tagStyle,
+  sizes,
   heightClass,
 }: {
-  images: BookingItem["images"];
-  tag: string;
-  tagStyle: BookingItem["tagStyle"];
+  images: RoomImage[];
+  tag: string | null;
+  sizes: string;
   heightClass: string;
 }) {
   const [idx, setIdx] = useState(0);
@@ -60,7 +43,7 @@ function Carousel({
           src={im.src}
           alt={im.alt}
           fill
-          sizes="(max-width: 768px) 100vw, 340px"
+          sizes={sizes}
           className={`object-cover transition-opacity duration-[400ms] ${i === idx ? "opacity-100" : "opacity-0"}`}
         />
       ))}
@@ -96,18 +79,19 @@ function Carousel({
           </div>
         </>
       )}
-      <span
-        className={`absolute top-3.5 right-3.5 z-[6] rounded-full px-3 py-1.5 text-[12.5px] font-bold shadow-[0_4px_10px_rgba(0,0,0,0.14)] ${TAG_CLS[tagStyle]}`}
-      >
-        {tag}
-      </span>
+      {/* סוג החדר מ-GuestHub. אין סוג להציג (הוא כבר הכותרת) — אין תג ריק */}
+      {tag && (
+        <span className="absolute top-3.5 right-3.5 z-[6] rounded-full bg-white px-3 py-1.5 text-[12.5px] font-bold text-navy-800 shadow-[0_4px_10px_rgba(0,0,0,0.14)]">
+          {tag}
+        </span>
+      )}
     </div>
   );
 }
 
 /* ---------- אייקוני צ'יפים (מהעיצוב) ---------- */
 
-function ChipIcon({ kind }: { kind: "guests" | "sqm" | "rooms" | "beds" }) {
+function ChipIcon({ kind }: { kind: "guests" | "sqm" | "beds" }) {
   const paths: Record<typeof kind, React.ReactNode> = {
     guests: (
       <>
@@ -123,15 +107,6 @@ function ChipIcon({ kind }: { kind: "guests" | "sqm" | "rooms" | "beds" }) {
     sqm: (
       <path
         d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    ),
-    rooms: (
-      <path
-        d="M3 11V6a2 2 0 012-2h14a2 2 0 012 2v5M3 11v7M21 11v7M3 14h18"
         stroke="currentColor"
         strokeWidth="1.6"
         strokeLinecap="round"
@@ -155,7 +130,7 @@ function ChipIcon({ kind }: { kind: "guests" | "sqm" | "rooms" | "beds" }) {
   );
 }
 
-function FeatureChip({ kind, children }: { kind: "guests" | "sqm" | "rooms" | "beds"; children: React.ReactNode }) {
+function FeatureChip({ kind, children }: { kind: "guests" | "sqm" | "beds"; children: React.ReactNode }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-lg bg-chip px-3 py-1.5 text-[13px] font-semibold text-chip-ink">
       <ChipIcon kind={kind} />
@@ -210,16 +185,18 @@ function RowCard({ item, nights }: { item: BookingItem; nights: number }) {
     <article className="flex overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2 max-lg:flex-col">
       <div className="relative shrink-0 basis-[320px] max-lg:basis-auto">
         <Carousel
-          images={item.images}
-          tag={item.tag}
-          tagStyle={item.tagStyle}
+          images={item.room.images}
+          tag={item.room.typeTag}
+          sizes="(max-width: 1024px) 100vw, 340px"
           heightClass="h-full min-h-64 max-lg:h-[220px] max-lg:min-h-0"
         />
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-[13px] p-6 md:px-7">
         <div>
-          <h3 className="mb-1.5 text-[22px] font-extrabold text-navy-800">{item.title}</h3>
+          <h3 className="mb-1.5 text-[22px] font-extrabold text-navy-800">
+            {item.room.title} · דירה {item.room.roomNumber}
+          </h3>
           <div className="flex items-center gap-1.5 text-[13.5px] font-medium text-ink-dim">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M12 21c4-4 7-7.4 7-11a7 7 0 10-14 0c0 3.6 3 7 7 11z" stroke="var(--color-sea-500)" strokeWidth="1.6" />
@@ -228,18 +205,26 @@ function RowCard({ item, nights }: { item: BookingItem; nights: number }) {
             {LOCATION_LINE}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <FeatureChip kind="guests">עד {item.guestsMax} אורחים</FeatureChip>
-          {item.sqm && <FeatureChip kind="sqm">{item.sqm} מ״ר</FeatureChip>}
-          {item.rooms && <FeatureChip kind="rooms">{item.rooms}</FeatureChip>}
-          {item.beds && <FeatureChip kind="beds">{item.beds}</FeatureChip>}
-        </div>
-        <div className="mt-px flex flex-wrap gap-x-4 gap-y-2">
-          {item.amenities.map((a) => (
-            <Amenity key={a}>{a}</Amenity>
-          ))}
-        </div>
-        <p className="mt-auto mb-0 text-[14px] leading-relaxed text-ink-dim">{item.description}</p>
+        {/* צ'יפ נוצר רק לשדה שמוגדר ב-GuestHub — אין צ'יפ ריק ואין מספר מומצא */}
+        {(item.room.guests || item.room.sizeSqm || item.room.bedsLabel) && (
+          <div className="flex flex-wrap gap-2">
+            {item.room.guests && <FeatureChip kind="guests">עד {item.room.guests} אורחים</FeatureChip>}
+            {item.room.sizeSqm && <FeatureChip kind="sqm">{item.room.sizeSqm} מ״ר</FeatureChip>}
+            {item.room.bedsLabel && <FeatureChip kind="beds">{item.room.bedsLabel}</FeatureChip>}
+          </div>
+        )}
+        {item.room.amenities.length > 0 && (
+          <div className="mt-px flex flex-wrap gap-x-4 gap-y-2">
+            {item.room.amenities.map((a) => (
+              <Amenity key={a}>{a}</Amenity>
+            ))}
+          </div>
+        )}
+        {item.room.description && (
+          <p className="mt-auto mb-0 text-[14px] leading-relaxed text-ink-dim">
+            {item.room.description}
+          </p>
+        )}
       </div>
 
       <div className="flex shrink-0 basis-[232px] flex-col justify-center gap-1 border-r border-chip bg-[#fbfdfe] px-6 py-[26px] max-lg:basis-auto max-lg:border-r-0 max-lg:border-t">
@@ -258,7 +243,7 @@ function RowCard({ item, nights }: { item: BookingItem; nights: number }) {
           <BookCta href={item.checkoutHref} />
         </div>
         <div className="mt-[9px] text-center text-[12px] font-semibold text-[#7c93a6]">
-          ביטול חינם עד 48 שעות
+          {CANCELLATION}
         </div>
       </div>
     </article>
@@ -268,35 +253,48 @@ function RowCard({ item, nights }: { item: BookingItem; nights: number }) {
 /* ---------- כרטיס גריד ---------- */
 
 function GridCard({ item, nights }: { item: BookingItem; nights: number }) {
-  const extra = Math.max(0, item.amenities.length - 3);
+  const extra = Math.max(0, item.room.amenities.length - 3);
+  const pills = [
+    item.room.guests ? `עד ${item.room.guests} אורחים` : null,
+    item.room.sizeSqm ? `${item.room.sizeSqm} מ״ר` : null,
+    item.room.bedsLabel,
+  ].filter((p): p is string => Boolean(p));
   return (
     <article className="flex flex-col overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2">
-      <Carousel images={item.images} tag={item.tag} tagStyle={item.tagStyle} heightClass="h-[210px]" />
+      <Carousel
+        images={item.room.images}
+        tag={item.room.typeTag}
+        sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
+        heightClass="h-[210px]"
+      />
       <div className="flex flex-1 flex-col gap-[11px] px-[22px] py-5">
-        <h3 className="text-[19px] font-extrabold text-navy-800">{item.title}</h3>
-        <div className="flex flex-wrap gap-[7px]">
-          <span className="rounded-[7px] bg-chip px-2.5 py-[5px] text-[12px] font-semibold text-chip-ink">
-            עד {item.guestsMax} אורחים
-          </span>
-          {item.sqm && (
-            <span className="rounded-[7px] bg-chip px-2.5 py-[5px] text-[12px] font-semibold text-chip-ink">
-              {item.sqm} מ״ר
-            </span>
-          )}
-          {item.rooms && (
-            <span className="rounded-[7px] bg-chip px-2.5 py-[5px] text-[12px] font-semibold text-chip-ink">
-              {item.rooms}
-            </span>
-          )}
-        </div>
-        <div className="flex flex-wrap gap-x-3.5 gap-y-[7px]">
-          {item.amenities.slice(0, 3).map((a) => (
-            <Amenity key={a} small>
-              {a}
-            </Amenity>
-          ))}
-          {extra > 0 && <span className="text-[12px] font-bold text-ocean-400">+{extra} מתקנים</span>}
-        </div>
+        <h3 className="text-[19px] font-extrabold text-navy-800">
+          {item.room.title} · דירה {item.room.roomNumber}
+        </h3>
+        {pills.length > 0 && (
+          <div className="flex flex-wrap gap-[7px]">
+            {pills.map((p) => (
+              <span
+                key={p}
+                className="rounded-[7px] bg-chip px-2.5 py-[5px] text-[12px] font-semibold text-chip-ink"
+              >
+                {p}
+              </span>
+            ))}
+          </div>
+        )}
+        {item.room.amenities.length > 0 && (
+          <div className="flex flex-wrap gap-x-3.5 gap-y-[7px]">
+            {item.room.amenities.slice(0, 3).map((a) => (
+              <Amenity key={a} small>
+                {a}
+              </Amenity>
+            ))}
+            {extra > 0 && (
+              <span className="text-[12px] font-bold text-ocean-400">+{extra} מתקנים</span>
+            )}
+          </div>
+        )}
         <div className="mt-auto flex items-end justify-between gap-2.5 border-t border-chip pt-3.5">
           <div>
             <div className="flex items-baseline gap-1">
@@ -379,13 +377,13 @@ export function ResultsList({
       {view === "rows" ? (
         <div className="flex flex-col gap-5">
           {items.map((item) => (
-            <RowCard key={item.roomTypeId} item={item} nights={nights} />
+            <RowCard key={item.roomId} item={item} nights={nights} />
           ))}
         </div>
       ) : (
         <div className="grid gap-[22px] md:grid-cols-2 lg:grid-cols-3">
           {items.map((item) => (
-            <GridCard key={item.roomTypeId} item={item} nights={nights} />
+            <GridCard key={item.roomId} item={item} nights={nights} />
           ))}
         </div>
       )}

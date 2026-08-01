@@ -5,10 +5,10 @@ import { Button } from "@/components/ui/Button";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { BUSINESS } from "@/lib/business";
-import { fetchAvailability } from "@/lib/booking-api";
-import { apartmentFor } from "@/lib/apartments";
+import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
+import { buildBookingResults } from "@/lib/booking-results";
 import { BookingSearchBar } from "./BookingSearchBar";
-import { ResultsList, type BookingItem } from "./ResultsList";
+import { ResultsList } from "./ResultsList";
 import {
   addDays,
   fmtRange,
@@ -71,48 +71,42 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
   const rooms = parseGuestsParam(one("guests"));
   const nights = nightsBetween(checkIn, checkOut);
 
-  const availability = await fetchAvailability(checkIn, checkOut);
+  /* שתי קריאות במקביל, פעם אחת לעמוד: זמינות לפי התאריכים (ללא cache) וקטלוג
+     התוכן (ISR 5 דקות, משותף עם עמוד הבית ו-/rooms) — לא קריאה לכל תוצאה */
+  const [availability, catalog] = await Promise.all([
+    fetchAvailability(checkIn, checkOut),
+    fetchWebsiteRooms(),
+  ]);
 
-  /* כרטיס לכל דירה פנויה (לא קטגוריות), ממוין מהזול ליקר. בהזמנה רב-חדרית
-     המחיר הכולל = הדירה שבכרטיס + הזולות הבאות מאותו סוג */
-  let items: BookingItem[] = [];
-  if (availability?.ok) {
-    const maxParty = Math.max(...rooms.map((r) => r.adults + r.children));
-    for (const t of availability.roomTypes) {
-      if (t.units.length < rooms.length || t.maxOccupancy < maxParty) continue;
-      const cfg = apartmentFor(t.name);
-      for (const unit of t.units) {
-        const others = t.units.filter((u) => u.suId !== unit.suId);
-        const stayTotal =
-          unit.totalPrice +
-          others.slice(0, rooms.length - 1).reduce((s, u) => s + u.totalPrice, 0);
-        const qs = new URLSearchParams({
-          type: t.roomTypeId,
-          unit: unit.suId,
-          checkin: checkIn,
-          checkout: checkOut,
-          guests: guestsParam(rooms),
-        });
-        items.push({
-          roomTypeId: unit.suId,
-          title: `${cfg.title} · דירה ${unit.code}`,
-          tag: cfg.tag,
-          tagStyle: cfg.tagStyle,
-          guestsMax: t.maxOccupancy,
-          sqm: cfg.sqm,
-          rooms: cfg.rooms,
-          beds: cfg.beds,
-          amenities: cfg.amenities,
-          description: cfg.description,
-          images: cfg.images,
-          pricePerNight: Math.round(unit.totalPrice / nights),
-          totalPrice: Math.round(stayTotal),
-          checkoutHref: `/booking/checkout?${qs}`,
-        });
-      }
-    }
-    items = items.sort((a, b) => a.totalPrice - b.totalPrice);
+  /* כרטיס לכל דירה פנויה (לא קטגוריות), ממוין מהזול ליקר */
+  const results =
+    availability?.ok && catalog
+      ? buildBookingResults({
+          availability,
+          rooms: catalog,
+          guestRooms: rooms,
+          nights,
+          checkIn,
+          checkOut,
+          guestsParam: guestsParam(rooms),
+        })
+      : null;
+
+  /* דיאגנוסטיקה לשרת בלבד: איזו דירה פנויה לא הוצגה ולמה. המזהים האלה לא
+     מגיעים לדפדפן — הם קיימים כדי שאפשר יהיה להשלים תמונות ב-GuestHub */
+  if (results && results.excluded.length > 0) {
+    console.warn(
+      `[booking] ${results.excluded.length}/${results.availableBeforeJoin} דירות פנויות הוסתרו ` +
+        `(${checkIn}→${checkOut}) — no-public-profile = לא מסומן להצגה באתר או בלי תמונה ציבורית ב-GuestHub: ` +
+        results.excluded.map((e) => `${e.code}/${e.roomId}=${e.reason}`).join(", "),
+    );
   }
+
+  const items = results?.items ?? [];
+  /* זמינות עלתה אבל קטלוג התוכן נפל — לא נופלים לקטלוג סטטי ולא מציגים
+     כרטיסים שגויים; מציגים הודעה זמנית והתאריכים נשמרים ב-URL */
+  const catalogDown = Boolean(availability?.ok) && !catalog;
+  const retryHref = `/booking?checkin=${checkIn}&checkout=${checkOut}&guests=${guestsParam(rooms)}#results`;
 
   const countLabel = items.length === 1 ? "דירה אחת זמינה" : `${items.length} דירות זמינות`;
   const rangeLabel = `${fmtRange(checkIn, checkOut)} ${checkIn.slice(0, 4)} · ${
@@ -182,7 +176,25 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
       {/* תוצאות */}
       <section id="results" className="bg-cloud pt-14 pb-20">
         <div className="mx-auto w-full max-w-shell px-5 sm:px-8">
-          {availability?.ok ? (
+          {catalogDown ? (
+            /* פרטי הדירות אינם זמינים כרגע — התאריכים והאורחים נשמרו ב-URL,
+               והכפתור מריץ את אותו חיפוש בדיוק מחדש */
+            <div className="rounded-card-lg border border-line bg-white p-10 text-center shadow-e1">
+              <h2 className="mb-2 text-[24px] font-extrabold text-navy-800">
+                פרטי הדירות אינם זמינים כרגע
+              </h2>
+              <p className="mx-auto mb-6 max-w-[480px] text-[15.5px] leading-relaxed text-ink-dim">
+                יש דירות פנויות בתאריכים שבחרתם, אבל אנחנו לא מצליחים לטעון את פרטי
+                הדירות ברגע זה. נסו שוב בעוד רגע — התאריכים והאורחים שלכם נשמרו.
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-3.5">
+                <Button href={retryHref}>נסו שוב</Button>
+                <Button href={BUSINESS.phones.office.tel} variant="outline">
+                  {BUSINESS.phones.office.label}
+                </Button>
+              </div>
+            </div>
+          ) : availability?.ok ? (
             items.length > 0 ? (
               <>
                 <ResultsList

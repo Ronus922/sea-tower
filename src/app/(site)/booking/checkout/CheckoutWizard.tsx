@@ -15,7 +15,9 @@ export type CheckoutQuote = {
   roomTypeId: string;
   preferredUnitId: string;
   title: string;
-  image: { src: string; alt: string };
+  /* התמונה הראשית של הדירה מ-GuestHub. null כשקטלוג התוכן לא נענה — עדיף
+     ריבוע ריק מתמונה של דירה אחרת */
+  image: { src: string; alt: string } | null;
   checkIn: string;
   checkOut: string;
   nights: number;
@@ -119,7 +121,9 @@ function SummaryBar({ quote }: { quote: CheckoutQuote }) {
       >
         <div className="flex shrink-0 items-center gap-3.5">
           <span className="relative block size-[62px] shrink-0 overflow-hidden rounded-xl">
-            <Image src={quote.image.src} alt={quote.image.alt} fill sizes="62px" className="object-cover" />
+            {quote.image && (
+              <Image src={quote.image.src} alt={quote.image.alt} fill sizes="62px" className="object-cover" />
+            )}
           </span>
           <span className="leading-tight">
             <span className="block text-[11.5px] font-semibold tracking-label text-[#7cb4dc]">
@@ -182,7 +186,9 @@ function AsideSummary({ quote, total }: { quote: CheckoutQuote; total: number })
     <>
       <div className="mb-[18px] flex items-center gap-[13px] border-b border-chip pb-[18px]">
         <span className="relative block size-16 shrink-0 overflow-hidden rounded-xl">
-          <Image src={quote.image.src} alt={quote.image.alt} fill sizes="64px" className="object-cover" />
+          {quote.image && (
+            <Image src={quote.image.src} alt={quote.image.alt} fill sizes="64px" className="object-cover" />
+          )}
         </span>
         <div>
           <div className="text-[16px] leading-tight font-extrabold text-navy-800">{quote.title}</div>

@@ -3,7 +3,8 @@
 // חובה HTTPS/mTLS במקום. ה-secret לעולם לא נשלח לדפדפן.
 
 export type AvailableUnit = {
-  suId: string;
+  suId: string; // מזהה היחידה למכירה — מה שההזמנה נסגרת עליו
+  roomId: string; // מזהה החדר הפיזי — המפתח היחיד לחיבור לתוכן מ-/api/public/rooms
   code: string; // מספר הדירה (room_number ב-GuestHub)
   totalPrice: number; // לכל השהות, לדירה זו
 };
