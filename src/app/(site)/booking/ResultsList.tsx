@@ -30,8 +30,11 @@ const fmt = (n: number) => `₪${n.toLocaleString("en-US")}`;
 
 /* ---------- קרוסלה ---------- */
 
-/* התמונה תמיד לרוחב: יחס 4:3 קבוע (§2). בלי היחס הקבוע גובה מסגרת התמונה
-   נגזר מגובה עמודת הטקסט, ותמונת נוף רחבה נחתכת לרצועה אנכית */
+/* מסגרת התמונה נקבעת בידי הקורא דרך className, ולא כאן: בכרטיס הגריד היחס
+   הקבוע 4:3 הוא מה ששומר על התמונה לרוחב (§2), ובכרטיס השורה הרוחב כבר קבוע
+   (‏320px) ולכן המסגרת נמתחת לגובה גוף הכרטיס. מה שמשותף לשתיהן: למסגרת יש
+   תמיד גובה משלה, והתמונה ממלאת אותה ב-object-cover — כך תמונה אנכית לא
+   מותחת את הכרטיס ותמונת נוף לא נחתכת לרצועה */
 function Carousel({
   apartment,
   sizes,
@@ -192,11 +195,15 @@ function RowCard({
   return (
     <article className="overflow-hidden rounded-[20px] border border-[#e9eef4] bg-white shadow-e2">
       <div className="flex max-lg:flex-col">
-        <div className="shrink-0 basis-[320px] max-lg:basis-auto">
+        {/* עמודת המדיה נמתחת לגובה גוף הכרטיס (‏align-items: stretch), והתמונה
+            ממלאת אותה עד למטה — עד לרצועת האקורדיון, בלי שטח לבן מתחתיה.
+            ‏min-h שומר על גובה סביר כשהטקסט קצר במיוחד. מתחת ל-lg הכרטיס
+            נערם, אין לעמודה גובה להימתח אליו, ולכן חוזרים ליחס 4:3 הקבוע */}
+        <div className="shrink-0 basis-[320px] self-stretch max-lg:basis-auto">
           <Carousel
             apartment={a}
             sizes="(max-width: 1024px) 100vw, 340px"
-            className="aspect-[4/3] w-full"
+            className="aspect-[4/3] w-full lg:aspect-auto lg:h-full lg:min-h-[248px]"
           />
         </div>
 

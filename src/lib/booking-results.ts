@@ -38,6 +38,18 @@ export type ExcludedRoom = {
   reason: "no-public-profile" | "no-public-image";
 };
 
+/* מה בדיוק חסר ב-GuestHub, בניסוח של מי שהולך לתקן את זה שם. הטקסט הזה
+   נכתב ללוג השרת ולכן הוא לא מניח היכרות עם הקוד או עם שמות השדות */
+const REASON_LABEL: Record<ExcludedRoom["reason"], string> = {
+  "no-public-profile":
+    "לא חזר מקטלוג האתר — הדירה לא מסומנת ״הצג באתר״ ב-GuestHub, או שאין לה אף תמונה פעילה",
+  "no-public-image":
+    "חזרה מהקטלוג בלי אף תמונה תקפה — צריך להעלות ב-GuestHub תמונה פעילה אחת לפחות",
+};
+
+/* סדר קבוע לדוח: קודם מה שחסר לו פרופיל, אחר כך מה שחסרות לו תמונות */
+const REASON_ORDER: ExcludedRoom["reason"][] = ["no-public-profile", "no-public-image"];
+
 export type BookingResults = {
   items: BookingItem[];
   excluded: ExcludedRoom[];
@@ -124,4 +136,40 @@ export function buildBookingResults({
 
   items.sort((a, b) => a.totalPrice - b.totalPrice);
   return { items, excluded, availableBeforeJoin };
+}
+
+/* דוח ההסתרות — לשרת בלבד. מסכם לאיש התפעול איזו דירה פנויה לא הופיעה
+   באתר ומה חסר לה ב-GuestHub, מקובץ לפי סיבה וממוין לפי מספר דירה כדי
+   שאותו מצב ייתן תמיד אותו טקסט (השוואה בין ריצות היא הדרך לראות שתיקון
+   ב-PMS באמת עבד). מחזיר null כשאין מה לדווח — קריאה שקטה היא המצב התקין.
+   הטקסט לא מגיע לדפדפן: ההתנהגות הציבורית היא הסתרה שקטה, בלי כרטיס חלופי */
+export function formatExcludedReport({
+  excluded,
+  availableBeforeJoin,
+  checkIn,
+  checkOut,
+}: {
+  excluded: ExcludedRoom[];
+  availableBeforeJoin: number;
+  checkIn: string;
+  checkOut: string;
+}): string | null {
+  if (excluded.length === 0) return null;
+
+  const lines = [
+    `[booking] ${excluded.length} מתוך ${availableBeforeJoin} דירות פנויות הוסתרו מ-/booking ` +
+      `(${checkIn} → ${checkOut})`,
+  ];
+
+  for (const reason of REASON_ORDER) {
+    const group = excluded
+      .filter((e) => e.reason === reason)
+      .sort((a, b) => a.code.localeCompare(b.code, "en"));
+    if (group.length === 0) continue;
+
+    lines.push(`  ${reason} (${group.length}) — ${REASON_LABEL[reason]}`);
+    for (const e of group) lines.push(`    · דירה ${e.code} · roomId=${e.roomId}`);
+  }
+
+  return lines.join("\n");
 }
