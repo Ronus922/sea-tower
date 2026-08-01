@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildBookingResults } from "./booking-results";
+import { buildBookingResults, formatExcludedReport } from "./booking-results";
 import type { AvailabilityResult, PublicRoom } from "./booking-api";
 
 /* בדיקות רגרסיה לנקודה שבה זמינות ותוכן נפגשים.
@@ -213,6 +213,60 @@ describe("מי נכנס לתוצאות", () => {
       guestsParam: "6-0",
     });
     expect(res.items).toHaveLength(0);
+  });
+});
+
+describe("דוח ההסתרות לשרת", () => {
+  const report = (excluded: Parameters<typeof formatExcludedReport>[0]["excluded"]) =>
+    formatExcludedReport({
+      excluded,
+      availableBeforeJoin: 5,
+      checkIn: "2026-08-04",
+      checkOut: "2026-08-06",
+    });
+
+  it("שקט כשלא הוסתרה אף דירה", () => {
+    expect(report([])).toBeNull();
+  });
+
+  it("מדווח כל דירה מוסתרת עם המזהה, הסיבה ומה חסר ב-GuestHub", () => {
+    const out = report([
+      { roomId: ROOM_NO_IMG, code: "1245", reason: "no-public-image" },
+      { roomId: "aaaa", code: "1130", reason: "no-public-profile" },
+    ])!;
+    expect(out).toContain("2 מתוך 5");
+    expect(out).toContain("2026-08-04 → 2026-08-06");
+    /* מספר הדירה ומזהה החדר — שניהם, כדי שאפשר יהיה לאתר את הרשומה ב-PMS */
+    expect(out).toContain("דירה 1245");
+    expect(out).toContain(`roomId=${ROOM_NO_IMG}`);
+    expect(out).toContain("דירה 1130");
+    /* לכל סיבה הסבר בעברית, לא רק המזהה הטכני */
+    expect(out).toContain("תמונה פעילה");
+    expect(out).toContain("הצג באתר");
+  });
+
+  it("מקבץ לפי סיבה וממיין לפי מספר דירה — אותו מצב נותן אותו טקסט", () => {
+    const excluded: Parameters<typeof report>[0] = [
+      { roomId: "c", code: "1329", reason: "no-public-image" },
+      { roomId: "a", code: "1242", reason: "no-public-image" },
+      { roomId: "b", code: "1238", reason: "no-public-image" },
+    ];
+    const out = report(excluded)!;
+    expect(out.split("\n").filter((l) => l.includes("דירה "))).toEqual([
+      "    · דירה 1238 · roomId=b",
+      "    · דירה 1242 · roomId=a",
+      "    · דירה 1329 · roomId=c",
+    ]);
+    /* סדר קלט אחר, אותו פלט */
+    expect(report([...excluded].reverse())).toBe(out);
+  });
+
+  it("הדוח נשאר בשרת — בונה התוצאות לא מחזיר אותו לכרטיסים", () => {
+    const { items, excluded } = build(
+      availability([unit("su-a", ROOM_A, "1102", 1400), unit("su-n", ROOM_NO_IMG, "1245", 1400)]),
+    );
+    expect(excluded).toHaveLength(1);
+    expect(JSON.stringify(items)).not.toContain("1245");
   });
 });
 

@@ -6,7 +6,7 @@ import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { BUSINESS } from "@/lib/business";
 import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
-import { buildBookingResults } from "@/lib/booking-results";
+import { buildBookingResults, formatExcludedReport } from "@/lib/booking-results";
 import { BookingSearchBar } from "./BookingSearchBar";
 import { ResultsList } from "./ResultsList";
 import {
@@ -94,14 +94,17 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
         })
       : null;
 
-  /* דיאגנוסטיקה לשרת בלבד: איזו דירה פנויה לא הוצגה ולמה. המזהים האלה לא
-     מגיעים לדפדפן — הם קיימים כדי שאפשר יהיה להשלים תמונות ב-GuestHub */
-  if (results && results.excluded.length > 0) {
-    console.warn(
-      `[booking] ${results.excluded.length}/${results.availableBeforeJoin} דירות פנויות הוסתרו ` +
-        `(${checkIn}→${checkOut}) — no-public-profile = לא מסומן להצגה באתר או בלי תמונה ציבורית ב-GuestHub: ` +
-        results.excluded.map((e) => `${e.code}/${e.roomId}=${e.reason}`).join(", "),
-    );
+  /* דיאגנוסטיקה לשרת בלבד: איזו דירה פנויה לא הוצגה ולמה, מקובץ לפי סיבה.
+     המזהים האלה לא מגיעים לדפדפן — הם קיימים כדי שאפשר יהיה להשלים את מה
+     שחסר ב-GuestHub. שקט בלוג = לא הוסתרה אף דירה */
+  if (results) {
+    const excludedReport = formatExcludedReport({
+      excluded: results.excluded,
+      availableBeforeJoin: results.availableBeforeJoin,
+      checkIn,
+      checkOut,
+    });
+    if (excludedReport) console.warn(excludedReport);
   }
 
   const items = results?.items ?? [];
