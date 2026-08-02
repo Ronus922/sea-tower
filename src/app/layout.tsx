@@ -45,17 +45,9 @@ export const metadata: Metadata = {
     description: DESCRIPTION,
     images: ["/images/hero-terrace.jpg"],
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
+  /* robots יושב ב-(site)/layout ולא כאן: not-found.tsx מרונדר בתבנית השורש,
+     וכל הנחיית index גלובלית הייתה נכתבת לצידה של ה-noindex של עמוד ה-404
+     ויוצרת שני תגי robots סותרים באותו עמוד. */
   /* אימות בעלות — התג נכתב רק כשהערך קיים ב-env; אין ערכי דמה */
   verification: {
     ...(process.env.GOOGLE_SITE_VERIFICATION
