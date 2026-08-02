@@ -5,6 +5,7 @@ import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { FaqEnhancer } from "@/components/site/FaqEnhancer";
 import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
+import { BUSINESS } from "@/lib/business";
 import { FAQ_CATEGORIES, FaqAnswer, FaqPlusIcon, buildFaqJsonLd } from "./faq-data";
 
 /* עמוד שאלות ותשובות — נבנה 1:1 לפי design-reference/exports/Faq.html.
@@ -158,7 +159,8 @@ export default function Faq() {
             {FAQ_CATEGORIES.map((cat, ci) => (
               <div key={cat.id} id={cat.id} className="tk-sec faq-sec">
                 <h2 className="tk-h">
-                  <span className="tk-num">{ci + 1}</span>
+                  {/* aria-hidden: אחרת השם הנגיש נקרא כאסימון אחד ("1כללי — על המקום") */}
+                  <span className="tk-num" aria-hidden="true">{ci + 1}</span>
                   {cat.title}
                 </h2>
                 {cat.items.map((item) => (
@@ -186,8 +188,15 @@ export default function Faq() {
             <div className="tk-info">
               <strong>חסרה לכם תשובה?</strong> נשמח שתעדכנו אותנו ונדאג להנגיש אותה לכולם.
               <br />
-              <strong>אימייל:</strong> office@sea-tower.co.il&nbsp;&nbsp;·&nbsp;&nbsp;
-              <strong>טלפון:</strong> 04-6891689
+              <strong>אימייל:</strong>{" "}
+              <a className="stm-link" href={`mailto:${BUSINESS.email}`} dir="ltr">
+                {BUSINESS.email}
+              </a>
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <strong>טלפון:</strong>{" "}
+              <a className="stm-link" href={BUSINESS.phones.office.tel} dir="ltr">
+                {BUSINESS.phones.office.label}
+              </a>
             </div>
           </div>
         </div>

@@ -39,7 +39,7 @@ export type GuestDetails = {
 const fmt = (n: number) => `₪${n.toLocaleString("en-US")}`;
 
 const inputCls = (invalid?: boolean) =>
-  `w-full rounded-[11px] border-[1.5px] px-[15px] py-[13px] text-[15px] text-[#14283d] outline-none transition-all focus:border-ocean-400 focus:shadow-[0_0_0_3px_rgba(43,127,184,0.12)] ${
+  `w-full rounded-[11px] border-[1.5px] px-[15px] py-[13px] text-[15px] text-[#14283d] outline-none transition-all focus:border-ocean-400 focus:shadow-[0_0_0_3px_rgba(43,127,184,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean-400 ${
     invalid ? "border-error" : "border-field"
   }`;
 
@@ -57,10 +57,21 @@ function Field({
   return (
     <div className="flex-1">
       <label className="mb-[7px] block text-[13px] font-semibold text-ink-dim" htmlFor={id}>
-        {label} <span className="text-error">*</span>
+        {label}{" "}
+        {/* הכוכבית דקורטיבית; החובה עצמה מסומנת ב-required על השדה */}
+        <span aria-hidden="true" className="text-error">
+          *
+        </span>
+        <span className="sr-only">(שדה חובה)</span>
       </label>
       {children}
-      {error && <p className="mt-1.5 text-[12.5px] font-semibold text-error">{error}</p>}
+      {/* role=alert: קודם לכן השגיאה הייתה גלויה בעין בלבד, בלי קשר תכנותי
+          לשדה ובלי הכרזה לקורא מסך */}
+      {error && (
+        <p id={`${id}-err`} role="alert" className="mt-1.5 text-[12.5px] font-semibold text-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
@@ -279,6 +290,9 @@ function GuestStep({
         <Field id="bk-first" label="שם פרטי" error={errors.firstName}>
           <input
             id="bk-first"
+            required
+            aria-invalid={!!errors.firstName || undefined}
+            aria-describedby={errors.firstName ? "bk-first-err" : undefined}
             type="text"
             autoComplete="given-name"
             placeholder="ישראל"
@@ -290,6 +304,9 @@ function GuestStep({
         <Field id="bk-last" label="שם משפחה" error={errors.lastName}>
           <input
             id="bk-last"
+            required
+            aria-invalid={!!errors.lastName || undefined}
+            aria-describedby={errors.lastName ? "bk-last-err" : undefined}
             type="text"
             autoComplete="family-name"
             placeholder="ישראלי"
@@ -314,6 +331,9 @@ function GuestStep({
         <Field id="bk-email" label="דואר אלקטרוני" error={errors.email}>
           <input
             id="bk-email"
+            required
+            aria-invalid={!!errors.email || undefined}
+            aria-describedby={errors.email ? "bk-email-err" : undefined}
             type="email"
             autoComplete="email"
             placeholder="name@email.com"
@@ -328,8 +348,12 @@ function GuestStep({
         <Field id="bk-email2" label="אישור דואר אלקטרוני" error={errors.emailConfirm}>
           <input
             id="bk-email2"
+            required
+            aria-invalid={!!errors.emailConfirm || undefined}
+            aria-describedby={errors.emailConfirm ? "bk-email2-err" : undefined}
             type="email"
-            autoComplete="email"
+            /* off ולא email: מילוי אוטומטי זהה לשני השדות מבטל את האישור */
+            autoComplete="off"
             placeholder="name@email.com"
             dir="ltr"
             value={guest.emailConfirm}
@@ -440,6 +464,9 @@ export function CheckoutWizard({ quote }: { quote: CheckoutQuote }) {
 
       <section className="px-5 pt-10 pb-[130px] sm:px-8 md:pb-[190px] lg:px-14">
         <div className="mx-auto max-w-shell">
+          {/* h1 של העמוד. העיצוב המאושר לא כולל כותרת נראית כאן, אבל בלעדיה
+              היה זה העמוד היחיד באתר בלי h1, וכותרת הצעד (h2) פתחה את העמוד */}
+          <h1 className="sr-only">השלמת הזמנה — מגדל הים</h1>
           <StepIndicator step={step} />
 
           {step < 3 ? (

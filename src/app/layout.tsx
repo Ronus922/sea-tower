@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Frank_Ruhl_Libre } from "next/font/google";
 import { openSans } from "@/lib/fonts";
 import { BUSINESS } from "@/lib/business";
+import { Analytics } from "@/components/site/Analytics";
 import "./globals.css";
 
 /* Open Sans = הגופן הראשי של כל האתר (‎--font-sans‎ ב-tokens.css מצביע עליו).
@@ -55,6 +56,15 @@ export const metadata: Metadata = {
       "max-video-preview": -1,
     },
   },
+  /* אימות בעלות — התג נכתב רק כשהערך קיים ב-env; אין ערכי דמה */
+  verification: {
+    ...(process.env.GOOGLE_SITE_VERIFICATION
+      ? { google: process.env.GOOGLE_SITE_VERIFICATION }
+      : {}),
+    ...(process.env.BING_SITE_VERIFICATION
+      ? { other: { "msvalidate.01": process.env.BING_SITE_VERIFICATION } }
+      : {}),
+  },
 };
 
 export default function RootLayout({
@@ -64,7 +74,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="he" dir="rtl" className={`${openSans.variable} ${frank.variable}`}>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        <Analytics />
+        {children}
+      </body>
     </html>
   );
 }

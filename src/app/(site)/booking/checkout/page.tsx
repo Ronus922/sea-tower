@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
 import { apartmentTitle } from "@/lib/apartment-view";
 import { roomCoverImage } from "@/lib/rooms-view";
+import { pageMeta } from "@/lib/seo";
 import {
   isDateOnly,
   nightsBetween,
@@ -16,10 +17,15 @@ import { CheckoutWizard, type CheckoutQuote } from "./CheckoutWizard";
    "Sea Tower - תשלום". השרת מאמת זמינות ובונה הצעת מחיר; ההזמנה עצמה
    נוצרת דרך POST /api/booking/checkout מול GuestHub. */
 
-export const metadata: Metadata = {
-  title: "השלמת הזמנה | Sea Tower דירות נופש מול הים בחיפה",
-  robots: { index: false },
-};
+/* עמוד תנועתי בתוך משפך ההזמנה — noindex, וה-canonical מצביע על /booking
+   (עמוד ההזמנה הציבורי) ולא נופל בירושה לעמוד הבית */
+export const metadata: Metadata = pageMeta({
+  title: "השלמת הזמנה | מגדל הים — דירות נופש מול הים בחיפה",
+  description:
+    "השלמת פרטי ההזמנה והתשלום עבור דירת נופש במגדל הים, חוף הכרמל בחיפה.",
+  path: "/booking",
+  robots: { index: false, follow: true },
+});
 
 export const dynamic = "force-dynamic";
 

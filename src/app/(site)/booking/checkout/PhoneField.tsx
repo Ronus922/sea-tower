@@ -97,7 +97,7 @@ export function PhoneField({ iso, value, error, onIsoChange, onValueChange }: Pr
           dir="ltr"
           value={value}
           onChange={(e) => onValueChange(e.target.value.replace(/[^\d\s-]/g, ""))}
-          className="min-w-0 flex-1 px-[15px] py-[13px] text-right text-[15px] text-[#14283d] outline-none"
+          className="min-w-0 flex-1 px-[15px] py-[13px] text-right text-[15px] text-[#14283d] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean-400"
         />
       </div>
       {error && <p className="mt-1.5 text-[12.5px] font-semibold text-error">{error}</p>}
@@ -117,7 +117,7 @@ export function PhoneField({ iso, value, error, onIsoChange, onValueChange }: Pr
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="חיפוש מדינה או קידומת"
-                  className="flex-1 bg-transparent text-[14.5px] text-[#14283d] outline-none"
+                  className="flex-1 bg-transparent text-[14.5px] text-[#14283d] outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean-400"
                 />
               </div>
             </div>

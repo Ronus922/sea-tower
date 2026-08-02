@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
+import { BUSINESS } from "@/lib/business";
 import { HOUSE_RULES, HrIcon } from "./house-rules-data";
 
 /* עמוד חוקי הבית — נבנה 1:1 לפי design-reference/exports/House-rules.html.
@@ -122,7 +123,8 @@ export default function HouseRules() {
             {HOUSE_RULES.map((sec, si) => (
               <div key={sec.id} id={sec.id} className="tk-sec">
                 <h2 className="tk-h">
-                  <span className="tk-num">{si + 1}</span>
+                  {/* aria-hidden: אחרת השם הנגיש נקרא כאסימון אחד ("2הגעה, קבלה ועזיבה") */}
+                  <span className="tk-num" aria-hidden="true">{si + 1}</span>
                   {sec.title}
                 </h2>
 
@@ -156,8 +158,15 @@ export default function HouseRules() {
               <strong>תודה על שיתוף הפעולה</strong> — שמירה על הכללים מאפשרת לכולם ליהנות משהות נעימה
               מול הים.
               <br />
-              <strong>לכל שאלה:</strong> office@sea-tower.co.il&nbsp;&nbsp;·&nbsp;&nbsp;
-              <strong>טלפון:</strong> 04-6891689
+              <strong>לכל שאלה:</strong>{" "}
+              <a className="stm-link" href={`mailto:${BUSINESS.email}`} dir="ltr">
+                {BUSINESS.email}
+              </a>
+              &nbsp;&nbsp;·&nbsp;&nbsp;
+              <strong>טלפון:</strong>{" "}
+              <a className="stm-link" href={BUSINESS.phones.office.tel} dir="ltr">
+                {BUSINESS.phones.office.label}
+              </a>
             </div>
           </div>
         </div>

@@ -13,7 +13,7 @@ import {
   readingMinutes,
   type Article,
 } from "@/data/articles";
-import { BUSINESS } from "@/lib/business";
+import { absUrl, businessRef, buildBreadcrumbLd, pageMeta, WEBSITE_ID } from "@/lib/seo";
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -37,24 +37,17 @@ export async function generateMetadata({
   const { slug } = await params;
   const article = getArticle(slug);
   if (!article) return {};
-  const url = `${BUSINESS.siteUrl}/articles/${article.slug}`;
-  const img = `${BUSINESS.siteUrl}${article.image}`;
-  return {
+  return pageMeta({
     title: article.seoTitle,
     description: article.seoDescription,
-    alternates: { canonical: url },
-    openGraph: {
-      type: "article",
-      title: article.seoTitle,
-      description: article.seoDescription,
-      url,
-      siteName: BUSINESS.name,
-      locale: "he_IL",
-      images: [{ url: img, alt: article.imageAlt }],
+    path: `/articles/${article.slug}`,
+    image: { url: article.image, alt: article.imageAlt },
+    article: {
       ...(article.publishedAt ? { publishedTime: article.publishedAt } : {}),
+      ...(article.updatedAt ? { modifiedTime: article.updatedAt } : {}),
       authors: [article.author],
     },
-  };
+  });
 }
 
 function MetaRow({ article }: { article: Article }) {
@@ -105,32 +98,36 @@ export default async function ArticlePage({
   const article = getArticle(slug);
   if (!article) notFound();
 
-  const url = `${BUSINESS.siteUrl}/articles/${article.slug}`;
+  const url = absUrl(`/articles/${article.slug}`);
+  /* BlogPosting — הסוג המדויק לתוכן מערכתי; המוציא לאור מפנה לישות העסק
+     היחידה ב-@id במקום להגדיר ארגון מתחרה. תאריכים נכתבים רק כשהם קיימים
+     במקור — לא ממציאים datePublished/dateModified. */
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
+    "@id": `${url}#article`,
     headline: article.title,
     description: article.seoDescription,
-    image: `${BUSINESS.siteUrl}${article.image}`,
+    image: absUrl(article.image),
     inLanguage: "he-IL",
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
-    author: { "@type": "Organization", name: article.author },
-    publisher: {
-      "@type": "Organization",
-      name: BUSINESS.nameEn,
-      url: BUSINESS.siteUrl,
-    },
+    url,
+    isPartOf: { "@id": WEBSITE_ID },
+    author: { "@type": "Organization", name: article.author, url: absUrl("/about") },
+    publisher: businessRef,
     ...(article.publishedAt ? { datePublished: article.publishedAt } : {}),
+    ...(article.updatedAt ?? article.publishedAt
+      ? { dateModified: article.updatedAt ?? article.publishedAt }
+      : {}),
   };
-  const breadcrumbLd = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    itemListElement: [
-      { "@type": "ListItem", position: 1, name: "ראשי", item: BUSINESS.siteUrl },
-      { "@type": "ListItem", position: 2, name: "מאמרים", item: `${BUSINESS.siteUrl}/articles` },
-      { "@type": "ListItem", position: 3, name: article.breadcrumbLabel ?? article.title, item: url },
-    ],
-  };
+  const breadcrumbLd = buildBreadcrumbLd([
+    { name: "ראשי", path: "/" },
+    { name: "מאמרים", path: "/articles" },
+    {
+      name: article.breadcrumbLabel ?? article.title,
+      path: `/articles/${article.slug}`,
+    },
+  ]);
 
   return (
     <>
@@ -187,7 +184,8 @@ export default async function ArticlePage({
               src={article.image}
               alt={article.imageAlt}
               fill
-              priority
+              /* התמונה יושבת מתחת ל-hero המלא (פירורי לחם + h1 + שורת מטא),
+                 כלומר מתחת לקיפול במובייל — priority כאן רק דחק משאבים מה-LCP */
               sizes="(max-width: 1024px) 100vw, 1000px"
             />
           </div>

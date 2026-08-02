@@ -101,6 +101,13 @@ export default async function Rooms() {
         <Container>
           {rooms.length > 0 ? (
             <>
+              {/* כותרת המקטע. בלעדיה העמוד קפץ מ-h1 ישר ל-h3 של הכרטיסים,
+                  ולקטלוג לא הייתה כותרת שמתארת אותו */}
+              <h2 className="mb-8 text-center text-[26px] font-extrabold tracking-heading text-navy-800 md:text-[32px]">
+                {rooms.length === 1
+                  ? "דירה אחת פנויה לאירוח"
+                  : `${rooms.length} דירות וסוויטות בבניין אלמוג`}
+              </h2>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {rooms.map((room) => (
                   <RoomCard key={room.id} room={room} sizes={CARD_SIZES} />

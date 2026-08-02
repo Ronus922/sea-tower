@@ -5,6 +5,7 @@ import { Chip, ImageBadge } from "@/components/ui/Chip";
 import { Chevron } from "@/components/ui/Chevron";
 import type { PublicRoom } from "@/lib/booking-api";
 import { roomBlurb, roomChips, roomCoverImage, roomTypeBadge } from "@/lib/rooms-view";
+import { apartmentTitle } from "@/lib/apartment-view";
 
 /* כרטיס דירה יחיד — התוכן מגיע חי מ-GuestHub (/api/public/rooms).
    אותו כרטיס בדיוק משרת את הקרוסלה בעמוד הבית ואת הרשת ב-/rooms;
@@ -49,7 +50,10 @@ export function RoomCard({
         )}
       </div>
       <div className="flex flex-1 flex-col p-6">
-        <h3 className="mb-3 text-h4 text-navy-800">{room.title}</h3>
+        {/* אותה כותרת שעמוד ההזמנות מציג ("דירה 1102 · חדר שינה וסלון").
+            room.title לבדו חזר על עצמו זהה בארבעה כרטיסים ויצר עץ כותרות
+            ורשימת קישורים בלתי ניתנים להבחנה */}
+        <h3 className="mb-3 text-h4 text-navy-800">{apartmentTitle(room)}</h3>
         {chips.length > 0 && (
           <div className="mb-3.5 flex flex-wrap gap-2">
             {chips.map((c) => (
@@ -66,11 +70,8 @@ export function RoomCard({
         >
           <span>
             לפרטים והזמנה
-            {/* שתי דירות יכולות לחלוק כותרת; לקורא מסך הקישור חייב להיות ייחודי */}
-            <span className="sr-only">
-              {" "}
-              — {room.title} (דירה {room.roomNumber})
-            </span>
+            {/* הכותרת הנראית כבר ייחודית; לקורא המסך נשאר ההקשר לאיזו דירה */}
+            <span className="sr-only"> — {apartmentTitle(room)}</span>
           </span>
           <Chevron dir="end" />
         </Link>

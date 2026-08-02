@@ -1,14 +1,21 @@
 import Image from "next/image";
 import Link from "next/link";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
+import { BUSINESS, MAPS_LINK } from "@/lib/business";
 
-const LINK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: string }> }> = [
+const LINK_COLUMNS: Array<{
+  id: string;
+  title: string;
+  links: Array<{ label: string; href: string }>;
+}> = [
   {
+    id: "links",
     title: "קישורים",
     links: [
       { label: "ראשי", href: "/" },
       { label: "אודות", href: "/about" },
-      { label: "הדירות שלנו", href: "/#apartments" },
+      { label: "הדירות והסוויטות", href: "/rooms" },
+      { label: "בדיקת זמינות והזמנה", href: "/booking" },
       { label: "מאמרים", href: "/articles" },
       { label: "שאלות נפוצות", href: "/faq" },
       { label: "חוקי הבית", href: "/house-rules" },
@@ -16,13 +23,17 @@ const LINK_COLUMNS: Array<{ title: string; links: Array<{ label: string; href: s
     ],
   },
   {
-    title: "פתרונות",
+    /* עוגני עמוד הבית הוחלפו ביעדים הקנוניים: לכל פתרון יש עמוד אמיתי
+       (/solutions), ולדירות יש /rooms — קודם לכן חמש התוויות הצביעו כולן
+       לאותם שני עוגנים בעמוד הבית */
+    id: "solutions",
+    title: "פתרונות אירוח",
     links: [
-      { label: "נופש בחיפה", href: "/#solutions" },
-      { label: "אירוח לעסקים", href: "/#solutions" },
-      { label: "רילוקיישן", href: "/#solutions" },
-      { label: "השכרה לטווח קצר", href: "/#solutions" },
-      { label: "סוויטות מול הים", href: "/#apartments" },
+      { label: "נופש מול הים בחיפה", href: "/solutions" },
+      { label: "אירוח לעסקים", href: "/solutions" },
+      { label: "רילוקיישן ומגורים זמניים", href: "/solutions" },
+      { label: "השכרה לטווח קצר", href: "/solutions" },
+      { label: "סוויטות מול הים", href: "/rooms" },
     ],
   },
 ];
@@ -80,9 +91,16 @@ export function Footer() {
             </div>
           </div>
 
+          {/* h2 ולא h4: הכותרות האלה הן הרמה העליונה בתוך landmark הפוטר.
+              כ-h4 הן יצרו דילוג h2→h4 בעץ הכותרות של כל עמוד באתר */}
           {LINK_COLUMNS.map((col) => (
-            <div key={col.title}>
-              <h4 className="mb-4 text-sm font-bold tracking-[0.03em] text-white">{col.title}</h4>
+            <nav key={col.title} aria-labelledby={`ft-${col.id}`}>
+              <h2
+                id={`ft-${col.id}`}
+                className="mb-4 text-sm font-bold tracking-[0.03em] text-white"
+              >
+                {col.title}
+              </h2>
               <ul className="flex flex-col gap-[11px] text-sm">
                 {col.links.map((link) => (
                   <li key={link.label}>
@@ -92,30 +110,57 @@ export function Footer() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </nav>
           ))}
 
+          {/* קודם לכן ישב כאן טופס ניוזלטר שהציג "✓ נרשמת!" בלי שום backend —
+              אין ספק דיוור, אין endpoint ואין טבלה, והכתובות נזרקו. הוחלף
+              בפרטי הקשר האמיתיים (מקור יחיד: business.ts), שהם גם המידע
+              המקומי שמנועי חיפוש ותשובות מחפשים בפוטר */}
           <div>
-            <h4 className="mb-4 text-sm font-bold tracking-[0.03em] text-white">הישארו מעודכנים</h4>
-            <p className="mb-3.5 text-[13.5px] leading-[1.6]">
-              מבצעים ועדכונים על דירות חדשות, ישירות למייל
-            </p>
-            {/* ponytail: אין עדיין backend לניוזלטר — הטופס ויזואלי בלבד */}
-            <form action="#" className="flex gap-[5px] rounded-btn border border-white/12 bg-white/7 p-[5px]">
-              <input
-                type="email"
-                required
-                aria-label="המייל שלכם"
-                placeholder="המייל שלכם"
-                className="h-[38px] min-w-0 flex-1 bg-transparent px-3 text-[13.5px] text-white placeholder:text-[#9fb6c8] focus:outline-none"
-              />
-              <button
-                type="submit"
-                className="rounded-lg bg-sea-500 px-[18px] py-2 text-sm font-bold whitespace-nowrap text-white transition-[background-color,transform] duration-300 ease-brand hover:-translate-y-0.5 hover:bg-[#46a6dd] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-              >
-                הרשמה
-              </button>
-            </form>
+            <h2 className="mb-4 text-sm font-bold tracking-[0.03em] text-white">דברו איתנו</h2>
+            <ul className="flex flex-col gap-[11px] text-sm">
+              <li>
+                <a
+                  href={BUSINESS.phones.office.tel}
+                  className="stm-link hover:text-white"
+                  dir="ltr"
+                >
+                  {BUSINESS.phones.office.label}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={BUSINESS.phones.mobile.tel}
+                  className="stm-link hover:text-white"
+                  dir="ltr"
+                >
+                  {BUSINESS.phones.mobile.label}
+                </a>
+              </li>
+              <li>
+                <a href={`mailto:${BUSINESS.email}`} className="stm-link hover:text-white" dir="ltr">
+                  {BUSINESS.email}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={MAPS_LINK}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="stm-link hover:text-white"
+                >
+                  {BUSINESS.address.full}
+                </a>
+              </li>
+              <li className="text-[#9fb6c8]">{BUSINESS.hours}</li>
+            </ul>
+            <Link
+              href="/contact"
+              className="stm-link mt-4 inline-flex min-h-11 items-center text-sm font-bold text-white"
+            >
+              שליחת פנייה מהטופס ›
+            </Link>
           </div>
         </div>
 

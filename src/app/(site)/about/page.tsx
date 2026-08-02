@@ -8,6 +8,7 @@ import { IconTile } from "@/components/ui/IconTile";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
+import { cn } from "@/lib/cn";
 
 /* עמוד אודות — נבנה 1:1 לפי design-reference/exports/About.html */
 
@@ -23,7 +24,8 @@ export const metadata: Metadata = pageMeta({
 const STATS = [
   { value: "50 מ׳", label: "מקו המים והטיילת" },
   { value: "14+", label: "דירות וסוויטות" },
-  { value: "4.8", label: "דירוג ממוצע מאורחים" },
+  /* דירוג 4.8 הוסר: אין מקור ביקורות ניתן לאימות (ראו גם עמוד הבית).
+     לא הוחלף בנתון אחר — אין עובדה מאומתת נוספת להציג במקומו */
   { value: "24/7", label: "שירות וזמינות" },
 ];
 
@@ -270,18 +272,23 @@ export default function About() {
         </Container>
       </section>
 
-      {/* רצועת נתונים — ארבעה מונים עם מפרידים */}
+      {/* רצועת נתונים — מונים עם מפרידים. המפריד נגזר מהמיקום ולא ממספר
+          קבוע, כך שהרצועה נשארת תקינה כשמספר הנתונים משתנה */}
       <section className="bg-white">
-        <Container className="grid grid-cols-2 lg:grid-cols-4">
+        <Container className="grid grid-cols-2 lg:grid-cols-3">
           {STATS.map((s, i) => (
             <div
               key={s.label}
-              className={
-                "px-4 py-7 text-center md:px-6 md:py-12" +
-                (i === 0 ? " border-b border-l border-[#eef2f6] lg:border-b-0" : "") +
-                (i === 1 ? " border-b border-[#eef2f6] lg:border-b-0 lg:border-l" : "") +
-                (i === 2 ? " border-l border-[#eef2f6]" : "")
-              }
+              className={cn(
+                "px-4 py-7 text-center md:px-6 md:py-12",
+                /* מובייל (2 עמודות): מפריד אנכי בפריט השמאלי של כל שורה,
+                   ומפריד אופקי מתחת לכל שורה שאינה האחרונה */
+                i % 2 === 0 && "border-l border-[#eef2f6]",
+                i < STATS.length - (STATS.length % 2 || 2) && "border-b border-[#eef2f6]",
+                /* דסקטופ (שורה אחת): רק מפרידים אנכיים בין הפריטים */
+                "lg:border-b-0 lg:border-l-0",
+                i < STATS.length - 1 && "lg:border-l lg:border-[#eef2f6]",
+              )}
             >
               <div
                 data-countup=""

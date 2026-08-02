@@ -1,4 +1,5 @@
 import type { PublicRoom } from "./booking-api";
+import { parseRoomCopy, shortDescription } from "./room-copy";
 
 /* נורמליזציה משותפת לכרטיס דירה — עמוד הבית ו-/rooms מציגים את אותו התוכן
    בדיוק, ולכן ההחלטות "מה מציגים ומה מסתירים" יושבות כאן ולא בכל עמוד בנפרד */
@@ -35,11 +36,13 @@ export function roomGallery(
   return out;
 }
 
-/* התמונה הראשונה בגלריה שעברה את הבדיקה (GuestHub כבר ממיין is_main קודם) */
+/* התמונה הראשונה בגלריה שעברה את הבדיקה (GuestHub כבר ממיין is_main קודם).
+   ברירת המחדל ל-alt כוללת את מספר הדירה: מספר דירות חולקות אותו סוג, ובלעדיו
+   נשלחו לקורא המסך ארבע תמונות עם אותו תיאור בדיוק ("חדר שינה וסלון") */
 export function roomCoverImage(room: PublicRoom): { src: string; alt: string } | null {
   for (const image of room.images) {
     const src = roomImageSrc(image.url);
-    if (src) return { src, alt: image.alt ?? room.title };
+    if (src) return { src, alt: image.alt ?? `דירה ${room.roomNumber} · ${room.title}` };
   }
   return null;
 }
@@ -79,9 +82,11 @@ export function roomChips(room: PublicRoom): string[] {
   return chips;
 }
 
-/* הקופי הקצר של הכרטיס. GuestHub כבר סינן טקסט שאינו בשפה המבוקשת, ולכן
-   ערך שקיים כאן בטוח להצגה */
-export const roomBlurb = (room: PublicRoom): string | null => room.summary ?? room.description;
+/* הקופי הקצר של הכרטיס — אותו צינור בדיוק שעמוד ההזמנות משתמש בו.
+   קודם לכן הוחזר כאן ה-description הגולמי של GuestHub, כלומר מסמך Markdown
+   שלם; ‎/rooms‎ ועמוד הבית הציגו בפועל למשתמשים "**תיאור הדירה**". */
+export const roomBlurb = (room: PublicRoom): string | null =>
+  shortDescription(parseRoomCopy(room.description), room.summary);
 
 /* כשהכותרת עצמה נלקחה מסוג החדר (חדר בלי שם עברי ב-GuestHub) אין טעם להדפיס
    את אותן מילים גם בתג שמעל התמונה */
