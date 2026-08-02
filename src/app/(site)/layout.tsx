@@ -1,5 +1,23 @@
+import type { Metadata } from "next";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+
+/* הנחיות האינדוקס של האתר הציבורי. הן יושבות כאן ולא בתבנית השורש כדי שעמוד
+   ה-404 (המרונדר בתבנית השורש) לא יקבל "index, follow" לצד ה-noindex שלו.
+   עמוד בודד רשאי לדרוס — /booking/checkout מגדיר noindex משלו. */
+export const metadata: Metadata = {
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+};
 
 /* התבנית הקבועה של האתר הציבורי: Header + Footer מרונדרים רק כאן.
    עמודי page.tsx מספקים תוכן בלבד — לעולם לא Header/Footer משלהם */
