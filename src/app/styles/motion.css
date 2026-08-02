@@ -247,10 +247,18 @@ footer input {
 }
 main input:focus,
 main textarea:focus,
-footer input:focus {
-  outline: none;
+main select:focus {
   border-color: var(--color-ocean-400);
   box-shadow: 0 0 0 3px rgba(43, 127, 184, 0.16);
+}
+/* פוקוס מקלדת: מסגרת אמיתית. הטבעת הרכה לבדה נמדדה 1.22:1 מול לבן — הרבה
+   מתחת ל-3:1 הנדרש לסימון פוקוס — ובשדות ללא בורדר (חיפוש, בורר חיוג)
+   לא נותר שום סימן נראה. ה-outline נוסף על העיצוב הקיים ולא מחליף אותו. */
+main input:focus-visible,
+main textarea:focus-visible,
+main select:focus-visible {
+  outline: 2px solid var(--color-ocean-400);
+  outline-offset: 2px;
 }
 .stm-invalid {
   border-color: #d9534f !important;

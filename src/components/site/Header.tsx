@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -143,11 +143,31 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 
+  const navRef = useRef<HTMLElement>(null);
+  const openerRef = useRef<HTMLButtonElement>(null);
+
   // נעילת גלילת הרקע כשהיריעה פתוחה (כמו במנוע המובייל של הרפרנס)
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  /* התנהגות מקלדת ליריעה: Escape סוגר, הפוקוס נכנס לקישור הראשון בפתיחה
+     וחוזר לכפתור ההמבורגר בסגירה. ה-inert על היריעה הסגורה כבר מוציא אותה
+     מסדר הטאב, ולכן אין צורך בלכידת פוקוס ידנית מעבר לכך */
+  useEffect(() => {
+    if (!open) return;
+    const opener = openerRef.current;
+    navRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      opener?.focus();
     };
   }, [open]);
 
@@ -172,7 +192,10 @@ export function Header() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-7 text-[15px] font-medium text-ink-strong lg:flex">
+        <nav
+          aria-label="ניווט ראשי"
+          className="hidden items-center gap-7 text-[15px] font-medium text-ink-strong lg:flex"
+        >
           {NAV.map((item) => (
             <Link
               key={item.label}
@@ -194,9 +217,11 @@ export function Header() {
 
         {/* המבורגר — מובייל/טאבלט */}
         <button
+          ref={openerRef}
           type="button"
           aria-label={open ? "סגירת תפריט" : "פתיחת תפריט"}
           aria-expanded={open}
+          aria-controls="site-mobile-nav"
           onClick={() => setOpen(!open)}
           className="flex size-11 items-center justify-center rounded-[10px] text-navy-800 lg:hidden"
         >
@@ -239,6 +264,9 @@ export function Header() {
           onClick={() => setOpen(false)}
         />
         <nav
+          ref={navRef}
+          id="site-mobile-nav"
+          aria-label="תפריט נייד"
           className={cn(
             "absolute inset-y-0 right-0 flex w-[78vw] max-w-[330px] flex-col gap-1 overflow-y-auto bg-white p-6 shadow-[-12px_0_40px_rgba(7,22,37,0.28)] transition-transform duration-[340ms] ease-brand motion-reduce:transition-none",
             open ? "translate-x-0" : "translate-x-full"

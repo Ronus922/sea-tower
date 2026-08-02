@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { BUSINESS } from "@/lib/business";
+import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
 import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
 import { buildBookingResults, formatExcludedReport } from "@/lib/booking-results";
 import { BookingSearchBar } from "./BookingSearchBar";
@@ -27,28 +28,11 @@ import {
 const DESCRIPTION =
   "בדקו זמינות והזמינו דירת נופש מול הים בחיפה — סטודיו, דירת חדר שינה וסלון או סוויטה משפחתית בבניין אלמוג, 50 מ׳ מהחוף. מחיר סופי כולל הכול, ביטול חינם עד 48 שעות.";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(BUSINESS.siteUrl),
-  title: "בדיקת זמינות והזמנה | Sea Tower דירות נופש מול הים בחיפה",
+export const metadata: Metadata = pageMeta({
+  title: "בדיקת זמינות והזמנה | מגדל הים — דירות נופש מול הים בחיפה",
   description: DESCRIPTION,
-  alternates: { canonical: "/booking" },
-  openGraph: {
-    title: "בדיקת זמינות והזמנה | Sea Tower דירות נופש מול הים בחיפה",
-    description: DESCRIPTION,
-    url: "/booking",
-    siteName: "מגדל הים — Sea Tower",
-    locale: "he_IL",
-    type: "website",
-    images: [
-      {
-        url: "/images/hero-terrace.jpg",
-        width: 1376,
-        height: 768,
-        alt: "מרפסת פנטהאוז מול מפרץ חיפה בשעת שקיעה",
-      },
-    ],
-  },
-};
+  path: "/booking",
+});
 
 export const dynamic = "force-dynamic";
 
@@ -127,6 +111,29 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
         }}
       />
       <MotionEngine />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildWebPageLd({
+              name: "בדיקת זמינות והזמנה — מגדל הים",
+              description: DESCRIPTION,
+              path: "/booking",
+            }),
+          ),
+        }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "בדיקת זמינות והזמנה", path: "/booking" },
+            ]),
+          ),
+        }}
+      />
 
       {/* Hero — פירורי לחם, כותרת גרדיאנט וגל תחתון */}
       <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-12 pb-[100px] text-center text-white md:pt-[60px] md:pb-[120px]">

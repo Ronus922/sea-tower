@@ -2,18 +2,23 @@ import Image from "next/image";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
-import { Stars } from "@/components/ui/Stars";
 import { StatCard } from "@/components/ui/StatCard";
 import { IconTile } from "@/components/ui/IconTile";
 import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
-import { Testimonials } from "@/components/site/Testimonials";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { RoomsCarousel } from "@/components/site/RoomsCarousel";
+import { ContactForm } from "@/components/site/ContactForm";
+import { ArticleCard } from "@/components/site/articles/ArticleCard";
+import { LISTED_ARTICLES } from "@/data/articles";
 import { buildSiteJsonLd } from "@/lib/seo";
 import { fetchWebsiteRooms } from "@/lib/booking-api";
+import { BUSINESS, MAPS_LINK } from "@/lib/business";
 
 /* עמוד הבית — נבנה לפי design-reference (Home.html / Home.png) */
+
+/* שלושת המאמרים הראשונים מהקטלוג האמיתי — מקור אמת יחיד: data/articles.ts */
+const HOME_ARTICLES = LISTED_ARTICLES.slice(0, 3);
 
 /* ---------- רקע "גלי הים": בועות ---------- */
 
@@ -290,29 +295,12 @@ const FAQS = [
 
 const ORGS = ["intel", "רמב״ם", "הטכניון", "ZIM", "אגד", "מקורות", "מת״ם"];
 
-const BLOG_POSTS = [
-  {
-    tag: "מדריך עיר",
-    title: "10 דברים לעשות בחיפה במרחק הליכה מהמגדל",
-    text: "מהטיילת ועד הקולינריה — כל מה ששווה לגלות מסביב.",
-  },
-  {
-    tag: "רילוקיישן",
-    title: "המדריך לרילוקיישן חלק לחיפה",
-    text: "איך עוברים עיר בלי כאב ראש — צ׳ק־ליסט מלא לעובדים ולמשפחות.",
-  },
-  {
-    tag: "טיפים",
-    title: "למה מלון דירות עדיף על חדר מלון רגיל",
-    text: "המרחב, החופש והמטבח שעושים את כל ההבדל בשהייה.",
-  },
-];
 
 const CONTACT_DETAILS = [
   {
-    label: "office@sea-tower.co.il",
-    href: "mailto:office@sea-tower.co.il",
-    dir: undefined,
+    label: BUSINESS.email,
+    href: `mailto:${BUSINESS.email}`,
+    dir: "ltr" as const,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
         <path
@@ -327,8 +315,9 @@ const CONTACT_DETAILS = [
     ),
   },
   {
-    label: "04-6891689 · 055-9994880",
-    href: "tel:04-6891689",
+    /* היה כאן ‎tel:04-6891689‎ — לא URI תקין, ולא ניתן היה לחייג לנייד כלל */
+    label: BUSINESS.phones.office.label,
+    href: BUSINESS.phones.office.tel,
     dir: "ltr" as const,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -342,8 +331,19 @@ const CONTACT_DETAILS = [
     ),
   },
   {
-    label: "בניין אלמוג, דוד אלעזר 10, חיפה",
-    href: undefined,
+    label: BUSINESS.phones.mobile.label,
+    href: BUSINESS.phones.mobile.tel,
+    dir: "ltr" as const,
+    icon: (
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <rect x="7" y="3" width="10" height="18" rx="2" stroke="var(--color-aqua)" strokeWidth="1.7" />
+        <path d="M11 18h2" stroke="var(--color-aqua)" strokeWidth="1.7" strokeLinecap="round" />
+      </svg>
+    ),
+  },
+  {
+    label: BUSINESS.address.full,
+    href: MAPS_LINK,
     dir: undefined,
     icon: (
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -357,10 +357,6 @@ const CONTACT_DETAILS = [
     ),
   },
 ];
-
-const FORM_FIELD =
-  "h-[46px] w-full rounded-btn border border-field bg-[#f7fafc] px-3.5 text-[15px] text-[#14283d] placeholder:text-ink-muted";
-const FORM_LABEL = "mb-[7px] block text-[13px] font-semibold text-ink-dim";
 
 /* ---------- העמוד ---------- */
 
@@ -432,11 +428,14 @@ export default async function Home() {
                 צפו בדירות
               </Button>
             </div>
-            <div className="hero-in-5 flex items-center gap-2.5">
-              <Stars size={18} />
-              <span className="text-[15px] font-semibold text-[#e6f0f7]">
-                4.8 · מאות אורחים מרוצים
+            {/* דירוג 4.8 הוסר יחד עם מקטע חוות הדעת: אין מקור ביקורות שניתן
+                לאמת. במקומו — עובדות מאומתות מתוך business.ts */}
+            <div className="hero-in-5 flex flex-wrap items-center gap-x-2.5 gap-y-1.5 text-[15px] font-semibold text-[#e6f0f7]">
+              <span>בניין אלמוג, חוף הכרמל בחיפה</span>
+              <span aria-hidden="true" className="text-[#7fa8c6]">
+                ·
               </span>
+              <span>{BUSINESS.hours}</span>
             </div>
           </div>
           <div className="hero-img-in relative w-full lg:flex-[0.95]">
@@ -455,7 +454,10 @@ export default async function Home() {
             <div className="absolute -bottom-6 right-4 animate-float rounded-card bg-white px-5 py-4 shadow-e4 md:-right-5">
               <div className="text-[26px] leading-none font-extrabold text-navy-800 md:text-[30px]">
                 {/* ספירה 0→50 ב-CSS (cnt50); "50" סטטי ל-reduced-motion דרך ה-media query */}
-                <span className="cnt50" aria-label="50" /> <span className="text-base">מ׳</span>
+                {/* role=img: aria-label אסור על span חסר role, והמספר עצמו
+                    נוצר ב-CSS (::after) ולכן אין לו טקסט אמיתי לחשוף */}
+                <span className="cnt50" role="img" aria-label="50" />{" "}
+                <span className="text-base">מ׳</span>
               </div>
               <div className="mt-1 text-[13px] font-semibold text-ink-dim">מקו המים והטיילת</div>
             </div>
@@ -733,8 +735,9 @@ export default async function Home() {
         </Container>
       </section>
 
-      {/* אורחים מספרים */}
-      <Testimonials />
+      {/* מקטע "אורחים מספרים" הוסר: חוות הדעת שהיו כאן היו תוכן מומצא, שתיים
+          מהן מיוחסות לחברות אמיתיות בשם, לצד דירוג 4.8 ללא מקור ניתן לאימות.
+          יוחזר רק מול מקור ביקורות אמיתי. */}
 
       {/* מרקיזת ארגונים */}
       <section className="overflow-hidden border-y border-line bg-white py-10">
@@ -768,32 +771,18 @@ export default async function Home() {
         <Container>
           <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
             <SectionHeading ws kicker="מאמרים ותובנות" title="מהבלוג של מגדל הים" />
-            <Button href="#blog" variant="link">
+            <Button href="/articles" variant="link">
               לכל המאמרים
             </Button>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {BLOG_POSTS.map((post) => (
-              <article
-                key={post.title}
-                data-rev="card"
-                className="stm-card overflow-hidden rounded-card border border-line bg-white"
-              >
-                {/* תמונות הבלוג חסרות בנכסי הרפרנס — משטח placeholder עד שיסופקו.
-                    stm-zoom: אותה תגובת hover שהמנוע ברפרנס נותן למדיה של הכרטיס */}
-                <div className="overflow-hidden">
-                  <div aria-hidden="true" className="stm-zoom h-[190px] w-full bg-[#dfe9f1]" />
-                </div>
-                <div className="p-6">
-                  <span className="text-[12.5px] font-bold tracking-[0.03em] text-kicker">
-                    {post.tag}
-                  </span>
-                  <h3 className="mt-2.5 mb-2 text-[18.5px]/[1.35] font-bold text-navy-800">
-                    {post.title}
-                  </h3>
-                  <p className="text-sm leading-[1.55] text-ink-dim">{post.text}</p>
-                </div>
-              </article>
+          {/* קודם לכן ישבו כאן שלושה מאמרים מומצאים שלא קיימים ב-/articles, עם
+              משטחי תמונה אפורים ובלי קישור, מתחת לכפתור שהצביע על עצמו (#blog).
+              עכשיו: שלושת המאמרים האמיתיים מהקטלוג, עם התמונות והקישורים שלהם */}
+          {/* .art-wrap.is-grid — אותה מעטפת שמעצבת את הכרטיסים ב-/articles,
+              כדי שכרטיס המאמר ייראה זהה בשני המקומות (ללא שכפול CSS) */}
+          <div className="art-wrap is-grid">
+            {HOME_ARTICLES.map((article) => (
+              <ArticleCard key={article.slug} article={article} />
             ))}
           </div>
         </Container>
@@ -850,79 +839,11 @@ export default async function Home() {
             className="w-full rounded-img bg-white p-6 shadow-[0_30px_60px_rgba(0,0,0,0.3)] md:p-8 lg:flex-1"
           >
             <h3 className="mb-5 text-[23px] font-extrabold text-navy-800">בקשת הצעה מהירה</h3>
-            {/* ponytail: אין עדיין backend לטופס — שליחה תחובר ל-Supabase בשלב הבא */}
-            <form action="#contact" className="flex flex-col gap-3.5">
-              <div className="flex flex-col gap-3.5 sm:flex-row">
-                <div className="flex-1">
-                  <label htmlFor="lf-name" className={FORM_LABEL}>
-                    שם מלא
-                  </label>
-                  <input
-                    id="lf-name"
-                    name="name"
-                    type="text"
-                    autoComplete="name"
-                    placeholder="השם שלכם"
-                    className={FORM_FIELD}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label htmlFor="lf-phone" className={FORM_LABEL}>
-                    טלפון
-                  </label>
-                  <input
-                    id="lf-phone"
-                    name="phone"
-                    type="tel"
-                    autoComplete="tel"
-                    placeholder="050-0000000"
-                    className={FORM_FIELD}
-                  />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="lf-email" className={FORM_LABEL}>
-                  אימייל
-                </label>
-                <input
-                  id="lf-email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
-                  placeholder="name@email.com"
-                  className={FORM_FIELD}
-                />
-              </div>
-              <div className="flex flex-col gap-3.5 sm:flex-row">
-                <div className="flex-1">
-                  <label htmlFor="lf-dates" className={FORM_LABEL}>
-                    תאריכים
-                  </label>
-                  <input
-                    id="lf-dates"
-                    name="dates"
-                    type="text"
-                    placeholder="הגעה — עזיבה"
-                    className={FORM_FIELD}
-                  />
-                </div>
-                <div className="flex-1">
-                  <label htmlFor="lf-guests" className={FORM_LABEL}>
-                    מספר אורחים
-                  </label>
-                  <input
-                    id="lf-guests"
-                    name="guests"
-                    type="text"
-                    placeholder="2 מבוגרים"
-                    className={FORM_FIELD}
-                  />
-                </div>
-              </div>
-              <Button type="submit" className="mt-1.5 w-full">
-                שלחו פנייה
-              </Button>
-            </form>
+            {/* אותו טופס עובד של /contact בגרסה קומפקטית: שולח באמת ל-/api/leads
+                עם אותה ולידציה, honeypot, הגבלת קצב וטיפול בשגיאות. קודם לכן
+                ישב כאן ‎<form action="#contact">‎ ש-MotionEngine חטף והציג
+                "✓ נשלח, נחזור אליכם" בזמן שהליד נזרק לפח */}
+            <ContactForm variant="compact" idPrefix="lf" />
           </div>
         </Container>
         {/* גל הפתיחה של הפוטר מגיע מה-Footer המשותף (חופף לריפוד התחתון כאן) */}

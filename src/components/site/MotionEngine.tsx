@@ -114,44 +114,6 @@ function countUpText(el: HTMLElement, durMs: number) {
   }, durMs + 2700); // רשת ביטחון אם rAF הושהה
 }
 
-function setupForm(form: HTMLFormElement) {
-  if (form.dataset.wired) return;
-  form.dataset.wired = "1";
-  form.addEventListener("submit", (e) => {
-    e.preventDefault();
-    const btn = form.querySelector<HTMLButtonElement>('button[type="submit"]');
-    if (!btn || btn.hasAttribute("data-stm-loading")) return;
-    const fields = Array.from(
-      form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input,textarea")
-    );
-    let ok = true;
-    fields.forEach((f) => {
-      const v = f.value.trim();
-      let bad = !v;
-      if (!bad && f.type === "email") bad = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
-      f.classList.toggle("stm-invalid", bad);
-      if (bad) ok = false;
-    });
-    if (!ok) {
-      form.querySelector<HTMLElement>(".stm-invalid")?.focus();
-      return;
-    }
-    const single = fields.length === 1 && fields[0].type === "email";
-    const html = btn.innerHTML;
-    btn.setAttribute("data-stm-loading", "");
-    btn.innerHTML =
-      '<span class="stm-spin"></span><span>' + (single ? "נרשם…" : "שולח…") + "</span>";
-    window.setTimeout(() => {
-      btn.innerHTML = "<span>" + (single ? "✓ נרשמת!" : "✓ נשלח, נחזור אליכם") + "</span>";
-      window.setTimeout(() => {
-        btn.removeAttribute("data-stm-loading");
-        btn.innerHTML = html;
-        if (single) fields[0].value = "";
-      }, 2200);
-    }, 1300);
-  });
-}
-
 export function MotionEngine() {
   useEffect(() => {
     const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -167,9 +129,6 @@ export function MotionEngine() {
       window.addEventListener("scroll", onScroll, { passive: true });
       cleanups.push(() => window.removeEventListener("scroll", onScroll));
     }
-
-    /* --- זרימת שליחה לטפסים (כולל ניוזלטר בפוטר) --- */
-    document.querySelectorAll<HTMLFormElement>("main form, footer form").forEach(setupForm);
 
     /* --- מוני ספירה --- */
     const countTargets = document.querySelectorAll<HTMLElement>("[data-countup]");

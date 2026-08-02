@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
+import { BUSINESS } from "@/lib/business";
 
 /* עמוד תקנון — נבנה 1:1 לפי design-reference/exports/regulations.html.
    הגופן Open Sans גלובלי (‎--font-sans‎). התנועה: מנוע התנועה המשותף
@@ -207,11 +208,11 @@ export default function Terms() {
               <p className="tk-clause">
                 <strong>7.4.</strong> הזמנה ששונתה פעם אחת – לא תוכל להשתנות שוב, ואם תבוטל תיחשב כמבוטלת ללא החזר.</p>
               <p className="tk-clause">
-                <strong>7.5.</strong> בקשה לביטול או שינוי תוגש בכתב לכתובת office@sea-tower.co.il לפחות 7 ימי עסקים לפני מועד ההגעה.</p>
+                <strong>7.5.</strong> בקשה לביטול או שינוי תוגש בכתב לכתובת {BUSINESS.email} לפחות 7 ימי עסקים לפני מועד ההגעה.</p>
               <p className="tk-clause">
                 <strong>7.6.</strong> כלל ההזמנות הינן ללא אפשרות ביטול, אלא אם צוין אחרת במפורש ובכפוף לאישור בכתב מאת החברה.</p>
               <p className="tk-clause">
-                <strong>7.7.</strong> ככל שההזמנה עומדת בתנאי הביטול, ניתן לבצע את הביטול באמצעות קטגוריית „תיק ההזמנות” באתר או בפנייה בכתב לכתובת: office@sea-tower.co.il.</p>
+                <strong>7.7.</strong> ככל שההזמנה עומדת בתנאי הביטול, ניתן לבצע את הביטול באמצעות קטגוריית „תיק ההזמנות” באתר או בפנייה בכתב לכתובת: {BUSINESS.email}.</p>
               <p className="tk-clause">
                 <strong>7.8.</strong> במקרה של אי הגעה (No-Show), יחויב המזמין במלוא סכום ההזמנה (100%), ולא תינתן אפשרות לשינוי מועדי האירוח.</p>
               <p className="tk-clause">
@@ -384,7 +385,15 @@ export default function Terms() {
             <div className="tk-info">
               <strong>עדכון אחרון:</strong> אוקטובר 2025<br />
               <strong>שם החברה:</strong> מגדל הים דירות נופש וסוויטות · Sea Tower – Vacation Apartments and Suites<br />
-              <strong>אימייל:</strong> office@sea-tower.co.il  ·  <strong>טלפון:</strong> 04-6891689
+              <strong>אימייל:</strong>{" "}
+              <a className="stm-link" href={`mailto:${BUSINESS.email}`} dir="ltr">
+                {BUSINESS.email}
+              </a>
+              {"  ·  "}
+              <strong>טלפון:</strong>{" "}
+              <a className="stm-link" href={BUSINESS.phones.office.tel} dir="ltr">
+                {BUSINESS.phones.office.label}
+              </a>
             </div>
           </div>
         </div>

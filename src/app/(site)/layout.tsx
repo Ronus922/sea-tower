@@ -11,8 +11,16 @@ export default function SiteLayout({
 }>) {
   return (
     <>
+      {/* דילוג לתוכן — מוסתר עד קבלת פוקוס מהמקלדת. בלעדיו כל ניווט מקלדת
+          עובר מחדש בכל עמוד דרך תפריט הניווט וכפתור ההזמנה */}
+      <a
+        href="#main"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:right-3 focus:z-[100] focus:rounded-btn focus:bg-white focus:px-4 focus:py-2.5 focus:text-[15px] focus:font-bold focus:text-navy-800 focus:shadow-e3 focus:outline-2 focus:outline-offset-2 focus:outline-sea-500"
+      >
+        דילוג לתוכן הראשי
+      </a>
       <Header />
-      <main>{children}</main>
+      <main id="main">{children}</main>
       <Footer />
     </>
   );

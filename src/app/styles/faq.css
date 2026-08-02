@@ -26,7 +26,11 @@
   color: #14283d;
   background: #fff;
   box-shadow: 0 18px 44px rgba(4, 16, 30, 0.35);
-  outline: none;
+}
+/* לשדה אין בורדר, ולכן ה-outline הוא סימן הפוקוס היחיד — אין לבטלו */
+.faq-search:focus-visible {
+  outline: 2px solid var(--color-ocean-400);
+  outline-offset: 2px;
 }
 .faq-search-ic {
   position: absolute;

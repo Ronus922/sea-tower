@@ -6,7 +6,11 @@ import type { ArticleCategory } from "@/data/articles";
 
 /* בקרות המאמרים — סינון לפי קטגוריה, מעבר גריד/רשימה, ועימוד.
    הכול פונקציונלי ונגזר מהנתונים: הספירות, הכרטיסים המוצגים והעמודים.
-   State בצד-לקוח בלבד (topic/view/page). */
+   State בצד-לקוח בלבד (topic/view/page).
+
+   כל הכרטיסים מרונדרים ל-HTML תמיד, ומי שמחוץ לעמוד הנוכחי מוסתר ב-CSS.
+   קודם לכן ה-slice החזיר 6 כרטיסים בלבד, כך שכל מאמר מהעמוד השני לא היה
+   קיים ב-HTML של /articles ולא היה לו שום קישור נכנס באתר. */
 
 const PAGE_SIZE = 6;
 
@@ -75,7 +79,8 @@ export function ArticlesBrowser({ articles }: { articles: ArticleCardData[] }) {
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, totalPages);
-  const visible = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
+  const onPage = (index: number) =>
+    index >= (current - 1) * PAGE_SIZE && index < current * PAGE_SIZE;
 
   function selectTopic(next: Topic) {
     setTopic(next);
@@ -85,14 +90,16 @@ export function ArticlesBrowser({ articles }: { articles: ArticleCardData[] }) {
   return (
     <>
       <div className="art-controls">
-        <div className="art-tabs" role="tablist" aria-label="סינון מאמרים לפי נושא">
+        {/* קבוצת כפתורי סינון עם aria-pressed, כמו מתגי התצוגה. קודם לכן היה
+            כאן tablist/tab בלי tabpanel, בלי aria-controls ובלי ניווט חצים —
+            תבנית ARIA חלקית מבלבלת יותר מכפתורים רגילים */}
+        <div className="art-tabs" role="group" aria-label="סינון מאמרים לפי נושא">
           {TABS.map((t) => (
             <button
               key={t.topic}
               type="button"
               className={`art-tab${topic === t.topic ? " is-active" : ""}`}
-              role="tab"
-              aria-selected={topic === t.topic}
+              aria-pressed={topic === t.topic}
               onClick={() => selectTopic(t.topic)}
             >
               {t.label} <span className="art-count">{counts[t.topic]}</span>
@@ -129,8 +136,10 @@ export function ArticlesBrowser({ articles }: { articles: ArticleCardData[] }) {
         role="region"
         aria-label="רשימת מאמרים"
       >
-        {visible.map((a) => (
-          <ArticleCard key={a.slug} article={a} />
+        {filtered.map((a, i) => (
+          <div key={a.slug} className={onPage(i) ? "contents" : "art-offpage"}>
+            <ArticleCard article={a} />
+          </div>
         ))}
       </div>
 

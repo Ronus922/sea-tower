@@ -1,31 +1,36 @@
 import type { MetadataRoute } from "next";
-import { BUSINESS } from "@/lib/business";
+import { absUrl } from "@/lib/seo";
 import { ARTICLES } from "@/data/articles";
 
-/* מפת אתר — כל העמודים הציבוריים + כל המאמרים. /design-system חסום ב-robots. */
-export default function sitemap(): MetadataRoute.Sitemap {
-  const base = BUSINESS.siteUrl;
-  const now = new Date();
-  const paths = [
-    "",
-    "/about",
-    "/rooms",
-    "/solutions",
-    "/articles",
-    "/faq",
-    "/house-rules",
-    "/terms",
-    "/contact",
-  ];
+/* מפת אתר — כל העמודים הציבוריים הניתנים לאינדוקס + כל המאמרים.
+   /design-system חסום ב-robots; /booking/checkout הוא noindex ולכן לא נכלל.
 
+   lastModified נכתב רק כשיש לו מקור אמת (publishedAt/updatedAt של מאמר).
+   קודם לכן כל הערכים היו new Date() — כלומר "עכשיו" בכל בקשה — ואות כזה
+   גורם לסורקים להתעלם מ-lastmod לגמרי. עדיף להשמיט מאשר לדווח ערך שקרי. */
+
+const PATHS = [
+  "/",
+  "/about",
+  "/rooms",
+  "/solutions",
+  "/booking",
+  "/articles",
+  "/faq",
+  "/house-rules",
+  "/terms",
+  "/contact",
+];
+
+export default function sitemap(): MetadataRoute.Sitemap {
   return [
-    ...paths.map((p) => ({
-      url: `${base}${p}`,
-      lastModified: now,
-    })),
-    ...ARTICLES.map((a) => ({
-      url: `${base}/articles/${a.slug}`,
-      lastModified: a.publishedAt ? new Date(a.publishedAt) : now,
-    })),
+    ...PATHS.map((p) => ({ url: absUrl(p) })),
+    ...ARTICLES.map((a) => {
+      const stamp = a.updatedAt ?? a.publishedAt;
+      return {
+        url: absUrl(`/articles/${a.slug}`),
+        ...(stamp ? { lastModified: new Date(stamp) } : {}),
+      };
+    }),
   ];
 }

@@ -9,6 +9,7 @@ import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { ContactForm } from "@/components/site/ContactForm";
 import { BUSINESS, MAPS_EMBED, MAPS_LINK, whatsappUrl } from "@/lib/business";
+import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
 
 /* עמוד צור קשר — שפת העיצוב של design-reference/exports/Solutions.html.
    פרטי הקשר מגיעים אך ורק מ-src/lib/business.ts */
@@ -16,55 +17,20 @@ import { BUSINESS, MAPS_EMBED, MAPS_LINK, whatsappUrl } from "@/lib/business";
 const DESCRIPTION =
   "צרו קשר עם Sea Tower לקבלת מידע והצעה מותאמת לדירות וסוויטות מול הים בחיפה — לנופש, עסקים, מגורים זמניים וניהול דירות.";
 
-export const metadata: Metadata = {
-  metadataBase: new URL(BUSINESS.siteUrl),
-  title: "צור קשר | Sea Tower דירות וסוויטות מול הים בחיפה",
+export const metadata: Metadata = pageMeta({
+  title: "צור קשר | מגדל הים — דירות וסוויטות מול הים בחיפה",
   description: DESCRIPTION,
-  alternates: { canonical: "/contact" },
-  openGraph: {
-    title: "צור קשר | Sea Tower דירות וסוויטות מול הים בחיפה",
-    description: DESCRIPTION,
-    url: "/contact",
-    siteName: "מגדל הים — Sea Tower",
-    locale: "he_IL",
-    type: "website",
-    images: [
-      {
-        url: "/images/hero-terrace.jpg",
-        width: 1376,
-        height: 768,
-        alt: "מרפסת פנטהאוז מול מפרץ חיפה בשעת שקיעה",
-      },
-    ],
-  },
-};
+  path: "/contact",
+});
 
-/* ContactPage + LodgingBusiness — פרטים מאומתים בלבד (business.ts) */
-const STRUCTURED_DATA = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": "ContactPage",
-      name: "צור קשר — מגדל הים",
-      url: `${BUSINESS.siteUrl}/contact`,
-      inLanguage: "he",
-    },
-    {
-      "@type": "LodgingBusiness",
-      name: "מגדל הים — Sea Tower",
-      url: BUSINESS.siteUrl,
-      image: `${BUSINESS.siteUrl}/images/hero-terrace.jpg`,
-      telephone: "+972-4-6891689",
-      email: BUSINESS.email,
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: BUSINESS.address.street,
-        addressLocality: BUSINESS.address.city,
-        addressCountry: "IL",
-      },
-    },
-  ],
-};
+/* ContactPage — מפנה לישות העסק ב-@id במקום להגדיר LodgingBusiness מתחרה.
+   פרטי הקשר עצמם מוגדרים פעם אחת ב-buildSiteJsonLd (עמוד הבית). */
+const STRUCTURED_DATA = buildWebPageLd({
+  type: "ContactPage",
+  name: "צור קשר — מגדל הים",
+  description: DESCRIPTION,
+  path: "/contact",
+});
 
 /* ---------- ערוצי קשר ---------- */
 
@@ -191,6 +157,17 @@ export default function Contact() {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(STRUCTURED_DATA) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            buildBreadcrumbLd([
+              { name: "ראשי", path: "/" },
+              { name: "צור קשר", path: "/contact" },
+            ]),
+          ),
+        }}
       />
       <MotionEngine />
 

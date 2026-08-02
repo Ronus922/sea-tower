@@ -23,7 +23,8 @@ export interface Article {
      סלוג ישיר ודרך "מאמרים נוספים" של מאמרי הסביבה */
   listed: boolean;
   featured?: boolean;
-  publishedAt?: string; // ISO; רק כשקיים במקור
+  publishedAt?: string; // ISO; רק כשקיים במקור — לא ממציאים תאריכים
+  updatedAt?: string; // ISO; רק כשידוע בוודאות שהתוכן עודכן
   author: string;
   readingMinutes?: number; // מהמקור כשקיים, אחרת נגזר בזמן ריצה
   breadcrumbLabel?: string; // תווית הפירור למאמר (ברירת מחדל: title)
@@ -107,8 +108,10 @@ export const ARTICLES: Article[] = [
     excerpt:
       "השכרת דירה לטווח קצר נולדה מהביקוש לפתרון לינה חלופי. בשנים האחרונות חל גידול של עשרות אחוזים בהשכרת דירות מרוהטות על בסיס יומי, שבועי וחודשי.",
     category: "general",
-    image: "/images/articles/bridal-suite.jpg",
-    imageAlt: "השכרת דירות מרוהטות לטווח קצר",
+    /* אין נכס ייעודי למאמר זה תחת images/articles; תמונת סוויטת הכלה ששימשה
+       כאן קודם אינה קשורה לנושא. עד שתסופק תמונה — דירה מרוהטת מול הים */
+    image: "/images/short-term-rental.jpg",
+    imageAlt: "חדר שינה בדירה מרוהטת מול הים במגדל הים, חיפה",
     listed: true,
     author: DEFAULT_AUTHOR,
     seoTitle: "השכרת דירות מרוהטות לטווח קצר | מגדל הים",

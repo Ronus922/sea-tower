@@ -56,7 +56,6 @@ main select {
     box-shadow 0.3s var(--ease-brand);
 }
 main select:focus {
-  outline: none;
   border-color: var(--color-ocean-400);
   box-shadow: 0 0 0 3px rgba(43, 127, 184, 0.16);
 }

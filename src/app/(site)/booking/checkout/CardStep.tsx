@@ -54,7 +54,7 @@ function luhnValid(digits: string): boolean {
 const fmt = (n: number) => `₪${n.toLocaleString("en-US")}`;
 
 const inputCls = (invalid?: boolean) =>
-  `w-full rounded-[11px] border-[1.5px] px-[15px] py-[13px] text-[15px] text-[#14283d] outline-none transition-all focus:border-ocean-400 focus:shadow-[0_0_0_3px_rgba(43,127,184,0.12)] ${
+  `w-full rounded-[11px] border-[1.5px] px-[15px] py-[13px] text-[15px] text-[#14283d] outline-none transition-all focus:border-ocean-400 focus:shadow-[0_0_0_3px_rgba(43,127,184,0.12)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ocean-400 ${
     invalid ? "border-error" : "border-field"
   }`;
 
@@ -367,8 +367,12 @@ export function CardStep({
         {consentRow("marketing", "מאשר/ת קבלת דברי פרסום והודעות על מבצעים ממגדל הים")}
       </div>
 
+      {/* role=alert: כשל תשלום היה עד כה שקט לחלוטין לקורא מסך */}
       {serverError && (
-        <div className="mb-4 rounded-[11px] border border-error-line bg-error-bg px-4 py-3 text-[14px] font-semibold text-error">
+        <div
+          role="alert"
+          className="mb-4 rounded-[11px] border border-error-line bg-error-bg px-4 py-3 text-[14px] font-semibold text-error"
+        >
           {serverError.message}
           {serverError.backToSearch && (
             <>
@@ -385,6 +389,7 @@ export function CardStep({
         type="button"
         onClick={submit}
         disabled={!consentsOk || sending}
+        aria-describedby={!consentsOk ? "pay-consent-hint" : undefined}
         className={`flex w-full items-center justify-center gap-[9px] rounded-xl px-4 py-[15px] text-[16.5px] font-bold text-white transition-all ${
           !consentsOk || sending
             ? "cursor-not-allowed bg-[#c2d2df]"
@@ -397,6 +402,12 @@ export function CardStep({
         </svg>
         {sending ? "מאשרים את ההזמנה…" : `אישור הזמנה מאובטח — ${fmt(total)}`}
       </button>
+      {/* קודם לכן הכפתור פשוט היה אפור, בלי שום הסבר מה חוסם את ההמשך */}
+      {!consentsOk && (
+        <p id="pay-consent-hint" className="mt-2 text-center text-[13px] font-semibold text-ink-dim">
+          כדי להמשיך יש לאשר את התקנון ואת מדיניות הפרטיות.
+        </p>
+      )}
       <button
         type="button"
         onClick={onBack}

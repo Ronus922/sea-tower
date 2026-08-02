@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { INQUIRY_TYPES, whatsappUrl } from "@/lib/business";
+import { track } from "@/lib/analytics";
 
 /* טופס צור קשר — שולח ל-/api/leads (אימות מלא גם בשרת).
    data-wired על ה-form מונע מ-MotionEngine לחווט אליו את זרימת הדמו */
@@ -44,7 +45,17 @@ function todayLocal(): string {
   ).padStart(2, "0")}`;
 }
 
-export function ContactForm() {
+/* "full" — עמוד צור קשר. "compact" — כרטיס "בקשת הצעה מהירה" בעמוד הבית:
+   אותה ולידציה, שליחה, honeypot, מצבי טעינה/שגיאה והצלחה בדיוק, בלי שדה
+   ההודעה החופשי ובלי כפתור ה-WhatsApp המשני, כדי להתאים לגובה הכרטיס */
+export function ContactForm({
+  variant = "full",
+  idPrefix = "cf",
+}: {
+  variant?: "full" | "compact";
+  idPrefix?: string;
+} = {}) {
+  const compact = variant === "compact";
   const [form, setForm] = useState<FormState>(EMPTY);
   const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>({});
   const [status, setStatus] = useState<Status>("idle");
@@ -105,6 +116,16 @@ export function ContactForm() {
         await res.json().catch(() => null);
       if (res.ok && data?.ok) {
         setStatus("success");
+        /* אירוע ההמרה נורה רק כאן — אחרי אישור הצלחה מהשרת, ולעולם לא על
+           קליק. נשלחים רק פרמטרים לא-מזהים: שם, טלפון, דוא״ל וההודעה
+           החופשית לא עוזבים את הדפדפן לכיוון המדידה */
+        track({
+          name: "generate_lead",
+          inquiry_type: form.inquiryType,
+          has_dates: Boolean(form.arrival),
+          guests_count: form.guests ? Number.parseInt(form.guests, 10) : null,
+          form_location: compact ? "home" : "contact",
+        });
       } else {
         if (data?.fieldErrors) setErrors(data.fieldErrors);
         setServerError(
@@ -133,7 +154,7 @@ export function ContactForm() {
 
   const aria = (key: keyof FormState) =>
     errors[key]
-      ? { "aria-invalid": true as const, "aria-describedby": `cf-${key}-err` }
+      ? { "aria-invalid": true as const, "aria-describedby": `${idPrefix}-${key}-err` }
       : {};
   const invalid = (key: keyof FormState) => (errors[key] ? " stm-invalid" : "");
 
@@ -141,7 +162,9 @@ export function ContactForm() {
     return (
       <div
         role="status"
-        className="flex min-h-[420px] flex-col items-center justify-center gap-4 text-center"
+        className={`flex flex-col items-center justify-center gap-4 text-center ${
+          compact ? "min-h-[280px]" : "min-h-[420px]"
+        }`}
       >
         <span className="flex size-16 items-center justify-center rounded-full bg-success-bg ring-1 ring-success-line">
           <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -161,20 +184,26 @@ export function ContactForm() {
   }
 
   return (
-    <form ref={formRef} data-wired="1" noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
+    <form
+      ref={formRef}
+      noValidate
+      onSubmit={onSubmit}
+      aria-label="טופס פנייה לקבלת הצעת אירוח"
+      className={`flex flex-col ${compact ? "gap-3.5" : "gap-4"}`}
+    >
       {/* honeypot — מוסתר מאנשים, בוטים ממלאים */}
       <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-        <label htmlFor="cf-company">חברה</label>
-        <input id="cf-company" name="company" type="text" tabIndex={-1} autoComplete="off" />
+        <label htmlFor={`${idPrefix}-company`}>חברה</label>
+        <input id={`${idPrefix}-company`} name="company" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex-1">
-          <label htmlFor="cf-name" className={LABEL}>
+          <label htmlFor={`${idPrefix}-name`} className={LABEL}>
             שם מלא <span aria-hidden="true" className="text-error">*</span>
           </label>
           <input
-            id="cf-name"
+            id={`${idPrefix}-name`}
             name="name"
             type="text"
             required
@@ -186,17 +215,17 @@ export function ContactForm() {
             {...aria("name")}
           />
           {errors.name && (
-            <p id="cf-name-err" className={ERR}>
+            <p id={`${idPrefix}-name-err`} className={ERR}>
               {errors.name}
             </p>
           )}
         </div>
         <div className="flex-1">
-          <label htmlFor="cf-phone" className={LABEL}>
+          <label htmlFor={`${idPrefix}-phone`} className={LABEL}>
             טלפון <span aria-hidden="true" className="text-error">*</span>
           </label>
           <input
-            id="cf-phone"
+            id={`${idPrefix}-phone`}
             name="phone"
             type="tel"
             required
@@ -210,7 +239,7 @@ export function ContactForm() {
             {...aria("phone")}
           />
           {errors.phone && (
-            <p id="cf-phone-err" className={ERR}>
+            <p id={`${idPrefix}-phone-err`} className={ERR}>
               {errors.phone}
             </p>
           )}
@@ -219,11 +248,11 @@ export function ContactForm() {
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex-1">
-          <label htmlFor="cf-email" className={LABEL}>
+          <label htmlFor={`${idPrefix}-email`} className={LABEL}>
             דוא״ל
           </label>
           <input
-            id="cf-email"
+            id={`${idPrefix}-email`}
             name="email"
             type="email"
             autoComplete="email"
@@ -236,18 +265,18 @@ export function ContactForm() {
             {...aria("email")}
           />
           {errors.email && (
-            <p id="cf-email-err" className={ERR}>
+            <p id={`${idPrefix}-email-err`} className={ERR}>
               {errors.email}
             </p>
           )}
         </div>
         <div className="flex-1">
-          <label htmlFor="cf-type" className={LABEL}>
+          <label htmlFor={`${idPrefix}-type`} className={LABEL}>
             סוג הפנייה <span aria-hidden="true" className="text-error">*</span>
           </label>
           <div className="relative">
             <select
-              id="cf-type"
+              id={`${idPrefix}-type`}
               name="inquiryType"
               required
               value={form.inquiryType}
@@ -256,7 +285,7 @@ export function ContactForm() {
                 form.inquiryType ? "" : "text-ink-muted"
               } ${errors.inquiryType ? "stm-invalid" : ""}`}
               aria-invalid={errors.inquiryType ? true : undefined}
-              aria-describedby={errors.inquiryType ? "cf-type-err" : undefined}
+              aria-describedby={errors.inquiryType ? `${idPrefix}-type-err` : undefined}
             >
               <option value="" disabled>
                 בחרו סוג פנייה
@@ -285,7 +314,7 @@ export function ContactForm() {
             </svg>
           </div>
           {errors.inquiryType && (
-            <p id="cf-type-err" className={ERR}>
+            <p id={`${idPrefix}-type-err`} className={ERR}>
               {errors.inquiryType}
             </p>
           )}
@@ -294,11 +323,11 @@ export function ContactForm() {
 
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="flex-1">
-          <label htmlFor="cf-arrival" className={LABEL}>
+          <label htmlFor={`${idPrefix}-arrival`} className={LABEL}>
             תאריך הגעה
           </label>
           <input
-            id="cf-arrival"
+            id={`${idPrefix}-arrival`}
             name="arrival"
             type="date"
             min={today}
@@ -308,17 +337,17 @@ export function ContactForm() {
             {...aria("arrival")}
           />
           {errors.arrival && (
-            <p id="cf-arrival-err" className={ERR}>
+            <p id={`${idPrefix}-arrival-err`} className={ERR}>
               {errors.arrival}
             </p>
           )}
         </div>
         <div className="flex-1">
-          <label htmlFor="cf-departure" className={LABEL}>
+          <label htmlFor={`${idPrefix}-departure`} className={LABEL}>
             תאריך עזיבה
           </label>
           <input
-            id="cf-departure"
+            id={`${idPrefix}-departure`}
             name="departure"
             type="date"
             min={form.arrival || today}
@@ -328,17 +357,17 @@ export function ContactForm() {
             {...aria("departure")}
           />
           {errors.departure && (
-            <p id="cf-departure-err" className={ERR}>
+            <p id={`${idPrefix}-departure-err`} className={ERR}>
               {errors.departure}
             </p>
           )}
         </div>
         <div className="sm:w-[150px]">
-          <label htmlFor="cf-guests" className={LABEL}>
+          <label htmlFor={`${idPrefix}-guests`} className={LABEL}>
             מספר אורחים
           </label>
           <input
-            id="cf-guests"
+            id={`${idPrefix}-guests`}
             name="guests"
             type="number"
             min={1}
@@ -351,47 +380,50 @@ export function ContactForm() {
             {...aria("guests")}
           />
           {errors.guests && (
-            <p id="cf-guests-err" className={ERR}>
+            <p id={`${idPrefix}-guests-err`} className={ERR}>
               {errors.guests}
             </p>
           )}
         </div>
       </div>
 
-      <div>
-        <label htmlFor="cf-message" className={LABEL}>
-          הודעה
-        </label>
-        <textarea
-          id="cf-message"
-          name="message"
-          rows={4}
-          maxLength={1500}
-          placeholder="ספרו לנו בכמה מילים מה אתם צריכים"
-          value={form.message}
-          onChange={(e) => set("message", e.target.value)}
-          className={`${FIELD.replace("h-12", "")} min-h-[110px] resize-y py-3${invalid("message")}`}
-          {...aria("message")}
-        />
-        {errors.message && (
-          <p id="cf-message-err" className={ERR}>
-            {errors.message}
-          </p>
-        )}
-      </div>
+      {/* שדה ההודעה החופשי קיים רק בגרסה המלאה — בכרטיס עמוד הבית אין לו מקום */}
+      {!compact && (
+        <div>
+          <label htmlFor={`${idPrefix}-message`} className={LABEL}>
+            הודעה
+          </label>
+          <textarea
+            id={`${idPrefix}-message`}
+            name="message"
+            rows={4}
+            maxLength={1500}
+            placeholder="ספרו לנו בכמה מילים מה אתם צריכים"
+            value={form.message}
+            onChange={(e) => set("message", e.target.value)}
+            className={`${FIELD.replace("h-12", "")} min-h-[110px] resize-y py-3${invalid("message")}`}
+            {...aria("message")}
+          />
+          {errors.message && (
+            <p id={`${idPrefix}-message-err`} className={ERR}>
+              {errors.message}
+            </p>
+          )}
+        </div>
+      )}
 
       <div>
         {/* אזור מגע 44px לצ׳קבוקס דרך ריפוד ה-label */}
-        <label htmlFor="cf-privacy" className="flex min-h-11 cursor-pointer items-center gap-2.5 py-1.5">
+        <label htmlFor={`${idPrefix}-privacy`} className="flex min-h-11 cursor-pointer items-center gap-2.5 py-1.5">
           <input
-            id="cf-privacy"
+            id={`${idPrefix}-privacy`}
             name="privacy"
             type="checkbox"
             required
             checked={form.privacy}
             onChange={(e) => set("privacy", e.target.checked)}
             aria-invalid={errors.privacy ? true : undefined}
-            aria-describedby={errors.privacy ? "cf-privacy-err" : undefined}
+            aria-describedby={errors.privacy ? `${idPrefix}-privacy-err` : undefined}
             className="size-[18px] shrink-0 accent-[var(--color-ocean-400)]"
           />
           <span className="text-[13.5px] leading-snug text-ink">
@@ -399,7 +431,7 @@ export function ContactForm() {
           </span>
         </label>
         {errors.privacy && (
-          <p id="cf-privacy-err" className={ERR}>
+          <p id={`${idPrefix}-privacy-err`} className={ERR}>
             {errors.privacy}
           </p>
         )}
@@ -420,27 +452,29 @@ export function ContactForm() {
             "שלחו לי הצעה"
           )}
         </button>
-        <button
-          type="button"
-          onClick={openWhatsApp}
-          className="stm-btn-outline inline-flex min-h-12 items-center justify-center gap-2 rounded-btn border border-edge px-5 py-3 text-[14.5px] font-semibold text-ocean-500 hover:border-ocean-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-500"
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path
-              d="M12 3a9 9 0 00-7.7 13.6L3 21l4.5-1.2A9 9 0 1012 3z"
-              stroke="currentColor"
-              strokeWidth="1.7"
-              strokeLinejoin="round"
-            />
-            <path
-              d="M9.2 8.4c.5 3 3.4 5.9 6.4 6.4l.9-.9c.2-.2.6-.3.9-.1l1.5.7"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-          </svg>
-          שליחה מהירה ב־WhatsApp
-        </button>
+        {!compact && (
+          <button
+            type="button"
+            onClick={openWhatsApp}
+            className="stm-btn-outline inline-flex min-h-12 items-center justify-center gap-2 rounded-btn border border-edge px-5 py-3 text-[14.5px] font-semibold text-ocean-500 hover:border-ocean-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-500"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 3a9 9 0 00-7.7 13.6L3 21l4.5-1.2A9 9 0 1012 3z"
+                stroke="currentColor"
+                strokeWidth="1.7"
+                strokeLinejoin="round"
+              />
+              <path
+                d="M9.2 8.4c.5 3 3.4 5.9 6.4 6.4l.9-.9c.2-.2.6-.3.9-.1l1.5.7"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+              />
+            </svg>
+            שליחה מהירה ב־WhatsApp
+          </button>
+        )}
       </div>
 
       {/* אזור סטטוס — aria-live קבוע כדי שהודעות יוקראו בלי לקפוץ בפריסה */}

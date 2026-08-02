@@ -504,11 +504,18 @@ function nodeText(n: ReactNode): string {
 }
 
 function blocksToText(blocks: FaqBlock[]): string {
-  return blocks
-    .map((b) => (b.t === "ul" ? b.items.map(nodeText).join(". ") : nodeText(b.c)))
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .trim();
+  return (
+    blocks
+      .map((b) => (b.t === "ul" ? b.items.map(nodeText).join(". ") : nodeText(b.c)))
+      .join(" ")
+      /* טקסט הקישורים בתשובות מסתיים ב-‎›‎ ("לפרטים המלאים בתקנון ›"). בעמוד
+         זהו חץ ויזואלי, אבל בתשובה המובנית הוא הופך להפניה תלושה שמנוע תשובות
+         מצטט כפי שהיא — לכן הוא נחתך יחד ברווח שלפניו */
+      .replace(/\s*›/g, "")
+      .replace(/\s+/g, " ")
+      .replace(/\s+([.,;:])/g, "$1")
+      .trim()
+  );
 }
 
 /* JSON-LD FAQPage — רק שאלות ותשובות המרונדרות בפועל בעמוד */

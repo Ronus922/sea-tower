@@ -73,7 +73,8 @@
 }
 .art-view-label {
   font-size: 13.5px;
-  color: #6c7e90;
+  /* הוכהה מ-#6c7e90 (3.64:1 מול bg-cloud) ל-4.56:1 — AA לטקסט 13.5px */
+  color: #5e6e7e;
   font-weight: 500;
 }
 .art-vbtn {
@@ -146,11 +147,13 @@
 }
 .tag-general {
   background: rgba(43, 127, 184, 0.12);
-  color: #2b7fb8;
+  /* הוכהה מ-#2b7fb8 (3.76:1 מול הצ'יפ) ל-4.56:1 */
+  color: #2671a4;
 }
 .tag-area {
   background: rgba(31, 138, 91, 0.13);
-  color: #1f8a5b;
+  /* הוכהה מ-#1f8a5b (3.69:1 מול הצ'יפ) ל-4.53:1 */
+  color: #1b7a51;
 }
 .art-title {
   font-family: var(--font-sans);
@@ -174,7 +177,8 @@
   gap: 6px;
   font-size: 14px;
   font-weight: 700;
-  color: #2b7fb8;
+  /* הוכהה מ-#2b7fb8 (4.35:1 מול לבן) ל-4.53:1 */
+  color: #2a7cb4;
 }
 .art-more svg {
   transition: transform 0.3s ease;
@@ -761,4 +765,10 @@
   .ar-blob {
     animation: none !important;
   }
+}
+
+/* כרטיס שאינו בעמוד העימוד הנוכחי. הוא נשאר ב-HTML (כדי שכל מאמר יהיה
+   קיים וסָריק בעמוד /articles) אך אינו מוצג ואינו בעץ הנגישות */
+.art-offpage {
+  display: none;
 }
