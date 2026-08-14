@@ -55,6 +55,7 @@ export const ARTICLES: Article[] = [
     imageAlt: "מבט אווירי על בניין אלמוג ומגדלי חוף הכרמל על קו החוף בחיפה",
     listed: true,
     author: DEFAULT_AUTHOR,
+    relatedSlugs: ["short-term-furnished-rental", "long-term-rental", "renovation-temporary-housing"],
     seoTitle: "השכרת דירות מרוהטות בחיפה | מגדל הים",
     seoDescription:
       "השכרת דירות מרוהטות בחיפה לטווח קצר — פתרון מושלם לנופש או למגורים זמניים, סאבלט נוח והשכרה ללא התחייבות.",
@@ -84,6 +85,7 @@ export const ARTICLES: Article[] = [
     imageAlt: "מיטה מוצעת עם מגבות מקופלות מול חלון פנורמי הפונה לחוף הים",
     listed: true,
     author: DEFAULT_AUTHOR,
+    relatedSlugs: ["complete-vacation-guide-haifa", "dining-carmel-beach", "short-term-furnished-rental"],
     seoTitle: "סוויטת התארגנות כלה מול הים | מגדל הים",
     seoDescription:
       "סוויטת התארגנות כלה גדולה ומרווחת מול הים במגדל הים — התלבשות, איפור וצילומים ברוגע לפני החתונה.",
@@ -98,6 +100,7 @@ export const ARTICLES: Article[] = [
     imageAlt: "סלון דירה מרוהטת עם ספה פינתית אפורה, שולחן קפה ופינת אוכל",
     listed: true,
     author: DEFAULT_AUTHOR,
+    relatedSlugs: ["long-term-rental", "furnished-apartments-haifa", "short-term-furnished-rental"],
     seoTitle: "משפצים דירה? מגורים זמניים בחיפה | מגדל הים",
     seoDescription:
       "פתרון לינה גמיש ונוח לתקופת הביניים בזמן שיפוץ הדירה — מגורים זמניים במגדל הים, חוף הכרמל בחיפה.",
@@ -114,6 +117,7 @@ export const ARTICLES: Article[] = [
     imageAlt: "חדר שינה בדירה מרוהטת מול הים במגדל הים, חיפה",
     listed: true,
     author: DEFAULT_AUTHOR,
+    relatedSlugs: ["furnished-apartments-haifa", "business-lodging", "long-term-rental"],
     seoTitle: "השכרת דירות מרוהטות לטווח קצר | מגדל הים",
     seoDescription:
       "השכרת דירות מרוהטות לטווח קצר על בסיס יומי, שבועי וחודשי — פתרון לינה חלופי נוח וגמיש במגדל הים.",
@@ -128,6 +132,7 @@ export const ARTICLES: Article[] = [
     imageAlt: "אורח בכורסה ולצדו מזוודת נסיעות בדירה מרוהטת",
     listed: true,
     author: DEFAULT_AUTHOR,
+    relatedSlugs: ["renovation-temporary-housing", "furnished-apartments-haifa", "short-term-furnished-rental"],
     seoTitle: "השכרת דירות מרוהטות לטווח ארוך | מגדל הים",
     seoDescription:
       "השכרת דירות מרוהטות לטווח בינוני וארוך במגדל הים — איזון בין מחיר, מיקום ואיכות בשוק שכירות מאתגר.",
@@ -142,6 +147,7 @@ export const ARTICLES: Article[] = [
     imageAlt: "איש עסקים מקליד במחשב נייד ליד ספל קפה ומחברת",
     listed: true,
     author: DEFAULT_AUTHOR,
+    relatedSlugs: ["short-term-furnished-rental", "long-term-rental", "dining-carmel-beach"],
     seoTitle: "פתרונות לינה לעסקים ולצוותי עבודה | מגדל הים",
     seoDescription:
       "השכרת דירות לעסקים ולצוותי עבודה — פתרון לינה נוח, מרכזי וגמיש בחיפה, לפגישות ולשהייה ממושכת.",

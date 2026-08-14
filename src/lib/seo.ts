@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BUSINESS } from "./business";
+import { BUSINESS, MAPS_LINK } from "./business";
 
 /* עזרי SEO/GEO משותפים — מקור אמת יחיד ל-canonical, Open Graph, Twitter ו-JSON-LD.
    ברירות המחדל הגלובליות (metadataBase, robots) יושבות ב-app/layout.tsx;
@@ -173,6 +173,12 @@ export function buildSiteJsonLd() {
           addressLocality: BUSINESS.address.city,
           addressCountry: "IL",
         },
+        /* עובדות מגובות בתוכן הגלוי בלבד: שעות הקבלה/עזיבה מוצגות בכל מפרט
+           דירה (stay-terms.ts) וב-FAQ; המפה היא קישור Google Maps לכתובת.
+           אין geo/sameAs/openingHours — אין נתונים מאומתים (SEO-AUDIT B4) */
+        hasMap: MAPS_LINK,
+        checkinTime: "14:30",
+        checkoutTime: "11:00",
         areaServed: "חיפה",
       },
     ],
