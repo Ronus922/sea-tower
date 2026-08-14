@@ -206,9 +206,36 @@ describe("JSON-LD", () => {
     const ld = parse(
       buildWebPageLd({ type: "ContactPage", name: "צור קשר", description: "ת", path: "/contact" }),
     );
-    expect(ld.isPartOf["@id"]).toBe(`${SITE}/#website`);
-    expect(ld.about["@id"]).toBe(`${SITE}/#business`);
-    expect(ld["@type"]).toBe("ContactPage");
+    const [page] = ld["@graph"];
+    expect(page.isPartOf["@id"]).toBe(`${SITE}/#website`);
+    expect(page.about["@id"]).toBe(`${SITE}/#business`);
+    expect(page["@type"]).toBe("ContactPage");
+  });
+
+  it("כל הפניית @id בעמוד תוכן נפתרת לצומת המוגדר באותו גרף (אין הפניות תלושות)", () => {
+    /* גוגל קורא נתונים מובנים פר-עמוד: הפניה ל-#business/#website בלי צומת
+       מקומי היא הפניה שבורה. withEntityAnchors חייב לסגור את הגרף בכל עמוד */
+    const ld = parse(buildWebPageLd({ name: "נ", description: "ת", path: "/about" }));
+    const nodes = ld["@graph"] as Array<Record<string, unknown>>;
+    const defined = new Set(nodes.map((n) => n["@id"]).filter(Boolean));
+    const refs: string[] = [];
+    const walk = (v: unknown): void => {
+      if (Array.isArray(v)) {
+        v.forEach(walk);
+        return;
+      }
+      if (v && typeof v === "object") {
+        const o = v as Record<string, unknown>;
+        const keys = Object.keys(o);
+        if (keys.length === 1 && keys[0] === "@id") refs.push(o["@id"] as string);
+        else keys.forEach((k) => walk(o[k]));
+      }
+    };
+    walk(nodes);
+    expect(refs.length).toBeGreaterThan(0);
+    for (const ref of refs) {
+      expect(defined.has(ref), `הפניה תלושה בגרף העמוד: ${ref}`).toBe(true);
+    }
   });
 
   it("FAQPage — לכל שאלה נראית יש תשובה לא ריקה", () => {
@@ -227,11 +254,14 @@ describe("JSON-LD", () => {
 
 describe("מקור אמת יחיד לפרטי העסק", () => {
   it("אין טלפון/אימייל/כתובת מקודדים קשיח בעמודים ובקומפוננטות", () => {
-    const banned = [/office@sea-tower\.co\.il/, /04-6891689/, /055-9994880/];
+    /* r@bios.co.il — מייל אישי שדלף בעבר לתשובת FAQ (טקסט + FAQPage JSON-LD);
+       אסור שיחזור לשום קובץ תוכן */
+    const banned = [/office@sea-tower\.co\.il/, /04-6891689/, /055-9994880/, /r@bios\.co\.il/];
     const files = [
       "src/app/(site)/page.tsx",
       "src/app/(site)/contact/page.tsx",
       "src/app/(site)/faq/page.tsx",
+      "src/app/(site)/faq/faq-data.tsx",
       "src/app/(site)/house-rules/page.tsx",
       "src/components/site/Footer.tsx",
       "src/components/site/Header.tsx",

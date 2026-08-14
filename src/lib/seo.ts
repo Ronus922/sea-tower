@@ -101,6 +101,42 @@ export function buildBreadcrumbLd(trail: Array<{ name: string; path: string }>) 
   };
 }
 
+/* ישויות עוגן מזעריות — גוגל קורא נתונים מובנים פר-עמוד, ולכן כל הפניית
+   @id (isPartOf/about/publisher/containedInPlace) חייבת להיפתר בתוך אותו
+   עמוד. עמוד הבית מגדיר את הישויות המלאות ב-buildSiteJsonLd; שאר העמודים
+   מטמיעים כאן רק שם, כתובת ולוגו — בלי לשכפל את הגרף המלא */
+function entityAnchorNodes() {
+  return [
+    {
+      "@type": "WebSite",
+      "@id": WEBSITE_ID,
+      url: SITE,
+      name: BUSINESS.name,
+      alternateName: BUSINESS.nameEn,
+      inLanguage: "he-IL",
+      publisher: businessRef,
+    },
+    {
+      "@type": ["LodgingBusiness", "LocalBusiness"],
+      "@id": BUSINESS_ID,
+      name: `${BUSINESS.name} — ${BUSINESS.nameEn}`,
+      url: SITE,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${SITE}/#logo`,
+        url: absUrl("/images/logo.png"),
+      },
+    },
+  ];
+}
+
+/* עוטף צומת JSON-LD של עמוד בגרף שכולל גם את ישויות העוגן */
+export function withEntityAnchors(node: Record<string, unknown>) {
+  const page = { ...node };
+  delete page["@context"];
+  return { "@context": "https://schema.org", "@graph": [page, ...entityAnchorNodes()] };
+}
+
 /* עמוד תוכן רגיל (About/Contact/Terms/HouseRules/Articles) — מקושר לאתר
    ולעסק דרך @id, כך שכל העמודים נקראים כישות אחת ולא כאוסף אתרים */
 export function buildWebPageLd({
@@ -115,8 +151,7 @@ export function buildWebPageLd({
   path: string;
 }) {
   const url = absUrl(path);
-  return {
-    "@context": "https://schema.org",
+  return withEntityAnchors({
     "@type": type,
     "@id": `${url}#webpage`,
     url,
@@ -125,7 +160,7 @@ export function buildWebPageLd({
     inLanguage: "he-IL",
     isPartOf: { "@id": WEBSITE_ID },
     about: businessRef,
-  };
+  });
 }
 
 /* JSON-LD של עמוד הבית: WebSite + העסק (LodgingBusiness) — בסיס לפאנל הידע

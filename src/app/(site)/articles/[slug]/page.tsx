@@ -12,7 +12,14 @@ import {
   readingMinutes,
   type Article,
 } from "@/data/articles";
-import { absUrl, businessRef, buildBreadcrumbLd, pageMeta, WEBSITE_ID } from "@/lib/seo";
+import {
+  absUrl,
+  businessRef,
+  buildBreadcrumbLd,
+  pageMeta,
+  WEBSITE_ID,
+  withEntityAnchors,
+} from "@/lib/seo";
 
 export function generateStaticParams() {
   return ARTICLES.map((a) => ({ slug: a.slug }));
@@ -101,8 +108,7 @@ export default async function ArticlePage({
   /* BlogPosting — הסוג המדויק לתוכן מערכתי; המוציא לאור מפנה לישות העסק
      היחידה ב-@id במקום להגדיר ארגון מתחרה. תאריכים נכתבים רק כשהם קיימים
      במקור — לא ממציאים datePublished/dateModified. */
-  const jsonLd = {
-    "@context": "https://schema.org",
+  const jsonLd = withEntityAnchors({
     "@type": "BlogPosting",
     "@id": `${url}#article`,
     headline: article.title,
@@ -118,7 +124,7 @@ export default async function ArticlePage({
     ...(article.updatedAt ?? article.publishedAt
       ? { dateModified: article.updatedAt ?? article.publishedAt }
       : {}),
-  };
+  });
   const breadcrumbLd = buildBreadcrumbLd([
     { name: "ראשי", path: "/" },
     { name: "מאמרים", path: "/articles" },
