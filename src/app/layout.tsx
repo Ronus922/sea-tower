@@ -22,7 +22,8 @@ export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   applicationName: BUSINESS.name,
-  alternates: { canonical: "/" },
+  /* canonical של הבית יושב ב-(site)/page.tsx ולא כאן: עמוד ה-404 מרונדר
+     בתבנית השורש, וקנוניקל גלובלי היה מוצמד גם אליו (SEO-AUDIT A5) */
   openGraph: {
     type: "website",
     locale: "he_IL",

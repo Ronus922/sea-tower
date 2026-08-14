@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
-import { WaveSeparator } from "@/components/ui/WaveSeparator";
+import { PageIntro } from "@/components/ui/PageIntro";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { BUSINESS } from "@/lib/business";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
@@ -25,8 +24,10 @@ import {
    "Sea Tower - מנוע הזמנה" (Claude Design). SSR מלא: כל חיפוש = ניווט
    עם פרמטרים חדשים והעמוד מרונדר עם נתונים טריים. */
 
+/* "ביטול חינם עד 48 שעות" הוסר מהתיאור: מדיניות הביטול סותרת את התקנון
+   (SEO-AUDIT B1) — עד הכרעת הבעלים לא מפרסמים אף גרסה בתוצאות החיפוש */
 const DESCRIPTION =
-  "בדקו זמינות והזמינו דירת נופש מול הים בחיפה — סטודיו, דירת חדר שינה וסלון או סוויטה משפחתית בבניין אלמוג, 50 מ׳ מהחוף. מחיר סופי כולל הכול, ביטול חינם עד 48 שעות.";
+  "בדקו זמינות והזמינו דירת נופש מול הים בחיפה — סטודיו, דירת חדר שינה וסלון או סוויטה משפחתית בבניין אלמוג, 50 מ׳ מהחוף. מחיר סופי כולל הכול, ללא עמלות נסתרות.";
 
 export const metadata: Metadata = pageMeta({
   title: "בדיקת זמינות והזמנה | מגדל הים — דירות נופש מול הים בחיפה",
@@ -135,51 +136,15 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
         }}
       />
 
-      {/* Hero — פירורי לחם, כותרת גרדיאנט וגל תחתון */}
-      <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-12 pb-[100px] text-center text-white md:pt-[60px] md:pb-[120px]">
-        <div
-          aria-hidden="true"
-          className="stm-blob absolute -top-[120px] -left-20 size-[420px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.35),transparent_68%)] blur-[10px]"
-        />
-        <div
-          aria-hidden="true"
-          className="stm-blob absolute -right-[60px] bottom-[60px] size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.18),transparent_70%)]"
-        />
-        <Container className="relative z-[2]">
-          <nav
-            aria-label="פירורי לחם"
-            className="hero-in-1 mb-[22px] inline-flex items-center gap-2 text-[13.5px] font-medium text-[#acc8dd]"
-          >
-            <Link href="/" className="stm-link -my-2 inline-flex min-h-11 items-center py-2">
-              ראשי
-            </Link>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M15 6l-6 6 6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            <span aria-current="page" className="font-semibold text-white">
-              בדיקת זמינות והזמנה
-            </span>
-          </nav>
-          <h1
-            data-ws=""
-            className="mb-4 text-[40px]/[1.1] font-extrabold tracking-heading md:text-[54px]/[1.08]"
-          >
-            בחרו את הדירה
-            <br />
-            <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-              לתאריכים שלכם
-            </span>
-          </h1>
-          <p className="hero-in-3 mx-auto max-w-[560px] text-[18px]/[1.6] font-light text-[#cdddea]">
-            בחרו תאריכים ומספר אורחים, וצפו במחיר ללילה, בסה״כ לשהייה ובכל הפרטים — הכול
-            במקום אחד.
-          </p>
-        </Container>
-        <WaveSeparator position="bottom" fill="var(--color-cloud)" />
-      </section>
+      {/* פתיח משימתי שקט — עמוד הזמנה הוא כלי עבודה, לא עמוד שיווק */}
+      <PageIntro
+        crumbs={[{ name: "ראשי", href: "/" }, { name: "בדיקת זמינות והזמנה" }]}
+        title="בחרו את הדירה לתאריכים שלכם"
+        lead="בחרו תאריכים ומספר אורחים, וצפו במחיר ללילה, בסה״כ לשהייה ובכל הפרטים — הכול במקום אחד."
+      />
 
-      {/* פס חיפוש צף — חופף לגל ה-Hero */}
-      <section className="relative z-10 -mt-[66px] bg-cloud">
+      {/* פס החיפוש — ישירות מתחת לפתיח */}
+      <section className="bg-cloud pt-6">
         <div className="mx-auto w-full max-w-shell px-5 sm:px-8">
           <BookingSearchBar checkIn={checkIn} checkOut={checkOut} rooms={rooms} />
         </div>
@@ -247,16 +212,10 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
         </div>
       </section>
 
-      {/* עזרה בבחירה — המקטע האחרון: הריפוד התחתון כולל את גובה גל הפוטר (70/120px) */}
-      <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900),var(--color-ocean-700)_70%,var(--color-ocean-600))] pt-16 pb-[150px] md:pt-20 md:pb-[200px]">
-        <div
-          aria-hidden="true"
-          className="stm-blob absolute -top-[90px] -left-[50px] size-[340px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.25),transparent_70%)]"
-        />
-        <Container className="relative z-[2] max-w-[760px] text-center text-white">
-          <h2 data-ws="" className="mb-3.5 text-[32px]/[1.12] font-black tracking-heading md:text-[40px]/[1.12]">
-            צריכים עזרה בבחירה?
-          </h2>
+      {/* עזרה בבחירה — נייבי אחיד; הריפוד התחתון כולל את גובה גל הפוטר (70/120px) */}
+      <section className="ed-wave-clear bg-navy-900 pt-16 md:pt-20">
+        <Container className="max-w-[760px] text-center text-white">
+          <h2 className="ed-h2 mb-3.5 text-white">צריכים עזרה בבחירה?</h2>
           <p className="mx-auto mb-[30px] max-w-[600px] text-[17px]/[1.6] text-[#bcd4e6]">
             נשמח להמליץ על הדירה שמתאימה בדיוק לתאריכים, להרכב ולתקציב שלכם — לנופש, לעבודה
             או לתקופה ארוכה.

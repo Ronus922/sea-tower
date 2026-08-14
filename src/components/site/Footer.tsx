@@ -23,34 +23,25 @@ const LINK_COLUMNS: Array<{
     ],
   },
   {
-    /* עוגני עמוד הבית הוחלפו ביעדים הקנוניים: לכל פתרון יש עמוד אמיתי
-       (/solutions), ולדירות יש /rooms — קודם לכן חמש התוויות הצביעו כולן
-       לאותם שני עוגנים בעמוד הבית */
+    /* כל תווית מקשרת לעוגן האמיתי שלה בעמוד הפתרונות — קודם לכן ארבע
+       תוויות שונות הצביעו על אותו URL עירום (SEO-AUDIT A10) */
     id: "solutions",
     title: "פתרונות אירוח",
     links: [
-      { label: "נופש מול הים בחיפה", href: "/solutions" },
-      { label: "אירוח לעסקים", href: "/solutions" },
-      { label: "רילוקיישן ומגורים זמניים", href: "/solutions" },
-      { label: "השכרה לטווח קצר", href: "/solutions" },
+      { label: "נופש מול הים בחיפה", href: "/solutions#sol-1" },
+      { label: "אירוח לעסקים", href: "/solutions#sol-2" },
+      { label: "רילוקיישן ומגורים זמניים", href: "/solutions#sol-3" },
+      { label: "השכרה לטווח קצר", href: "/solutions#sol-4" },
       { label: "סוויטות מול הים", href: "/rooms" },
     ],
   },
 ];
 
-/* אייקוני רשתות — ברפרנס הם מוצגים ללא קישורים; דקורטיביים עד שיתקבלו כתובות */
-const SOCIAL_PATHS = [
-  "M13 22v-8h3l.5-3.5H13V8.3c0-1 .3-1.7 1.8-1.7H17V3.4c-.3 0-1.4-.1-2.6-.1-2.6 0-4.4 1.6-4.4 4.5v2.6H7V14h3v8z",
-  "M12 8.7A3.3 3.3 0 1012 15.3 3.3 3.3 0 0012 8.7zm0 5.4a2.1 2.1 0 110-4.2 2.1 2.1 0 010 4.2zm4.2-5.5a.77.77 0 11-1.54 0 .77.77 0 011.54 0zM19 9c-.05-1.05-.3-2-1.08-2.77C17.15 5.46 16.2 5.2 15.15 5.16 14.07 5.1 9.93 5.1 8.85 5.16c-1.05.05-2 .3-2.77 1.07C5.3 7 5.05 7.95 5 9c-.06 1.08-.06 5.22 0 6.3.05 1.05.3 2 1.08 2.77.77.77 1.72 1.03 2.77 1.08 1.08.06 5.22.06 6.3 0 1.05-.05 2-.3 2.77-1.08.77-.77 1.03-1.72 1.08-2.77.06-1.08.06-5.22 0-6.3z",
-  "M21.6 7.2s-.2-1.4-.8-2c-.76-.8-1.6-.8-2-.85C16 4.1 12 4.1 12 4.1h0s-4 0-6.8.25c-.4.05-1.24.05-2 .85-.6.6-.8 2-.8 2S2.1 8.85 2.1 10.5v1.4c0 1.65.2 3.3.2 3.3s.2 1.4.8 2c.76.8 1.76.77 2.2.86 1.6.15 6.7.2 6.7.2s4 0 6.8-.26c.4-.05 1.24-.05 2-.85.6-.6.8-2 .8-2s.2-1.65.2-3.3v-1.4c0-1.65-.2-3.3-.2-3.3zM9.9 14.6V8.9l5.15 2.86z",
-  "M6.94 5a1.94 1.94 0 11-3.88 0 1.94 1.94 0 013.88 0zM3.4 8.5h3.1V21H3.4zM9 8.5h2.96v1.7h.04c.41-.78 1.42-1.6 2.92-1.6 3.12 0 3.7 2.05 3.7 4.72V21h-3.1v-5.5c0-1.3-.02-3-1.83-3-1.84 0-2.12 1.43-2.12 2.9V21H9z",
-];
-
 export function Footer() {
   return (
-    /* השוליים השליליים מרימים את גל הפתיחה מעל תחתית המקטע הקודם (כמו ברפרנס,
-       שם הגל ישב אבסולוטית בתחתית המקטע במילוי צבע הפוטר) — כך הגל עובד מעל
-       כל רקע עמוד. מקטע אחרון בעמוד חייב ריפוד תחתון בגובה הגל (70/120px) */
+    /* השוליים השליליים מרימים את גל הפתיחה מעל תחתית המקטע הקודם — כך הגל
+       עובד מעל כל רקע עמוד. מקטע אחרון בעמוד חייב ריפוד תחתון בגובה הגל
+       (70/120px) — ראו ‎.ed-wave-clear‎ ב-editorial.css */
     <footer className="-mt-[70px] text-[#9fb6c8] md:-mt-[120px]">
       <WaveSeparator flow position="bottom" fill="var(--color-navy-950)" />
       <div className="bg-navy-950 px-5 pt-14 pb-6 sm:px-8 lg:px-14">
@@ -65,7 +56,7 @@ export function Footer() {
                 className="object-contain opacity-92 brightness-0 invert"
               />
               <span className="flex flex-col leading-[1.05]">
-                <span className="text-[26px] font-extrabold text-white">מגדל הים</span>
+                <span className="font-serif text-[26px] font-semibold text-white">מגדל הים</span>
                 <span className="text-[13px] font-light tracking-[0.12em] text-white">
                   דירות בוטיק על הים
                 </span>
@@ -77,30 +68,20 @@ export function Footer() {
               בכניסה הדרומית לחיפה ממש על חוף הכרמל, רק כ-50 מטר מקו המים, תוכלו ליהנות מחדרים
               גדולים, יפים ומאובזרים בכל מה שיש בבית, עם נוף עוצר נשימה.
             </p>
-            <div className="flex gap-2.5" aria-hidden="true">
-              {SOCIAL_PATHS.map((d, i) => (
-                <span
-                  key={i}
-                  className="flex size-[38px] items-center justify-center rounded-[10px] bg-white/6"
-                >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="#9fb6c8">
-                    <path d={d} />
-                  </svg>
-                </span>
-              ))}
-            </div>
+            {/* אייקוני הרשתות החברתיות המתים הוסרו — יוחזרו רק עם כתובות
+                אמיתיות מהבעלים (DESIGN-AUDIT ממצא 7) */}
           </div>
 
-          {/* h2 ולא h4: הכותרות האלה הן הרמה העליונה בתוך landmark הפוטר.
-              כ-h4 הן יצרו דילוג h2→h4 בעץ הכותרות של כל עמוד באתר */}
+          {/* כותרות העמודות הן div עם aria-labelledby — לא h2: כותרת בפוטר
+              אינה חלק ממתאר התוכן של העמוד (SEO-AUDIT A13) */}
           {LINK_COLUMNS.map((col) => (
             <nav key={col.title} aria-labelledby={`ft-${col.id}`}>
-              <h2
+              <div
                 id={`ft-${col.id}`}
                 className="mb-4 text-sm font-bold tracking-[0.03em] text-white"
               >
                 {col.title}
-              </h2>
+              </div>
               <ul className="flex flex-col gap-[11px] text-sm">
                 {col.links.map((link) => (
                   <li key={link.label}>
@@ -113,12 +94,8 @@ export function Footer() {
             </nav>
           ))}
 
-          {/* קודם לכן ישב כאן טופס ניוזלטר שהציג "✓ נרשמת!" בלי שום backend —
-              אין ספק דיוור, אין endpoint ואין טבלה, והכתובות נזרקו. הוחלף
-              בפרטי הקשר האמיתיים (מקור יחיד: business.ts), שהם גם המידע
-              המקומי שמנועי חיפוש ותשובות מחפשים בפוטר */}
           <div>
-            <h2 className="mb-4 text-sm font-bold tracking-[0.03em] text-white">דברו איתנו</h2>
+            <div className="mb-4 text-sm font-bold tracking-[0.03em] text-white">דברו איתנו</div>
             <ul className="flex flex-col gap-[11px] text-sm">
               <li>
                 <a
@@ -166,12 +143,15 @@ export function Footer() {
 
         <div className="mx-auto mt-[18px] flex max-w-shell flex-wrap items-center justify-between gap-2.5 text-[13px] text-[#6c869a]">
           <span>© 2026 מגדל הים — כל הזכויות שמורות</span>
+          {/* "הצהרת נגישות" ו"מדיניות ביטולים" היו ספאנים מתים שנראו כקישורים.
+              הוסרו עד שיהיו עמודים אמיתיים (SEO-AUDIT B7) */}
           <span className="flex gap-5">
             <Link href="/terms" className="transition-colors hover:text-white">
               תקנון האתר
             </Link>
-            <span>הצהרת נגישות</span>
-            <span>מדיניות ביטולים</span>
+            <Link href="/house-rules" className="transition-colors hover:text-white">
+              חוקי הבית
+            </Link>
           </span>
         </div>
       </div>

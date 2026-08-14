@@ -32,8 +32,9 @@ function Chevron({ size }: { size: number }) {
 const base =
   "inline-flex items-center justify-center gap-[9px] focus-visible:outline-2 focus-visible:outline-offset-2";
 
+/* מוצק ושקט במקום גרדיאנט+זוהר — היוקרה מגיעה מריסון (DESIGN-AUDIT ממצא 3) */
 const primary =
-  "stm-btn-primary rounded-btn bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-7 py-[15px] text-[16px] font-bold text-white shadow-glow";
+  "stm-btn-primary rounded-btn bg-navy-800 px-7 py-[15px] text-[16px] font-bold text-white shadow-e2 hover:bg-navy-700";
 /* min-h + margin שלילי: אזור מגע 44px בלי לשנות את הזרימה הוויזואלית (Iron Rule #6) */
 const linkHitArea = "-my-2 min-h-11 py-2";
 

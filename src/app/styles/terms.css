@@ -16,14 +16,16 @@
   align-items: start;
 }
 
-/* תוכן עניינים — דביק מתחת ל-header, גלילה פנימית לפי גובה החלון */
+/* תוכן עניינים — דביק מתחת ל-header, גלילה פנימית לפי גובה החלון.
+   שטוח: קו hairline במקום כרטיס מעוגל עם צל (DESIGN-AUDIT ממצא 3) */
 .tk-toc {
   position: sticky;
   top: 96px;
-  background: #fff;
-  border-radius: 18px;
-  padding: 26px 24px;
-  box-shadow: 0 12px 34px rgba(14, 37, 64, 0.08);
+  background: none;
+  border-inline-start: 1px solid var(--color-hairline);
+  border-radius: 0;
+  padding: 4px 24px 4px 0;
+  box-shadow: none;
   max-height: calc(100vh - 120px);
   overflow: auto;
 }
@@ -71,12 +73,13 @@
   font-weight: 600;
 }
 
-/* כרטיס המסמך המשפטי */
+/* גיליון המסמך — שטוח, בלי קופסה */
 .tk-pad {
-  background: #fff;
-  border-radius: 18px;
-  padding: 46px 50px;
-  box-shadow: 0 12px 40px rgba(14, 37, 64, 0.08);
+  background: none;
+  border-radius: 0;
+  padding: 4px 0 0;
+  box-shadow: none;
+  max-width: 760px;
 }
 
 /* סעיף — offset גלילה כדי שה-header הדביק לא יכסה כותרות מעוגנות */
@@ -86,27 +89,24 @@
 }
 .tk-h {
   display: flex; /* תומך בתג מספר .tk-num בכותרות FAQ/חוקי הבית; לא משנה כותרת טקסט בודדת */
-  align-items: center;
-  gap: 11px;
-  font-size: 21px;
-  font-weight: 800;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--font-serif);
+  font-size: 23px;
+  font-weight: 600;
   color: #0e2540;
   margin: 0 0 16px;
   padding-bottom: 11px;
-  border-bottom: 2px solid #eef2f6;
+  border-bottom: 1px solid var(--color-hairline);
 }
-/* תג מספר סעיף (FAQ + חוקי הבית) */
+/* מספר סעיף — ספרה סריפית שקטה במקום אריח בגרדיאנט */
 .tk-num {
-  width: 30px;
-  height: 30px;
-  border-radius: 9px;
-  background: linear-gradient(135deg, #eaf4fb, #d6e9f7);
-  color: #2b7fb8;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  font-family: var(--font-serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--color-sand);
   flex-shrink: 0;
+  min-width: 24px;
 }
 .tk-clause {
   margin: 0 0 11px;
@@ -165,13 +165,14 @@
   font-weight: 600;
 }
 
-/* פאנל מידע מסכם (פרטי חברה) */
+/* פאנל מידע מסכם (פרטי חברה) — קו עליון במקום קופסה */
 .tk-info {
-  margin-top: 14px;
-  padding: 22px 24px;
-  background: #f5f9fc;
-  border: 1px solid #e4eef5;
-  border-radius: 14px;
+  margin-top: 22px;
+  padding: 18px 0 0;
+  background: none;
+  border: 0;
+  border-top: 1px solid var(--color-hairline);
+  border-radius: 0;
   font-size: 14.5px;
   line-height: 1.85;
   color: #3c4f63;
@@ -189,8 +190,8 @@
     position: static;
     max-height: none;
     margin-bottom: 24px;
-  }
-  .tk-pad {
-    padding: 30px 24px;
+    border-inline-start: 0;
+    border-bottom: 1px solid var(--color-hairline);
+    padding: 0 0 18px;
   }
 }

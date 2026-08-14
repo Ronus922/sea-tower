@@ -25,6 +25,9 @@
   /* --- נייטרלים --- */
   --color-mist: #f5f9fc;  /* Card Mist — רקע כרטיס בהיר */
   --color-cloud: #eaf0f6; /* Section Cloud — רקע מקטע */
+  --color-paper: #faf8f3;      /* נייר חם — מקטעים אדיטוריאליים/שיווקיים */
+  --color-paper-deep: #f1ede4; /* נייר כהה מעט — הפרדה שקטה בין מקטעי נייר */
+  --color-hairline: #e2dcd0;   /* קו hairline על נייר */
   --color-line: #e4eef5;  /* Border */
   --color-field: #dbe5ee; /* מסגרת שדות טופס */
   --color-edge: #c9d6e2;  /* מסגרת כפתור outline */
@@ -50,10 +53,10 @@
   --color-error-line: #f3cfcf;
 
   /* --- גופנים --- */
-  /* Open Sans הוא הגופן הראשי בכל האתר (מקור: כל רפרנסי העמודים).
-     --font-serif (Frank Ruhl) נשמר לעמוד design-system הפנימי בלבד */
+  /* Open Sans — גוף ו-UI. Frank Ruhl Libre (סריף עברי מספר המותג) — קול
+     התצוגה של הכותרות: אדיטוריאלי, ים-תיכוני, נטען ממילא ב-root layout */
   --font-sans: var(--font-open-sans), system-ui, sans-serif;
-  --font-serif: var(--font-frank), serif;
+  --font-serif: var(--font-frank), "Frank Ruhl Libre", serif;
 
   /* --- סולם טיפוגרפי (ספר מותג, פרק 05) --- */
   --text-display: 62px;

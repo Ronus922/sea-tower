@@ -122,7 +122,7 @@ export function buildWebPageLd({
     url,
     name,
     description,
-    inLanguage: "he",
+    inLanguage: "he-IL",
     isPartOf: { "@id": WEBSITE_ID },
     about: businessRef,
   };
@@ -142,7 +142,7 @@ export function buildSiteJsonLd() {
         url: SITE,
         name: BUSINESS.name,
         alternateName: BUSINESS.nameEn,
-        inLanguage: "he",
+        inLanguage: "he-IL",
         publisher: businessRef,
       },
       {
@@ -152,7 +152,13 @@ export function buildSiteJsonLd() {
         description:
           "מלון דירות בוטיק בבניין אלמוג על חוף הכרמל בחיפה — דירות וסוויטות מאובזרות ברמה מלונאית, כ-50 מטר מקו המים.",
         url: SITE,
-        image: absUrl(OG_IMAGE.url),
+        /* צילומים אמיתיים מהריפו בלבד — הבניין, הנוף מהמרפסת וסוויטה (SEO-AUDIT A8) */
+        image: [
+          absUrl(OG_IMAGE.url),
+          absUrl("/images/articles/furnished-apartments-haifa.jpg"),
+          absUrl("/images/sea-view-sunset.jpg"),
+          absUrl("/images/suite-details.jpg"),
+        ],
         logo: {
           "@type": "ImageObject",
           "@id": `${SITE}/#logo`,

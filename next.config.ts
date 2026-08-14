@@ -7,6 +7,10 @@ const GUESTHUB = process.env.GUESTHUB_API_URL ?? "http://127.0.0.1:3007";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  images: {
+    /* AVIF לפני WebP — ברירת המחדל של Next היא WebP בלבד (SEO-AUDIT A3) */
+    formats: ["image/avif", "image/webp"],
+  },
   async rewrites() {
     return [{ source: "/room-images/:path*", destination: `${GUESTHUB}/uploads/rooms/:path*` }];
   },
