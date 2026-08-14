@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Frank_Ruhl_Libre } from "next/font/google";
 import { openSans } from "@/lib/fonts";
 import { BUSINESS } from "@/lib/business";
@@ -17,11 +17,22 @@ const TITLE = "מגדל הים — דירות בוטיק וסוויטות על �
 const DESCRIPTION =
   "מלון דירות בוטיק בבניין אלמוג על חוף הכרמל בחיפה — דירות וסוויטות מאובזרות ברמה מלונאית, 50 מטר מקו המים. לנופש, לעסקים, לרילוקיישן ולכל תקופה.";
 
+/* צבע ערכת הנושא לדפדפן — תואם ל-theme_color שב-manifest */
+export const viewport: Viewport = {
+  themeColor: "#0e2540",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(BUSINESS.siteUrl),
   title: TITLE,
   description: DESCRIPTION,
   applicationName: BUSINESS.name,
+  /* PWA — חוויית standalone ב-iOS לאחר "הוספה למסך הבית" */
+  appleWebApp: {
+    capable: true,
+    title: BUSINESS.name,
+    statusBarStyle: "default",
+  },
   /* canonical של הבית יושב ב-(site)/page.tsx ולא כאן: עמוד ה-404 מרונדר
      בתבנית השורש, וקנוניקל גלובלי היה מוצמד גם אליו (SEO-AUDIT A5) */
   openGraph: {

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
+import { InstallPrompt } from "@/components/site/InstallPrompt";
 
 /* הנחיות האינדוקס של האתר הציבורי. הן יושבות כאן ולא בתבנית השורש כדי שעמוד
    ה-404 (המרונדר בתבנית השורש) לא יקבל "index, follow" לצד ה-noindex שלו.
@@ -40,6 +41,8 @@ export default function SiteLayout({
       <Header />
       <main id="main">{children}</main>
       <Footer />
+      {/* הצעת התקנה כ-PWA — בקר גלובלי יחיד, מוצג רק במובייל לפי המדיניות שבקומפוננטה */}
+      <InstallPrompt />
     </>
   );
 }
