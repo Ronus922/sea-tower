@@ -406,13 +406,15 @@
   font-weight: 600;
 }
 .ar-tagline {
-  display: inline-flex;
+  /* flex (לא inline-flex): שורה משלו, לא נצמד לפירורי הלחם */
+  display: flex;
+  inline-size: fit-content;
   align-items: center;
   gap: 12px;
   color: var(--color-kicker);
   font-weight: 700;
   font-size: 12.5px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0.14em;
   margin-bottom: 16px;
 }
 .ar-tagline::before {
