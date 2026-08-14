@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { CANCELLATION_NOTE } from "@/lib/stay-terms";
 import { fmtHeWithDay, guestsSummary, type RoomParty } from "../dates";
 import { PhoneField, COUNTRIES } from "./PhoneField";
 import { CardPreview, CardStep, EMPTY_CARD, type CardDetails } from "./CardStep";
@@ -247,7 +248,7 @@ function AsideSummary({ quote, total }: { quote: CheckoutQuote; total: number })
           <path d="M12 3l7 3v5c0 4.4-3 8-7 10-4-2-7-5.6-7-10V6z" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" />
           <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-        ביטול חינם עד 48 שעות לפני ההגעה
+        {CANCELLATION_NOTE}
       </div>
     </>
   );
@@ -519,7 +520,7 @@ export function CheckoutWizard({ quote }: { quote: CheckoutQuote }) {
                 <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.6" />
                 <path d="M12 7v5l3 2" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
               </svg>
-              ביטול חינם עד 48 שעות
+              {CANCELLATION_NOTE}
             </span>
           </div>
         </div>
