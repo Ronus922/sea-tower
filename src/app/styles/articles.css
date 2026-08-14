@@ -8,7 +8,7 @@
 
 /* ---------- אינדקס: בקרות ---------- */
 .art-section {
-  background: var(--color-cloud);
+  background: var(--color-paper);
   padding: 46px 56px 204px; /* 84px מרווח + 120px גל פוטר */
 }
 .art-inner {
@@ -33,8 +33,8 @@
   align-items: center;
   gap: 8px;
   padding: 10px 18px;
-  border-radius: 999px;
-  border: 1.5px solid #dbe5ee;
+  border-radius: 0;
+  border: 1px solid var(--color-hairline);
   background: #fff;
   color: #46596c;
   font-family: inherit;
@@ -138,26 +138,25 @@
   flex-direction: column;
   flex: 1;
 }
+/* קטגוריה — overline שקט במקום צ'יפ צבעוני (DESIGN-AUDIT ממצא 3) */
 .art-tag {
   align-self: flex-start;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 700;
-  padding: 4px 11px;
-  border-radius: 999px;
+  letter-spacing: 0.16em;
+  padding: 0;
+  border-radius: 0;
+  background: none;
 }
 .tag-general {
-  background: rgba(43, 127, 184, 0.12);
-  /* הוכהה מ-#2b7fb8 (3.76:1 מול הצ'יפ) ל-4.56:1 */
   color: #2671a4;
 }
 .tag-area {
-  background: rgba(31, 138, 91, 0.13);
-  /* הוכהה מ-#1f8a5b (3.69:1 מול הצ'יפ) ל-4.53:1 */
   color: #1b7a51;
 }
 .art-title {
-  font-family: var(--font-sans);
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-weight: 600;
   color: #0e2540;
   margin: 0;
   line-height: 1.3;
@@ -223,26 +222,23 @@
   }
 }
 
-/* תצוגת גריד */
+/* תצוגת גריד — אדיטוריאלית: תמונה חשופה, טקסט על הרקע, קו hairline תחתון
+   במקום קופסה לבנה מעוגלת עם צל */
 .art-wrap.is-grid .art-item {
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(14, 37, 64, 0.06);
+  background: none;
+  border-radius: 0;
+  box-shadow: none;
   overflow: hidden;
-  transition: transform 0.4s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.4s ease;
-}
-.art-wrap.is-grid .art-item:hover {
-  transform: translateY(-7px);
-  box-shadow: 0 28px 50px -18px rgba(14, 37, 64, 0.26);
+  border-bottom: 1px solid var(--color-hairline);
 }
 .art-wrap.is-grid .art-item:hover .art-img {
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 .art-wrap.is-grid .art-media {
   aspect-ratio: 16 / 10;
 }
 .art-wrap.is-grid .art-body {
-  padding: 19px 21px 21px;
+  padding: 16px 0 20px;
 }
 .art-wrap.is-grid .art-tag {
   margin-bottom: 11px;
@@ -373,72 +369,20 @@
 /* ============================================================
    מאמר מלא — /articles/[slug]
    ============================================================ */
+/* פתיח מאמר — עמוד מגזין: נייר חם, טיפוגרפיה סריפית, יישור להתחלה.
+   הגרדיאנט המונפש וה-blobs הוסרו (DESIGN-AUDIT ממצאים 1+2) */
 .ar-hero {
   position: relative;
-  overflow: hidden;
-  background: linear-gradient(120deg, #0a1d31 0%, #143c61 58%, #1d5888 100%);
-  background-size: 165% 165%;
-  animation: arGrad 20s ease infinite;
-  color: #fff;
-  padding: 54px 56px 128px;
-}
-@keyframes arGrad {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-.ar-blob {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(10px);
-  pointer-events: none;
-}
-.ar-blob.b1 {
-  top: -120px;
-  left: -80px;
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(58, 155, 214, 0.34), transparent 68%);
-  animation: arFloatA 14s ease-in-out infinite;
-}
-.ar-blob.b2 {
-  bottom: 30px;
-  right: -70px;
-  width: 320px;
-  height: 320px;
-  background: radial-gradient(circle, rgba(124, 208, 247, 0.2), transparent 70%);
-  animation: arFloatB 17s ease-in-out infinite;
-}
-@keyframes arFloatA {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(26px, 30px);
-  }
-}
-@keyframes arFloatB {
-  0%,
-  100% {
-    transform: translate(0, 0);
-  }
-  50% {
-    transform: translate(-22px, -26px);
-  }
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding: 40px 56px 44px;
+  border-block-end: 1px solid var(--color-hairline);
 }
 .ar-heroinner {
   max-width: 880px;
   margin: 0 auto;
   position: relative;
-  z-index: 2;
-  text-align: center;
+  text-align: start;
 }
 .ar-crumb {
   display: inline-flex;
@@ -446,48 +390,55 @@
   gap: 8px;
   font-size: 13.5px;
   font-weight: 500;
-  color: #acc8dd;
-  margin-bottom: 20px;
+  color: var(--color-ink-dim);
+  margin-bottom: 26px;
 }
 .ar-crumb a {
-  color: #acc8dd;
+  color: var(--color-ink-dim);
   text-decoration: none;
   transition: color 0.2s;
 }
 .ar-crumb a:hover {
-  color: #fff;
+  color: var(--color-navy-800);
 }
 .ar-crumb .cur {
-  color: #fff;
+  color: var(--color-navy-800);
   font-weight: 600;
 }
 .ar-tagline {
-  display: inline-block;
-  background: rgba(124, 208, 247, 0.18);
-  color: #bfe3f7;
+  /* flex (לא inline-flex): שורה משלו, לא נצמד לפירורי הלחם */
+  display: flex;
+  inline-size: fit-content;
+  align-items: center;
+  gap: 12px;
+  color: var(--color-kicker);
   font-weight: 700;
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  padding: 6px 16px;
-  border-radius: 999px;
-  margin-bottom: 18px;
+  font-size: 12.5px;
+  letter-spacing: 0.14em;
+  margin-bottom: 16px;
+}
+.ar-tagline::before {
+  content: "";
+  inline-size: 26px;
+  block-size: 1px;
+  background: var(--color-sand);
 }
 .ar-title {
-  font-family: var(--font-sans);
-  font-size: 50px;
-  line-height: 1.12;
-  font-weight: 700;
-  margin: 0 0 24px;
-  letter-spacing: -0.01em;
+  font-family: var(--font-serif);
+  font-size: clamp(34px, 4.6vw, 54px);
+  line-height: 1.14;
+  font-weight: 550;
+  margin: 0 0 22px;
+  color: var(--color-navy-800);
+  text-wrap: balance;
 }
 .ar-meta {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
   gap: 9px 22px;
   align-items: center;
   font-size: 14.5px;
-  color: #cdddea;
+  color: var(--color-ink-dim);
 }
 .ar-m {
   display: inline-flex;
@@ -501,46 +452,36 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: rgba(205, 221, 234, 0.5);
+  background: var(--color-hairline);
 }
 
 .ar-featsec {
-  background: var(--color-cloud);
-  /* padding-top (ולא margin על הילד) — אחרת ה-margin "בורח" מהמקטע ומציג
-     את רקע ה-body הלבן כפס לבן מתחת לגל (ברפרנס ה-body היה cloud) */
-  padding: 28px 56px 0;
+  background: var(--color-paper);
+  padding: 36px 56px 0;
 }
 .ar-featwrap {
   position: relative;
   max-width: 1000px;
   margin: 0 auto;
   aspect-ratio: 16 / 9;
-  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 30px 70px -24px rgba(14, 37, 64, 0.45);
-  z-index: 6;
-}
-/* שכבת פרלקסה מוגדלת (‎±9%) כדי שתזוזת ה-translateY לא תחשוף פערים.
-   MotionEngine מזיז את [data-parallax] בדסקטופ בלבד. */
-.ar-featparallax {
-  position: absolute;
-  inset: -9% 0;
-  height: 118%;
-  will-change: transform;
 }
 .ar-featimg {
   object-fit: cover;
 }
 .ar-figcap {
   max-width: 1000px;
-  margin: 13px auto 0;
+  margin: 12px auto 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-hairline);
   font-size: 13.5px;
+  font-weight: 600;
   color: #7d8fa0;
-  text-align: center;
+  text-align: start;
 }
 
 .ar-bodysec {
-  background: var(--color-cloud);
+  background: var(--color-paper);
   padding: 40px 24px 30px;
 }
 .ar-body {
@@ -563,16 +504,17 @@
   text-align: justify;
 }
 .ar-body h2 {
+  font-family: var(--font-serif);
   font-size: 30px;
-  font-weight: 800;
+  font-weight: 600;
   color: #0e2540;
   margin: 46px 0 16px;
-  letter-spacing: -0.01em;
-  line-height: 1.2;
+  line-height: 1.22;
 }
 .ar-body h3 {
-  font-size: 21px;
-  font-weight: 700;
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 600;
   color: #15406a;
   margin: 34px 0 12px;
 }
@@ -617,15 +559,15 @@
 }
 .ar-quote {
   margin: 36px 0;
-  padding: 14px 28px;
-  border-right: 4px solid #2b7fb8;
-  background: linear-gradient(90deg, rgba(43, 127, 184, 0.07), rgba(43, 127, 184, 0));
-  font-family: var(--font-sans);
+  padding: 6px 26px;
+  border-inline-start: 2px solid var(--color-sand);
+  background: none;
+  font-family: var(--font-serif);
   font-style: italic;
   font-size: 24px;
   line-height: 1.55;
   color: #15406a;
-  border-radius: 0 12px 12px 0;
+  border-radius: 0;
 }
 .ar-quote cite {
   display: block;
@@ -640,7 +582,7 @@
   max-width: 720px;
   margin: 8px auto 0;
   height: 1px;
-  background: #dbe5ee;
+  background: var(--color-hairline);
 }
 .ar-backwrap {
   max-width: 720px;
@@ -651,27 +593,25 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: #fff;
-  border: 1.5px solid #dbe5ee;
+  background: none;
+  border: 1px solid var(--color-hairline);
   color: #15406a;
   font-size: 15px;
   font-weight: 700;
   padding: 12px 22px;
-  border-radius: 11px;
+  border-radius: 0;
   text-decoration: none;
-  transition: transform 0.25s ease, border-color 0.25s ease, color 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: border-color 0.25s ease, color 0.25s ease, background-color 0.25s ease;
 }
 .ar-back:hover {
-  transform: translateY(-2px);
-  border-color: #bcd4e6;
+  border-color: var(--color-ocean-400);
   color: #2b7fb8;
-  box-shadow: 0 10px 24px rgba(14, 37, 64, 0.1);
+  background: #fff;
 }
 
 /* מאמרים נוספים — כותרת המקטע; הכרטיסים משתמשים ב-.art-item הגרידי */
 .rel-sec {
-  background: var(--color-cloud);
+  background: var(--color-paper);
   padding: 18px 56px 200px; /* 80px מרווח + 120px גל פוטר */
 }
 .rel-inner {
@@ -695,12 +635,11 @@
   display: inline-block;
 }
 .rel-h2 {
-  font-family: var(--font-sans);
+  font-family: var(--font-serif);
   font-size: 34px;
-  font-weight: 700;
+  font-weight: 600;
   color: #0e2540;
   margin: 0 0 28px;
-  letter-spacing: -0.01em;
 }
 
 /* ---------- רספונסיבי ---------- */
@@ -709,7 +648,7 @@
     padding: 36px 20px 134px; /* 64 + 70 גל */
   }
   .ar-hero {
-    padding: 42px 22px 116px;
+    padding: 34px 22px 38px;
   }
   .ar-title {
     font-size: 34px;
@@ -759,13 +698,7 @@
   }
 }
 
-/* תנועה מופחתת — עוצר את אנימציות הרקע/גרדיאנט של ה-Hero */
-@media (prefers-reduced-motion: reduce) {
-  .ar-hero,
-  .ar-blob {
-    animation: none !important;
-  }
-}
+/* (אנימציות הרקע של ה-Hero הוסרו — אין עוד מה לעצור ב-reduced-motion) */
 
 /* כרטיס שאינו בעמוד העימוד הנוכחי. הוא נשאר ב-HTML (כדי שכל מאמר יהיה
    קיים וסָריק בעמוד /articles) אך אינו מוצג ואינו בעץ הנגישות */

@@ -2,9 +2,9 @@
 @import "tailwindcss";
 @import "./styles/tokens.css";
 @import "./styles/base.css";
+@import "./styles/editorial.css";
 @import "./styles/motion.css";
 @import "./styles/home.css";
-@import "./styles/about.css";
 @import "./styles/contact.css";
 @import "./styles/terms.css";
 @import "./styles/faq.css";

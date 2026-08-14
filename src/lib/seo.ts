@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { BUSINESS } from "./business";
+import { BUSINESS, MAPS_LINK } from "./business";
 
 /* עזרי SEO/GEO משותפים — מקור אמת יחיד ל-canonical, Open Graph, Twitter ו-JSON-LD.
    ברירות המחדל הגלובליות (metadataBase, robots) יושבות ב-app/layout.tsx;
@@ -101,6 +101,42 @@ export function buildBreadcrumbLd(trail: Array<{ name: string; path: string }>) 
   };
 }
 
+/* ישויות עוגן מזעריות — גוגל קורא נתונים מובנים פר-עמוד, ולכן כל הפניית
+   @id (isPartOf/about/publisher/containedInPlace) חייבת להיפתר בתוך אותו
+   עמוד. עמוד הבית מגדיר את הישויות המלאות ב-buildSiteJsonLd; שאר העמודים
+   מטמיעים כאן רק שם, כתובת ולוגו — בלי לשכפל את הגרף המלא */
+function entityAnchorNodes() {
+  return [
+    {
+      "@type": "WebSite",
+      "@id": WEBSITE_ID,
+      url: SITE,
+      name: BUSINESS.name,
+      alternateName: BUSINESS.nameEn,
+      inLanguage: "he-IL",
+      publisher: businessRef,
+    },
+    {
+      "@type": ["LodgingBusiness", "LocalBusiness"],
+      "@id": BUSINESS_ID,
+      name: `${BUSINESS.name} — ${BUSINESS.nameEn}`,
+      url: SITE,
+      logo: {
+        "@type": "ImageObject",
+        "@id": `${SITE}/#logo`,
+        url: absUrl("/images/logo.png"),
+      },
+    },
+  ];
+}
+
+/* עוטף צומת JSON-LD של עמוד בגרף שכולל גם את ישויות העוגן */
+export function withEntityAnchors(node: Record<string, unknown>) {
+  const page = { ...node };
+  delete page["@context"];
+  return { "@context": "https://schema.org", "@graph": [page, ...entityAnchorNodes()] };
+}
+
 /* עמוד תוכן רגיל (About/Contact/Terms/HouseRules/Articles) — מקושר לאתר
    ולעסק דרך @id, כך שכל העמודים נקראים כישות אחת ולא כאוסף אתרים */
 export function buildWebPageLd({
@@ -115,17 +151,16 @@ export function buildWebPageLd({
   path: string;
 }) {
   const url = absUrl(path);
-  return {
-    "@context": "https://schema.org",
+  return withEntityAnchors({
     "@type": type,
     "@id": `${url}#webpage`,
     url,
     name,
     description,
-    inLanguage: "he",
+    inLanguage: "he-IL",
     isPartOf: { "@id": WEBSITE_ID },
     about: businessRef,
-  };
+  });
 }
 
 /* JSON-LD של עמוד הבית: WebSite + העסק (LodgingBusiness) — בסיס לפאנל הידע
@@ -142,7 +177,7 @@ export function buildSiteJsonLd() {
         url: SITE,
         name: BUSINESS.name,
         alternateName: BUSINESS.nameEn,
-        inLanguage: "he",
+        inLanguage: "he-IL",
         publisher: businessRef,
       },
       {
@@ -152,7 +187,13 @@ export function buildSiteJsonLd() {
         description:
           "מלון דירות בוטיק בבניין אלמוג על חוף הכרמל בחיפה — דירות וסוויטות מאובזרות ברמה מלונאית, כ-50 מטר מקו המים.",
         url: SITE,
-        image: absUrl(OG_IMAGE.url),
+        /* צילומים אמיתיים מהריפו בלבד — הבניין, הנוף מהמרפסת וסוויטה (SEO-AUDIT A8) */
+        image: [
+          absUrl(OG_IMAGE.url),
+          absUrl("/images/articles/furnished-apartments-haifa.jpg"),
+          absUrl("/images/sea-view-sunset.jpg"),
+          absUrl("/images/suite-details.jpg"),
+        ],
         logo: {
           "@type": "ImageObject",
           "@id": `${SITE}/#logo`,
@@ -167,6 +208,12 @@ export function buildSiteJsonLd() {
           addressLocality: BUSINESS.address.city,
           addressCountry: "IL",
         },
+        /* עובדות מגובות בתוכן הגלוי בלבד: שעות הקבלה/עזיבה מוצגות בכל מפרט
+           דירה (stay-terms.ts) וב-FAQ; המפה היא קישור Google Maps לכתובת.
+           אין geo/sameAs/openingHours — אין נתונים מאומתים (SEO-AUDIT B4) */
+        hasMap: MAPS_LINK,
+        checkinTime: "14:30",
+        checkoutTime: "11:00",
         areaServed: "חיפה",
       },
     ],

@@ -1,0 +1,93 @@
+# SEO-AUDIT — מגדל הים (Sea Tower)
+
+**תאריך:** 2026-08-14 · **שיטה:** crawl חי של כל 13 הראוטים (rendered HTML, playwright) + קריאת קוד מלאה +
+Claude SEO (runtime מאומת `doctor: ready`).
+**סיווג:** **A** = בטוח לתיקון עכשיו · **B** = דורש החלטת בעלים עובדתית · **C** = דורש גישה/אימות חיצוני
+
+בסיס טוב שקיים כבר: metadata ייחודי לכל עמוד, canonicals תקינים, robots.ts + sitemap.ts מסודרים,
+BreadcrumbList בכל עמוד, FAQPage נקי, זהות עסק יציבה (`#business`/`#website`), אפס aggregateRating מומצא,
+llms.txt, בדיקות יחידה על ה-SEO. הממצאים להלן הם הפערים.
+
+---
+
+## A — בטוח לתיקון עכשיו
+
+| # | ממצא | ראיות | השפעה | תיקון |
+|---|------|-------|--------|-------|
+| A1 | **וידאו ה-hero נטען במלואו בכל כניסה לבית** — `preload="auto"`, 1.5MB, מתחרה ב-LCP | `(site)/page.tsx:449` | LCP/רוחב פס | `preload="metadata"` + poster קיים; הפוסטר הופך ל-LCP מיידי |
+| A2 | **אפס `priority` באתר כולו** — תמונת ה-hero של about/solutions/articles-index נטענת lazy למרות שהיא ה-LCP | crawl: `imgEager: 0` בכל עמוד; grep `priority` = 0 תוצאות | LCP בעמודים פנימיים | `priority` + `fetchPriority="high"` לתמונה הראשונה מעל הקפל פר-עמוד |
+| A3 | **AVIF לא מופעל** — אין `images.formats` ב-next.config | `next.config.ts` (אין בלוק images) | משקל תמונות | `formats: ["image/avif","image/webp"]` |
+| A4 | **נכס יתום 1.76MB** — `public/images/סוויטות עם גקוזי.png`, אפס הפניות, שם קובץ עם רווח ועברית | סריקת grep מלאה | משקל deploy, היגיינה | מחיקה |
+| A5 | **404 יורש canonical של הבית + title של הבית** | crawl: `/this-page-does-not-exist` → canonical `https://sea-tower.bios.co.il/`, title האתר | סיגנל קנוניקל שגוי | הסרת `alternates.canonical` מ-root layout → הזזה לעמוד הבית; metadata ייעודי ל-not-found |
+| A6 | **עוגני-בית במקום עמודים קנוניים** — CTA-ים ל-`/#apartments`/`/#contact` ב-rooms/about/solutions/contact + גוף המאמר הראשי | pages-survey + grep | פיזור link equity, אנקורים חלשים | קישור ל-`/rooms` ו-`/contact` |
+| A7 | **/rooms בלי קישור בניווט הראשי** | `Header.tsx` NAV | crawl depth + CRO לעמוד המסחרי המרכזי | הוספה לניווט |
+| A8 | **schema חסר שניתן לבנות מעובדות קיימות:** `AboutPage`/`CollectionPage` (builders קיימים ולא בשימוש!), `ItemList` לחדרים ב-/rooms מנתוני GuestHub חיים, `image` ל-LodgingBusiness (תמונות אמיתיות בריפו), `WebPage` לעמודי solutions/rooms/articles | `seo.ts` builders + crawl JSON-LD | עושר ישויות, GEO | שימוש ב-builders + הרחבה זהירה |
+| A9 | **OG image זהה בכל האתר** (hero-terrace.jpg) חוץ ממאמרים | crawl | CTR בשיתופים | OG פר-משפחת-עמוד מתמונות אמיתיות קיימות |
+| A10 | **עמודת "פתרונות אירוח" בפוטר: 4 אנקורים שונים → אותו URL עירום** | `Footer.tsx:29-38` | אנקור-ספאם קל, UX | קישור לעוגנים `#sol-N` הקיימים בעמוד |
+| A11 | **`/terms` §21 משכפל את חוקי הבית בלי לקשר ל-/house-rules** (ולהפך) | pages-survey | internal linking | קישורים הדדיים |
+| A12 | **`inLanguage` לא עקבי** — `"he"` ב-seo.ts מול `"he-IL"` ב-BlogPosting | קוד | עקביות schema | האחדה ל-`"he-IL"` |
+| A13 | **כותרות `<h2>` בפוטר** יוצרות רעש במתאר כל עמוד | `Footer.tsx:98` | מבנה סמנטי | פוטר עובר ל-nav עם `aria-label`, כותרות יורדות לרמת טקסט |
+| A14 | **תוכן לא-ניתן-לאימות** (תקדים קיים בריפו): ציטוט "ספר האורחים", מרקיזת ארגונים בשמות, "אירחנו... מאינטל, רמב״ם, הטכניון", "14+" | pages-survey | אמינות, סיכון מותג | הסרה/החלפה בעובדות מאומתות (ראו DESIGN-AUDIT ממצא 9) |
+| A15 | **alt חלש בתמונות מאמרים** — חזרת מילות מפתח של הכותרת במקום תיאור התמונה | `data/articles.ts` | image SEO | שכתוב תיאורי לפי מה שרואים בפועל בתמונה |
+| A16 | **duplicated strings במקום מקור יחיד** — "המחירים כוללים מע״מ..." מוקלד מחדש ב-booking במקום `STAY_TERMS`; טקסט וואטסאפ ×3 ב-contact | pages-survey | תחזוקה/עקביות | ייבוא מהמקור |
+| A17 | **PNG צילומי** — `haifa-cable-car.png` (124KB colormap) | assets-survey | משקל | המרה ל-JPEG באיכות זהה |
+| A18 | **`hero-sea-poster.jpg` 135KB לא מאופטם** (מוגש ישירות, לא דרך next/image) | assets-survey | LCP הבית אחרי A1 | דחיסה ידנית (אותו פריים, איכות מותאמת) |
+| A19 | **מקטע FAQ בבית משכפל שאלות מ-/faq בניסוח שונה** ללא קישור לעמוד המלא | `(site)/page.tsx:277-294` | פוטנציאל קניבליזציה קל | קישור "לכל השאלות" ל-/faq |
+| A20 | **תבנית hero כפולה ×7 עם H1 מפוצל-מילים** (`data-ws`) — טקסט ה-H1 נטען כ-DOM מפוצל אחרי hydration | קוד + crawl h1 | סיכון עיבוד נמוך אך מיותר | הסרת פיצול מילים מ-H1 (חלק מהרידיזיין) |
+
+## B — דורש החלטת בעלים (לא מטופל בקוד עכשיו)
+
+| # | ממצא | פירוט |
+|---|------|-------|
+| B1 | **סתירת מדיניות ביטולים (קריטי, חשיפה צרכנית)** — "ביטול חינם עד 48 שעות" (meta של /booking, stay-terms.ts, badge בצ'קאאוט בזמן הזנת כרטיס, ResultsList) ↔ תקנון §7.1 "לא יינתן החזר כספי", §7.6 "ללא אפשרות ביטול", §7.5 "7 ימי עסקים" ↔ FAQ "מדיניות הביטול שלנו נוקשה". **ארבע גרסאות סותרות. רק הבעלים יכול לקבוע את המדיניות האמיתית.** לא מופץ אף נוסח עד הכרעה. |
+| B2 | **דומיין בתקנון** — §1 מחייב משפטית מול `sea-tower.co.il` בעוד האתר מוגש מ-`sea-tower.bios.co.il`. הכרעה משפטית/DNS של הבעלים. |
+| B3 | **9 מתוך 10 מאמרים הם thin content (~40 מילים)** — בעיית ה-SEO התוכנית הגדולה באתר. אסור לפתור בג'ונק AI; נדרש תוכן אמיתי מהבעלים/כותב. ה-URLs נשמרים. אין noindex אוטומטי. |
+| B4 | **קואורדינטות גיאוגרפיות, sameAs (רשתות), openingHoursSpecification, מספר דירות אמיתי** — אין נתונים מאומתים בריפו; אסור להמציא. עם קבלתם: תוספת מיידית ל-LodgingBusiness. |
+| B5 | **"עדכון אחרון: אוקטובר 2025" בתקנון** — האם התקנון בתוקף? עדכון תאריך = הצהרה משפטית. |
+| B6 | **תגי האבטחה בצ'קאאוט** ("פרטי הכרטיס מוצפנים") — לאשר מול המימוש בפועל. |
+| B7 | **הצהרת נגישות ומדיניות ביטולים כעמודים** — נדרשים כעמודים אמיתיים (חובה רגולטורית בישראל לעסק כזה); כרגע ספאנים מתים בפוטר. דורש תוכן מהבעלים. |
+
+## C — דורש גישה חיצונית
+
+| # | ממצא | תלות |
+|---|------|------|
+| C1 | Google Search Console / PageSpeed / CrUX field data — `GOOGLE_SITE_VERIFICATION` לא מוגדר ב-env; אין קרדנצ'לס | חשבון Google של הבעלים |
+| C2 | Google Business Profile alignment (NAP, קטגוריה, שעות) | גישת GBP |
+| C3 | אימות ביצועים בפרודקשן אמיתי (TTFB/CDN/caching מאחורי proxy) | סביבת הפרודקשן החיצונית |
+| C4 | ביקורות אמיתיות (Google/Booking) לשילוב עתידי | מקור ביקורות מאומת |
+
+---
+
+## סטטוס מימוש — BEFORE → FIX → AFTER
+
+אומת ב-crawl מלא (rendered HTML, playwright) של הבנייה החדשה על כל 14 הראוטים × 7 רוחבים (320→1440).
+
+| # | לפני | תיקון | אחרי (אומת בריצה) |
+|---|------|-------|--------------------|
+| A1 | וידאו 1.5MB ‏`preload="auto"` | `preload="metadata"` + פוסטר דחוס | הפוסטר (84KB, היה 136KB) הוא ה-LCP |
+| A2 | `imgEager: 0` בכל האתר | `priority` לתמונות מעל הקפל | rooms: 2 eager · about: 1 · article: 1 |
+| A3 | אין `images.formats` | AVIF+WebP ב-next.config | ✓ |
+| A4 | נכס יתום 1.76MB | נמחק | ✓ |
+| A5 | 404 עם canonical של הבית + title האתר | canonical עבר ל-(site)/page, metadata ייעודי ל-not-found | 404: אין canonical, robots=noindex, title ייעודי |
+| A6 | CTA-ים ל-`/#apartments`/`/#contact` | קישורים קנוניים ל-/rooms ו-/contact (כולל בגוף המאמר) | ✓ אפס מופעים |
+| A7 | אין /rooms בניווט | נוסף לניווט הראשי | ✓ |
+| A8 | schema חסר | CollectionPage+ItemList(Accommodation×N חי) ב-/rooms, AboutPage, CollectionPage ב-/articles, WebPage ב-/solutions, image[] אמיתי ל-LodgingBusiness | ✓ נצפה ב-JSON-LD בריצה |
+| A9 | OG image זהה בכל האתר | תמונות אמיתיות פר-משפחה (rooms/solutions/about) | ✓ |
+| A10 | 4 אנקורים → URL עירום | קישורי `#sol-N` אמיתיים בפוטר | ✓ |
+| A11 | אין קישור terms↔house-rules | קישורים הדדיים | ✓ |
+| A12 | `inLanguage` לא עקבי | `he-IL` בכל ה-builders | ✓ |
+| A13 | `<h2>` בפוטר | div+aria-labelledby | ✓ |
+| A14 | ציטוט "ספר האורחים", מרקיזת ארגונים, שמות ארגונים, "14+" | הוסרו/הוחלפו בעובדות מאומתות | ✓ |
+| A15 | alt = חזרת כותרת | 9 תיאורי alt אמיתיים לפי תוכן התמונה | ✓ |
+| A16 | מחרוזות משוכפלות | TOC נגזר מהנתונים (faq/house-rules), וואטסאפ קבוע אחד, solutions ממקור יחיד | ✓ |
+| A17 | PNG צילומי 124KB | JPEG ‏68KB | ✓ |
+| A18 | פוסטר 136KB | 84KB | ✓ |
+| A19 | FAQ בבית בלי קישור | "לכל השאלות והתשובות" → /faq | ✓ |
+| A20 | H1 מפוצל-מילים ×7 | פיצול המילים הוסר מהמנוע | ✓ |
+
+**תוצאות ריצה (אחרי):** אפס גלישה אופקית ב-98 בדיקות · H1 יחיד בכל עמוד · canonical עצמי בכל עמוד
+ציבורי · lint נקי · 63/63 בדיקות עוברות · build תקין.
+
+**B1–B7 (החלטות בעלים) ו-C1–C4 (גישה חיצונית) — ללא שינוי, ממתינים.** צעד ביניים בטוח שבוצע
+ב-B1: ההבטחה "ביטול חינם עד 48 שעות" הוסרה מ-meta description של /booking (הסרת claim ≠ בחירת
+מדיניות); ה-UI בצ'קאאוט לא שונה וממתין להכרעה.

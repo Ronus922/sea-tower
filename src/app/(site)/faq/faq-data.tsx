@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { BUSINESS } from "@/lib/business";
 
 /* נתוני השאלות והתשובות — מקור אמת יחיד: מרונדר ל-DOM וגם ל-JSON-LD (FAQPage).
    הטקסט מועתק מילה-במילה מ-design-reference/exports/Faq.html */
@@ -436,8 +437,11 @@ export const FAQ_CATEGORIES: FaqCategory[] = [
             t: "p",
             c: (
               <>
-                לפרטים נוספים פנו לצוות המכירות שלנו במייל: <strong>r@bios.co.il</strong> ונשמח
-                לעזור.
+                לפרטים נוספים פנו לצוות המכירות שלנו במייל:{" "}
+                <a className="stm-link" href={`mailto:${BUSINESS.email}`} dir="ltr">
+                  {BUSINESS.email}
+                </a>{" "}
+                ונשמח לעזור.
               </>
             ),
           },
