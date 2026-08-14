@@ -58,6 +58,36 @@ llms.txt, בדיקות יחידה על ה-SEO. הממצאים להלן הם הפ
 
 ---
 
-## סטטוס מימוש (יעודכן עם BEFORE → FIX → AFTER)
+## סטטוס מימוש — BEFORE → FIX → AFTER
 
-יעודכן בסוף המעבר — ראו טבלת האימות בדוח הסופי.
+אומת ב-crawl מלא (rendered HTML, playwright) של הבנייה החדשה על כל 14 הראוטים × 7 רוחבים (320→1440).
+
+| # | לפני | תיקון | אחרי (אומת בריצה) |
+|---|------|-------|--------------------|
+| A1 | וידאו 1.5MB ‏`preload="auto"` | `preload="metadata"` + פוסטר דחוס | הפוסטר (84KB, היה 136KB) הוא ה-LCP |
+| A2 | `imgEager: 0` בכל האתר | `priority` לתמונות מעל הקפל | rooms: 2 eager · about: 1 · article: 1 |
+| A3 | אין `images.formats` | AVIF+WebP ב-next.config | ✓ |
+| A4 | נכס יתום 1.76MB | נמחק | ✓ |
+| A5 | 404 עם canonical של הבית + title האתר | canonical עבר ל-(site)/page, metadata ייעודי ל-not-found | 404: אין canonical, robots=noindex, title ייעודי |
+| A6 | CTA-ים ל-`/#apartments`/`/#contact` | קישורים קנוניים ל-/rooms ו-/contact (כולל בגוף המאמר) | ✓ אפס מופעים |
+| A7 | אין /rooms בניווט | נוסף לניווט הראשי | ✓ |
+| A8 | schema חסר | CollectionPage+ItemList(Accommodation×N חי) ב-/rooms, AboutPage, CollectionPage ב-/articles, WebPage ב-/solutions, image[] אמיתי ל-LodgingBusiness | ✓ נצפה ב-JSON-LD בריצה |
+| A9 | OG image זהה בכל האתר | תמונות אמיתיות פר-משפחה (rooms/solutions/about) | ✓ |
+| A10 | 4 אנקורים → URL עירום | קישורי `#sol-N` אמיתיים בפוטר | ✓ |
+| A11 | אין קישור terms↔house-rules | קישורים הדדיים | ✓ |
+| A12 | `inLanguage` לא עקבי | `he-IL` בכל ה-builders | ✓ |
+| A13 | `<h2>` בפוטר | div+aria-labelledby | ✓ |
+| A14 | ציטוט "ספר האורחים", מרקיזת ארגונים, שמות ארגונים, "14+" | הוסרו/הוחלפו בעובדות מאומתות | ✓ |
+| A15 | alt = חזרת כותרת | 9 תיאורי alt אמיתיים לפי תוכן התמונה | ✓ |
+| A16 | מחרוזות משוכפלות | TOC נגזר מהנתונים (faq/house-rules), וואטסאפ קבוע אחד, solutions ממקור יחיד | ✓ |
+| A17 | PNG צילומי 124KB | JPEG ‏68KB | ✓ |
+| A18 | פוסטר 136KB | 84KB | ✓ |
+| A19 | FAQ בבית בלי קישור | "לכל השאלות והתשובות" → /faq | ✓ |
+| A20 | H1 מפוצל-מילים ×7 | פיצול המילים הוסר מהמנוע | ✓ |
+
+**תוצאות ריצה (אחרי):** אפס גלישה אופקית ב-98 בדיקות · H1 יחיד בכל עמוד · canonical עצמי בכל עמוד
+ציבורי · lint נקי · 63/63 בדיקות עוברות · build תקין.
+
+**B1–B7 (החלטות בעלים) ו-C1–C4 (גישה חיצונית) — ללא שינוי, ממתינים.** צעד ביניים בטוח שבוצע
+ב-B1: ההבטחה "ביטול חינם עד 48 שעות" הוסרה מ-meta description של /booking (הסרת claim ≠ בחירת
+מדיניות); ה-UI בצ'קאאוט לא שונה וממתין להכרעה.
