@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import type { ArticleBlock, Run } from "@/data/articles";
 
@@ -50,7 +51,8 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
               </h3>
             );
           case "ul":
-            return (
+          case "ol":
+            return block.t === "ul" ? (
               <ul key={i} data-rev="up">
                 {block.items.map((item, j) => (
                   <li key={j}>
@@ -58,6 +60,27 @@ export function ArticleBody({ blocks }: { blocks: ArticleBlock[] }) {
                   </li>
                 ))}
               </ul>
+            ) : (
+              <ol key={i} data-rev="up">
+                {block.items.map((item, j) => (
+                  <li key={j}>
+                    <Runs runs={item} />
+                  </li>
+                ))}
+              </ol>
+            );
+          case "img":
+            return (
+              <figure key={i} className="ar-bodyfig" data-rev="media">
+                <Image
+                  src={block.src}
+                  alt={block.alt}
+                  width={block.w}
+                  height={block.h}
+                  sizes="(max-width: 768px) 100vw, 720px"
+                />
+                {block.caption && <figcaption>{block.caption}</figcaption>}
+              </figure>
             );
           case "quote":
             return (
