@@ -63,6 +63,38 @@ export function V2Root({ children }: { children: React.ReactNode }) {
         });
       });
 
+      /* ---- אלמנט 3: חשיפת תמונות הדירות — טריגר יחיד על מיכל הקרוסלה
+         (הקרוסלה אופקית ו-ScrollTrigger אנכי: טריגר פר-כרטיס היה נורה על
+         כרטיסים שמחוץ למסך אופקית), stagger על כל הכרטיסים ---- */
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const container = root.querySelector("[data-v2-cards]");
+        if (!container) return; // GuestHub לא זמין — אין כרטיסים, אין אנימציה
+        const media = gsap.utils.toArray<HTMLElement>(".v2-room-media", container);
+        const imgs = media
+          .map((m) => m.querySelector("img"))
+          .filter((i): i is HTMLImageElement => i !== null);
+        if (!media.length) return;
+
+        /* המצב המוסתר מוחל רק כאן — אחרי ש-GSAP נטען. clearProps בסיום
+           מפנה את ה-inline transform כדי שזום ה-hover של stm-zoom (CSS)
+           יחזור לעבוד אחרי האנימציה */
+        gsap.set(media, { clipPath: "inset(0 0 100% 0)" });
+        gsap.set(imgs, { scale: 1.08 });
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: container, start: "top 80%", once: true },
+          onComplete: () => {
+            gsap.set(media, { clearProps: "clipPath" });
+            gsap.set(imgs, { clearProps: "transform" });
+          },
+        });
+        tl.to(media, {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 0.9,
+          ease: "power2.out",
+          stagger: 0.12,
+        }).to(imgs, { scale: 1, duration: 0.9, ease: "power2.out", stagger: 0.12 }, 0);
+      });
+
       /* ---- אלמנט 2: פרלקסה על וידאו ה-hero (דסקטופ בלבד — מתחת ל-768px
          עלות הביצועים לא מוצדקת) ---- */
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
