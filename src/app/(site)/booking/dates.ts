@@ -22,6 +22,30 @@ export function addDays(d: string, days: number): string {
   return t.toISOString().slice(0, 10);
 }
 
+/* עזרי לוח־שנה — משותפים ל-DateRangePicker (עמוד ההזמנות) ול-StayDatesField
+   (טופס הצעת המחיר) */
+export function monthStart(d: string): string {
+  return `${d.slice(0, 7)}-01`;
+}
+
+export function addMonths(d: string, n: number): string {
+  const year = Number(d.slice(0, 4));
+  const month = Number(d.slice(5, 7)) - 1 + n;
+  const y = year + Math.floor(month / 12);
+  const m = ((month % 12) + 12) % 12;
+  return `${y}-${String(m + 1).padStart(2, "0")}-01`;
+}
+
+export function daysInMonth(first: string): number {
+  const y = Number(first.slice(0, 4));
+  const m = Number(first.slice(5, 7));
+  return new Date(Date.UTC(y, m, 0)).getUTCDate();
+}
+
+export function firstWeekday(first: string): number {
+  return new Date(`${first}T12:00:00Z`).getUTCDay();
+}
+
 export function nightsBetween(checkIn: string, checkOut: string): number {
   return Math.round(
     (Date.parse(`${checkOut}T12:00:00Z`) - Date.parse(`${checkIn}T12:00:00Z`)) / 86_400_000,

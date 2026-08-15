@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { INQUIRY_TYPES, whatsappUrl } from "@/lib/business";
 import { track } from "@/lib/analytics";
+import { StayDatesField } from "@/components/site/StayDatesField";
 
 /* טופס צור קשר — שולח ל-/api/leads (אימות מלא גם בשרת).
    data-wired על ה-form מונע מ-MotionEngine לחווט אליו את זרימת הדמו */
@@ -321,47 +322,16 @@ export function ContactForm({
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row">
-        <div className="flex-1">
-          <label htmlFor={`${idPrefix}-arrival`} className={LABEL}>
-            תאריך הגעה
-          </label>
-          <input
-            id={`${idPrefix}-arrival`}
-            name="arrival"
-            type="date"
-            min={today}
-            value={form.arrival}
-            onChange={(e) => set("arrival", e.target.value)}
-            className={`${FIELD}${invalid("arrival")}`}
-            {...aria("arrival")}
-          />
-          {errors.arrival && (
-            <p id={`${idPrefix}-arrival-err`} className={ERR}>
-              {errors.arrival}
-            </p>
-          )}
-        </div>
-        <div className="flex-1">
-          <label htmlFor={`${idPrefix}-departure`} className={LABEL}>
-            תאריך עזיבה
-          </label>
-          <input
-            id={`${idPrefix}-departure`}
-            name="departure"
-            type="date"
-            min={form.arrival || today}
-            value={form.departure}
-            onChange={(e) => set("departure", e.target.value)}
-            className={`${FIELD}${invalid("departure")}`}
-            {...aria("departure")}
-          />
-          {errors.departure && (
-            <p id={`${idPrefix}-departure-err`} className={ERR}>
-              {errors.departure}
-            </p>
-          )}
-        </div>
+      {/* תאריכון בסגנון רפרנס הבעלים (2026-08-15) במקום שני שדות type="date"
+          — הערכים נשארים מחרוזות "YYYY-MM-DD" כמו קודם, כך שהוולידציה,
+          ה-API וה-WhatsApp לא משתנים. שדה האורחים עובר כ-children כדי לשבת
+          באותה שורה */}
+      <StayDatesField
+        idPrefix={idPrefix}
+        arrival={form.arrival}
+        departure={form.departure}
+        onChange={(arrival, departure) => setForm((f) => ({ ...f, arrival, departure }))}
+      >
         <div className="sm:w-[150px]">
           <label htmlFor={`${idPrefix}-guests`} className={LABEL}>
             מספר אורחים
@@ -385,7 +355,10 @@ export function ContactForm({
             </p>
           )}
         </div>
-      </div>
+      </StayDatesField>
+      {(errors.arrival || errors.departure) && (
+        <p className={`${ERR} -mt-2`}>{errors.arrival ?? errors.departure}</p>
+      )}
 
       {/* שדה ההודעה החופשי קיים רק בגרסה המלאה — בכרטיס עמוד הבית אין לו מקום */}
       {!compact && (

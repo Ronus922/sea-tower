@@ -1,7 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HE_MONTHS, HE_WEEKDAYS, addDays, fmtHe, todayInIsrael } from "./dates";
+import {
+  HE_MONTHS,
+  HE_WEEKDAYS,
+  addDays,
+  addMonths,
+  daysInMonth,
+  firstWeekday,
+  fmtHe,
+  monthStart,
+  todayInIsrael,
+} from "./dates";
 
 /* בורר טווח תאריכים — פורט React של sea-tower-datepicker.js מהרפרנס:
    מודאל עם שני חודשים RTL, בחירת הגעה→עזיבה, סימון טווח, ניקוי וסגירה.
@@ -13,28 +23,6 @@ type Props = {
   initialDeparture: string | null;
   onClose: (arrival: string | null, departure: string | null) => void;
 };
-
-function monthStart(d: string): string {
-  return `${d.slice(0, 7)}-01`;
-}
-
-function addMonths(d: string, n: number): string {
-  const year = Number(d.slice(0, 4));
-  const month = Number(d.slice(5, 7)) - 1 + n;
-  const y = year + Math.floor(month / 12);
-  const m = ((month % 12) + 12) % 12;
-  return `${y}-${String(m + 1).padStart(2, "0")}-01`;
-}
-
-function daysInMonth(first: string): number {
-  const y = Number(first.slice(0, 4));
-  const m = Number(first.slice(5, 7));
-  return new Date(Date.UTC(y, m, 0)).getUTCDate();
-}
-
-function firstWeekday(first: string): number {
-  return new Date(`${first}T12:00:00Z`).getUTCDay();
-}
 
 export function DateRangePicker({ open, initialArrival, initialDeparture, onClose }: Props) {
   const today = todayInIsrael();
