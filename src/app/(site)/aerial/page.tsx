@@ -5,9 +5,10 @@ import { AerialScroller } from "@/components/site/AerialScroller";
 import { HomeSections } from "@/components/site/home/HomeSections";
 import { pageMeta } from "@/lib/seo";
 
-/* ‏/aerial — טיוטת "דף בית עם פתיח scrollytelling": רצועת וידאו בגובה 500px
-   שמתנגנת עם הגלילה (סקראב), ומתחת למסלול — כל מקטעי עמוד הבית
-   (HomeSections), להערכת הבעלים האם זה יכול לשמש כדף הבית.
+/* ‏/aerial — טיוטת "דף בית עם פתיח scrollytelling": רצועת וידאו בגובה 800px
+   (קטומה לגובה המסך) שמתנגנת עם הגלילה (סקראב) והכיתובים מונחים עליה,
+   ומתחת למסלול — כל מקטעי עמוד הבית (HomeSections), להערכת הבעלים האם
+   זה יכול לשמש כדף הבית.
 
    טיוטה שאינה מקושרת משום מקום (הכרעת בעלים, 2026-08-15): לא בניווט, לא
    בפוטר ולא ב-sitemap (רשימת PATHS ידנית), ו-noindex עד אישור פרסום —
