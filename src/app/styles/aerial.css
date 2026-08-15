@@ -1,15 +1,26 @@
 /* ============================================================
    מגדל הים — /aerial (scrollytelling: הסרטון מפורק לגלילה)
-   שפת עמוד הבית: נייבי, גרדיאנט aqua→sea על מילות מפתח, Open Sans,
-   ease-brand. תנועה על transform/opacity בלבד (כללי PR #10).
+   גרסת "מועמד לדף בית": רצועת וידאו בגובה 500px בראש במה של מסך
+   מלא, מתחתיה אזור כיתובים על גרדיאנט ה-hero של הבית (אורבים +
+   בועות), ובתחתית המסלול גל המעבר אל מקטעי HomeSections.
+   תנועה על transform/opacity בלבד (כללי PR #10).
    ============================================================ */
 
-/* המסלול: גובה הגלילה קובע את אורך ה"טיסה" (כ-5 מסכים ל-29 שניות) */
+/* המסלול: גובה הגלילה קובע את אורך ה"טיסה" (כ-5 מסכים ל-29 שניות).
+   ‎--ae-band = גובה רצועת הווידאו: 500px, אלא אם המסך נמוך מדי — ואז
+   נשמרים לפחות 210px לאזור הכיתובים שמתחתיה */
 .ae-track {
+  --ae-band: min(500px, calc(100vh - 210px));
   position: relative;
   height: 520vh;
   background: var(--color-navy-950);
 }
+@supports (height: 100dvh) {
+  .ae-track {
+    --ae-band: min(500px, calc(100dvh - 210px));
+  }
+}
+
 /* מצב reduced-motion: בלי חטיפת גלילה — במה אחת סטטית */
 .ae-track.is-static {
   height: auto;
@@ -17,12 +28,16 @@
 .ae-track.is-static .ae-stage {
   position: relative;
   height: auto;
-  min-height: 100vh;
   padding-bottom: 40px;
 }
 .ae-track.is-static .ae-video {
   position: relative;
-  height: 56vh;
+  height: var(--ae-band);
+}
+.ae-track.is-static .ae-scrim,
+.ae-track.is-static .ae-zone-bg,
+.ae-track.is-static .ae-progress {
+  display: none;
 }
 .ae-track.is-static .ae-chapter {
   position: relative;
@@ -31,35 +46,48 @@
   margin: 22px auto 0;
 }
 
+/* הבמה: מסך מלא דביק — רצועת הווידאו למעלה, גרדיאנט ה-hero של הבית מתחת */
 .ae-stage {
   position: sticky;
   top: 0;
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  background: linear-gradient(
+    120deg,
+    var(--color-navy-900) 0%,
+    var(--color-ocean-700) 58%,
+    var(--color-ocean-600) 100%
+  );
 }
 .ae-video {
   position: absolute;
-  inset: 0;
+  inset-inline: 0;
+  top: 0;
   width: 100%;
-  height: 100%;
+  height: var(--ae-band);
   object-fit: cover;
 }
 /* סקרים בשפת ה-hero של הבית — נייבי שמחזיק טקסט לבן קריא על שמיים בהירים */
 .ae-scrim {
   position: absolute;
-  inset: 0;
+  inset-inline: 0;
+  top: 0;
+  height: var(--ae-band);
   pointer-events: none;
   background:
     linear-gradient(180deg, rgba(7, 22, 37, 0.55) 0%, rgba(7, 22, 37, 0) 26%),
     linear-gradient(0deg, rgba(7, 22, 37, 0.62) 0%, rgba(7, 22, 37, 0) 44%);
+}
+/* רקע האורבים/הבועות של ה-hero — רק באזור שמתחת לרצועת הווידאו */
+.ae-zone-bg {
+  top: var(--ae-band);
 }
 
 /* --- פרקים --- */
 .ae-chapter {
   position: absolute;
   inset-inline: 0;
-  bottom: 11vh;
   z-index: 2;
   margin: 0 auto;
   max-width: 720px;
@@ -67,7 +95,6 @@
   text-align: center;
   color: #fff;
   opacity: 0;
-  transform: translateY(26px);
   transition:
     opacity 0.55s var(--ease-brand),
     transform 0.55s var(--ease-brand);
@@ -75,16 +102,14 @@
 }
 .ae-chapter.is-on {
   opacity: 1;
-  transform: none;
   pointer-events: auto;
 }
 
-/* פרק הפתיחה = כותרת העמוד, ממורכזת על הפריים הרחב.
+/* פרק הפתיחה = כותרת העמוד, ממורכז על רצועת הווידאו.
    הווינייטה הרדיאלית מעגנת את הטקסט על שמיים/ים בהירים — כמו הרקע
    הנייבי שמחזיק את ה-H1 בבית */
 .ae-title {
-  bottom: auto;
-  top: 50%;
+  top: calc(var(--ae-band) / 2);
   transform: translateY(calc(-50% + 26px));
 }
 .ae-title::before {
@@ -97,6 +122,21 @@
 .ae-title.is-on {
   transform: translateY(-50%);
 }
+
+/* כיתובי הפרקים — ממורכזים באזור הגרדיאנט שמתחת לרצועה */
+.ae-cap {
+  top: var(--ae-band);
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(26px);
+}
+.ae-cap.is-on {
+  transform: none;
+}
+
 .ae-badge {
   display: inline-flex;
   align-items: center;
@@ -186,7 +226,7 @@
 }
 .ae-h2 {
   margin-bottom: 10px;
-  font-size: 28px;
+  font-size: 26px;
   line-height: 1.18;
   font-weight: 800;
   letter-spacing: var(--tracking-heading, -0.01em);
@@ -215,11 +255,11 @@
   box-shadow: 0 8px 20px rgba(43, 127, 184, 0.32);
 }
 
-/* פס התקדמות הטיסה — aqua, מתמלא מימין (RTL), transform בלבד */
+/* פס התקדמות הטיסה — aqua על התפר שבין הרצועה לאזור הכיתובים, RTL */
 .ae-progress {
   position: absolute;
   inset-inline: 0;
-  bottom: 0;
+  top: calc(var(--ae-band) - 3px);
   z-index: 3;
   height: 3px;
   background: rgba(255, 255, 255, 0.14);
@@ -231,27 +271,45 @@
   transform-origin: right;
 }
 
+/* מסכים צרים/נמוכים: אזור הכיתובים מינימלי (210px) — מקטינים כדי שהפרק
+   האחרון (קיקר + כותרת + טקסט + CTA) ייכנס בלי חיתוך */
+@media (max-width: 480px) {
+  .ae-h2 {
+    font-size: 24px;
+  }
+  .ae-text {
+    font-size: 14.5px;
+  }
+  .ae-cta {
+    margin-top: 14px;
+  }
+}
+
 @media (min-width: 768px) {
   .ae-h1 {
-    font-size: 62px;
+    font-size: 52px;
     line-height: 1.06;
   }
   .ae-h2 {
-    font-size: 38px;
+    font-size: 34px;
   }
   .ae-text {
     font-size: 17px;
   }
-  .ae-chapter {
-    bottom: 13vh;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ae-chapter,
+  .ae-chapter {
+    transition: none;
+  }
+  .ae-cap {
+    transform: none;
+  }
   .ae-title,
   .ae-title.is-on {
-    transition: none;
+    transform: translateY(-50%);
+  }
+  .ae-track.is-static .ae-chapter {
     transform: none;
   }
   .ae-hint {
