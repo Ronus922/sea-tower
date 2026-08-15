@@ -502,7 +502,7 @@ export async function V2HomeSections() {
             className="w-full rounded-img bg-white p-6 shadow-[0_30px_60px_rgba(0,0,0,0.3)] md:p-8 lg:flex-1"
           >
             <h3 className="mb-5 text-[23px] font-extrabold text-navy-800">בקשת הצעה מהירה</h3>
-            <ContactForm variant="compact" idPrefix="lf" />
+            <ContactForm variant="compact" idPrefix="lf" floatingDates />
           </div>
         </Container>
         {/* גל הפתיחה של הפוטר מגיע מה-Footer המשותף (חופף לריפוד התחתון כאן) */}

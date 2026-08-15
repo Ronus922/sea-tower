@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import {
   HE_MONTHS,
   HE_WEEKDAYS,
@@ -25,6 +25,9 @@ type Props = {
   arrival: string;
   departure: string;
   onChange: (arrival: string, departure: string) => void;
+  /* פאנל צף מעל התוכן (popover) במקום אינליין שדוחף את העמוד — ‏/v2.
+     ברירת המחדל (אינליין) נשארת זהה לחלוטין ל-/ ול-/contact */
+  floating?: boolean;
   children?: React.ReactNode;
 };
 
@@ -51,24 +54,92 @@ function MoonIcon({ size = 15 }: { size?: number }) {
   );
 }
 
-export function StayDatesField({ idPrefix, arrival, departure, onChange, children }: Props) {
+export function StayDatesField({ idPrefix, arrival, departure, onChange, floating, children }: Props) {
   const today = todayInIsrael();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<string>(() => monthStart(arrival || today));
   const [active, setActive] = useState<"in" | "out">("in");
   const snapshot = useRef<{ arrival: string; departure: string }>({ arrival, departure });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeTimer = useRef<number | undefined>(undefined);
   const panelId = useId();
 
   const nights = arrival && departure ? nightsBetween(arrival, departure) : 0;
 
+  /* סגירה עם החזרת פוקוס לשדה — מקלדת, כפתורי הפאנל והשלמת טווח (במצב צף).
+     לחיצה מחוץ לפאנל סוגרת בלי לגנוב את הפוקוס מהיעד שנלחץ */
+  const close = (returnFocus: boolean) => {
+    setOpen(false);
+    if (returnFocus && floating) fieldRef.current?.focus();
+  };
+
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        if (floating) fieldRef.current?.focus();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, floating]);
+
+  /* מצב צף: סגירה בלחיצה מחוץ לרכיב */
+  useEffect(() => {
+    if (!floating || !open) return;
+    const onDown = (e: PointerEvent) => {
+      if (e.target instanceof Node && !rootRef.current?.contains(e.target)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", onDown);
+    return () => document.removeEventListener("pointerdown", onDown);
+  }, [floating, open]);
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
+
+  /* מצב צף: מיקום הפאנל יחסית לשדה — מתחתיו, ומתהפך מעליו כשאין מקום;
+     הצמדה אופקית לגבולות המסך כך שלעולם אין גלילה אופקית. רץ גם על
+     resize/scroll כי המרווח מהשוליים תלוי ב-viewport */
+  useLayoutEffect(() => {
+    if (!floating || !open) return;
+    const update = () => {
+      const rootEl = rootRef.current;
+      const panel = panelRef.current;
+      const field = fieldRef.current;
+      if (!rootEl || !panel || !field) return;
+      const fr = field.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - fr.bottom - 12;
+      const spaceAbove = fr.top - 12;
+      const up = panel.scrollHeight > spaceBelow && spaceAbove > spaceBelow;
+      /* גובה מקסימלי לפי הצד שנבחר — הפאנל נגלל פנימית במסכים נמוכים */
+      panel.style.maxHeight = `${Math.max(up ? spaceAbove : spaceBelow, 220)}px`;
+      if (up) {
+        panel.style.top = "auto";
+        panel.style.bottom = `${rootEl.offsetHeight - field.offsetTop + 8}px`;
+      } else {
+        panel.style.bottom = "auto";
+        panel.style.top = `${field.offsetTop + field.offsetHeight + 8}px`;
+      }
+      panel.style.transform = "";
+      const pr = panel.getBoundingClientRect();
+      const dx =
+        pr.left < 8
+          ? 8 - pr.left
+          : pr.right > window.innerWidth - 8
+            ? window.innerWidth - 8 - pr.right
+            : 0;
+      if (dx) panel.style.transform = `translateX(${dx}px)`;
+    };
+    update();
+    window.addEventListener("resize", update);
+    window.addEventListener("scroll", update, true);
+    return () => {
+      window.removeEventListener("resize", update);
+      window.removeEventListener("scroll", update, true);
+    };
+  }, [floating, open, view, arrival, departure]);
 
   const toggle = () => {
     if (!open) {
@@ -81,7 +152,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
 
   const cancel = () => {
     onChange(snapshot.current.arrival, snapshot.current.departure);
-    setOpen(false);
+    close(true);
   };
 
   /* המונה מזיז את תאריך היציאה בלבד; בלי תאריכים — מתחיל מהיום */
@@ -101,6 +172,11 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
     } else {
       onChange(arrival, d);
       setActive("in");
+      /* מצב צף: הטווח הושלם — הפאנל נסגר מעצמו (השהיה קצרה כדי שהבחירה תיראה) */
+      if (floating) {
+        window.clearTimeout(closeTimer.current);
+        closeTimer.current = window.setTimeout(() => close(true), 350);
+      }
     }
   };
 
@@ -157,7 +233,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
   const prevDisabled = view <= monthStart(today);
 
   return (
-    <div className="stm-sd">
+    <div ref={rootRef} className={`stm-sd${floating ? " stm-sd-float" : ""}`}>
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="min-w-0 flex-1">
           <label htmlFor={`${idPrefix}-dates`} className="mb-[7px] block text-[13px] font-semibold text-ink-dim">
@@ -165,6 +241,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
           </label>
           <button
             id={`${idPrefix}-dates`}
+            ref={fieldRef}
             type="button"
             className={`stm-sd-field${open ? " open" : ""}`}
             aria-expanded={open}
@@ -225,7 +302,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
       </div>
 
       {open && (
-        <div id={panelId} className="stm-sd-panel" role="group" aria-label="בחירת תאריכי שהות">
+        <div ref={panelRef} id={panelId} className="stm-sd-panel" role="group" aria-label="בחירת תאריכי שהות">
           <div className="stm-sd-head">
             <div className="stm-sd-sum">
               <span className="stm-sd-sumicon">
@@ -288,7 +365,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
               <button type="button" className="stm-sd-cancel" onClick={cancel}>
                 ביטול
               </button>
-              <button type="button" className="stm-sd-close" onClick={() => setOpen(false)}>
+              <button type="button" className="stm-sd-close" onClick={() => close(true)}>
                 סגור
               </button>
             </span>
