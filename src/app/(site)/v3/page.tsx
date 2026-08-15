@@ -86,7 +86,8 @@ export default function HomeV3Sun() {
               <SplitWords>
                 לחיות מול הים,
                 <br />
-                <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                {/* גרדיאנט כהה מהמקור: aqua→sea-400 נופל מתחת ל-4.5:1 על שמי הבוקר */}
+                <span className="bg-[linear-gradient(120deg,var(--color-ocean-500),var(--color-ocean-600))] bg-clip-text text-transparent">
                   ברמה מלונאית
                 </span>
               </SplitWords>
@@ -97,7 +98,7 @@ export default function HomeV3Sun() {
             </p>
             <div className="hero-in-4 mb-9 flex flex-wrap items-center gap-3.5">
               <Button href="#contact">הזמינו עכשיו</Button>
-              <Button href="#apartments" variant="outline" surface="dark">
+              <Button href="#apartments" variant="outline" surface="dark" className="v3-glass-dark">
                 צפו בדירות
               </Button>
             </div>

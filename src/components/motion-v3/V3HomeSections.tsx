@@ -305,7 +305,7 @@ export async function V3HomeSections() {
             </div>
           )}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-3.5">
-            <Button href="/rooms" variant="outline">
+            <Button href="/rooms" variant="outline" className="v3-surface">
               לכל החדרים שלנו
             </Button>
             <Button href="/booking">בדקו זמינות</Button>
@@ -323,7 +323,7 @@ export async function V3HomeSections() {
           className="stm-blob absolute -top-[100px] -right-[60px] size-[380px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.22),transparent_70%)]"
         />
         <Container className="relative z-[2] flex flex-col items-center gap-12 lg:flex-row lg:gap-14">
-          <div className="v3-on-sky w-full lg:flex-[1.05]">
+          <div className="v3-on-sky v3-scrim-dark w-full lg:flex-[1.05]">
             <V3SectionHeading
               dark
               kicker="למה לבחור בנו"
@@ -387,7 +387,7 @@ export async function V3HomeSections() {
       <section id="process" className="bg-white py-14 md:py-20">
         <Container className="flex flex-col gap-14 lg:flex-row">
           <div className="lg:flex-1">
-            <V3SectionHeading className="v3-on-sky" kicker="פשוט להתארח" title={<>שלושה צעדים <br />עד הים</>} />
+            <V3SectionHeading className="v3-on-sky v3-scrim" kicker="פשוט להתארח" title={<>שלושה צעדים <br />עד הים</>} />
             {/* רצף אנכי 1→2→3 */}
             <div className="mt-8 flex flex-col gap-3.5">
               {STEPS.map((step, i) => (
@@ -408,7 +408,7 @@ export async function V3HomeSections() {
             </div>
           </div>
           <div className="lg:flex-1">
-            <V3SectionHeading className="v3-on-sky" kicker="שאלות נפוצות" title="כל מה שרציתם לדעת" />
+            <V3SectionHeading className="v3-on-sky v3-scrim" kicker="שאלות נפוצות" title="כל מה שרציתם לדעת" />
             <div className="mt-8 flex flex-col gap-3">
               {FAQS.map((faq) => (
                 <details
@@ -436,8 +436,8 @@ export async function V3HomeSections() {
       <section id="blog" className="bg-white py-14 md:py-20">
         <Container>
           <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-            <V3SectionHeading className="v3-on-sky" kicker="מאמרים ותובנות" title="מהבלוג של מגדל הים" />
-            <Button href="/articles" variant="link">
+            <V3SectionHeading className="v3-on-sky v3-scrim" kicker="מאמרים ותובנות" title="מהבלוג של מגדל הים" />
+            <Button href="/articles" variant="link" className="v3-surface">
               לכל המאמרים
             </Button>
           </div>

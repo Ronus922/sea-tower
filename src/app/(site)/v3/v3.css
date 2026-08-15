@@ -79,6 +79,39 @@
   color: var(--v3-ink);
 }
 
+/* --- תיקוני ניגודיות (סבב 2): משטחים קבועים.
+   רצועת הדמדומים זהב→לילה עוברת בהירות-ביניים שבה אף צבע טקסט חשוף
+   לא מגיע ל-4.5:1 (מתמטית: כשבהירות השמיים בין ~0.16 ל-~0.26). לכן כל
+   בלוק טקסט חופשי שחוצה אותה מקבל משטח משלו עם צבע טקסט מוצמד —
+   הצמדת --v3-ink מקומית מנתקת את הבלוק מהיפוך הצבע הגלובלי --- */
+.v3-root .v3-scrim {
+  --v3-ink: #0e2540;
+  background: rgba(250, 248, 243, 0.92);
+  border-radius: var(--radius-card-lg);
+  padding: 18px 20px;
+}
+.v3-root .v3-scrim-dark {
+  --v3-ink: #eaf4fb;
+  background: rgba(10, 29, 49, 0.9);
+  border-radius: var(--radius-card-lg);
+  padding: 22px 24px;
+}
+
+/* כפתורים על השמיים (מוחרגים מהיפוך הצבע בכוונה — צבעם קבוע,
+   לכן המשטח שלהם חייב להיות קבוע גם הוא) */
+.v3-root .v3-glass-dark {
+  background: rgba(10, 29, 49, 0.78);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.v3-root .v3-surface {
+  background: #ffffff;
+}
+.v3-root .stm-link.v3-surface {
+  border-radius: 999px;
+  padding-inline: 16px;
+  color: var(--color-ocean-500);
+}
+
 /* --- אלמנט 2 מוגבר: וידאו בגובה 130% (מהלך 30% מהמיכל) --- */
 .v3-root .v3-media-wrap {
   position: relative;
