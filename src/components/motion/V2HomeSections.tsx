@@ -349,34 +349,42 @@ export async function V2HomeSections() {
             </div>
           </div>
           <div className="relative w-full lg:flex-[0.95]">
-            <Image
-              src="/images/suite-details.jpg"
-              alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
-              width={1376}
-              height={768}
-              data-rev="media"
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"
-            />
-            <div className="absolute -bottom-6 right-4 flex animate-float items-center gap-3 rounded-card bg-white px-5 py-3.5 shadow-e4 [animation-duration:6.5s] md:-right-5">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect
-                  x="3"
-                  y="6"
-                  width="18"
-                  height="13"
-                  rx="2"
-                  stroke="var(--color-ocean-400)"
-                  strokeWidth="1.7"
-                />
-                <path d="M3 10h18" stroke="var(--color-ocean-400)" strokeWidth="1.7" />
-              </svg>
-              <div>
-                <div className="text-[15px] leading-[1.1] font-extrabold text-navy-800">
-                  הכול כלול
-                </div>
-                <div className="text-[12.5px] font-semibold text-ink-dim">
-                  חשבונות · ניקיון · נטפליקס
+            {/* סעיף 3 (v2-polish): חשיפת GSAP באותו דפוס של תמונות הדירות
+                (clip-path מלמטה + scale פנימה, v2-why-media ב-V2Root) —
+                ‏data-rev הוסר כדי ש-MotionEngine לא ינפיש אותה במקביל */}
+            <div className="v2-why-media rounded-card-lg">
+              <Image
+                src="/images/suite-details.jpg"
+                alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
+                width={1376}
+                height={768}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"
+              />
+            </div>
+            {/* התגית בעטיפה נפרדת: המיקום וכניסת ה-GSAP על העטיפה, ריחוף
+                ה-animate-float על הפנימי — שני ה-transform לא מתנגשים */}
+            <div data-v2-tag="" className="absolute -bottom-6 right-4 md:-right-5">
+              <div className="flex animate-float items-center gap-3 rounded-card bg-white px-5 py-3.5 shadow-e4 [animation-duration:6.5s]">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect
+                    x="3"
+                    y="6"
+                    width="18"
+                    height="13"
+                    rx="2"
+                    stroke="var(--color-ocean-400)"
+                    strokeWidth="1.7"
+                  />
+                  <path d="M3 10h18" stroke="var(--color-ocean-400)" strokeWidth="1.7" />
+                </svg>
+                <div>
+                  <div className="text-[15px] leading-[1.1] font-extrabold text-navy-800">
+                    הכול כלול
+                  </div>
+                  <div className="text-[12.5px] font-semibold text-ink-dim">
+                    חשבונות · ניקיון · נטפליקס
+                  </div>
                 </div>
               </div>
             </div>

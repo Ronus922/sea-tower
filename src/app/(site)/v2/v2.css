@@ -28,3 +28,10 @@
     height: 120%;
   }
 }
+
+/* --- סעיף 3 (v2-polish): עוטף תמונת החדר ב"למה לבחור בנו" — חותך את
+   ה-scale של החשיפה (כמו v2-room-media). אין כאן מצב-התחלה מוסתר:
+   ה-clip-path/scale מוחלים רק ב-V2Root אחרי ש-GSAP נטען --- */
+.v2-root .v2-why-media {
+  overflow: hidden;
+}
