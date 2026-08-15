@@ -7,15 +7,16 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { BUSINESS } from "@/lib/business";
 
-/* הניווט הראשי — /rooms נוסף (העמוד המסחרי המרכזי נעדר ממנו לחלוטין,
-   SEO-AUDIT A7); "תקנון" ירד לפוטר, שם מקומו של קישור משפטי */
+/* הניווט הראשי — הסדר קבוע לפי הנחיית בעלים (2026-08-15). אותו מערך משמש
+   את תפריט הדסקטופ ואת יריעת המובייל, כך שהסדר זהה בשניהם.
+   קישור /rooms הוסר מכאן לפי אותה הנחיה ("exactly" — שישה פריטים בלבד);
+   הוא נשאר בפוטר, בכפתורי עמוד הבית וב-sitemap. "תקנון" בפוטר */
 const NAV = [
   { href: "/", label: "ראשי" },
-  { href: "/rooms", label: "הדירות והסוויטות" },
-  { href: "/solutions", label: "פתרונות אירוח" },
-  { href: "/articles", label: "מאמרים" },
-  { href: "/faq", label: "שאלות נפוצות" },
   { href: "/about", label: "אודות" },
+  { href: "/solutions", label: "פתרונות אירוח" },
+  { href: "/faq", label: "שאלות נפוצות" },
+  { href: "/articles", label: "מאמרים" },
   { href: "/contact", label: "צור קשר" },
 ];
 
