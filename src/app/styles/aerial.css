@@ -1,0 +1,263 @@
+/* ============================================================
+   מגדל הים — /aerial (scrollytelling: הסרטון מפורק לגלילה)
+   שפת עמוד הבית: נייבי, גרדיאנט aqua→sea על מילות מפתח, Open Sans,
+   ease-brand. תנועה על transform/opacity בלבד (כללי PR #10).
+   ============================================================ */
+
+/* המסלול: גובה הגלילה קובע את אורך ה"טיסה" (כ-5 מסכים ל-29 שניות) */
+.ae-track {
+  position: relative;
+  height: 520vh;
+  background: var(--color-navy-950);
+}
+/* מצב reduced-motion: בלי חטיפת גלילה — במה אחת סטטית */
+.ae-track.is-static {
+  height: auto;
+}
+.ae-track.is-static .ae-stage {
+  position: relative;
+  height: auto;
+  min-height: 100vh;
+  padding-bottom: 40px;
+}
+.ae-track.is-static .ae-video {
+  position: relative;
+  height: 56vh;
+}
+.ae-track.is-static .ae-chapter {
+  position: relative;
+  inset: auto;
+  transform: none;
+  margin: 22px auto 0;
+}
+
+.ae-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+}
+.ae-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* סקרים בשפת ה-hero של הבית — נייבי שמחזיק טקסט לבן קריא על שמיים בהירים */
+.ae-scrim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(7, 22, 37, 0.55) 0%, rgba(7, 22, 37, 0) 26%),
+    linear-gradient(0deg, rgba(7, 22, 37, 0.62) 0%, rgba(7, 22, 37, 0) 44%);
+}
+
+/* --- פרקים --- */
+.ae-chapter {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 11vh;
+  z-index: 2;
+  margin: 0 auto;
+  max-width: 720px;
+  padding: 0 24px;
+  text-align: center;
+  color: #fff;
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.55s var(--ease-brand),
+    transform 0.55s var(--ease-brand);
+  pointer-events: none;
+}
+.ae-chapter.is-on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+/* פרק הפתיחה = כותרת העמוד, ממורכזת על הפריים הרחב.
+   הווינייטה הרדיאלית מעגנת את הטקסט על שמיים/ים בהירים — כמו הרקע
+   הנייבי שמחזיק את ה-H1 בבית */
+.ae-title {
+  bottom: auto;
+  top: 50%;
+  transform: translateY(calc(-50% + 26px));
+}
+.ae-title::before {
+  content: "";
+  position: absolute;
+  inset: -14% -34%;
+  z-index: -1;
+  background: radial-gradient(ellipse at center, rgba(7, 22, 37, 0.55), transparent 70%);
+}
+.ae-title.is-on {
+  transform: translateY(-50%);
+}
+.ae-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 22px;
+  padding: 8px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(4px);
+}
+.ae-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--color-spark);
+  box-shadow: 0 0 10px var(--color-spark);
+}
+.ae-h1 {
+  margin-bottom: 18px;
+  font-size: 40px;
+  line-height: 1.1;
+  font-weight: 800;
+  letter-spacing: var(--tracking-heading, -0.01em);
+  text-shadow: 0 2px 30px rgba(7, 22, 37, 0.6);
+}
+.ae-grad {
+  background: linear-gradient(120deg, var(--color-aqua), var(--color-sea-400));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.ae-lead {
+  text-shadow: 0 1px 14px rgba(7, 22, 37, 0.6);
+  margin: 0 auto 26px;
+  max-width: 520px;
+  font-size: 18px;
+  line-height: 1.66;
+  font-weight: 300;
+  color: #cdddea;
+}
+.ae-hint {
+  text-shadow: 0 1px 14px rgba(7, 22, 37, 0.6);
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #9fc0d8;
+}
+.ae-hint svg {
+  animation: aeHint 1.6s var(--ease-brand) infinite;
+}
+@keyframes aeHint {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  50% {
+    transform: translateY(6px);
+    opacity: 1;
+  }
+}
+
+/* כיתובי הפרקים — קיקר בשפת SectionKicker + כותרת לבנה */
+.ae-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: var(--tracking-label, 0.08em);
+  color: var(--color-aqua);
+}
+.ae-kicker::before {
+  content: "";
+  width: 22px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+.ae-h2 {
+  margin-bottom: 10px;
+  font-size: 28px;
+  line-height: 1.18;
+  font-weight: 800;
+  letter-spacing: var(--tracking-heading, -0.01em);
+  text-shadow: 0 2px 24px rgba(7, 22, 37, 0.55);
+}
+.ae-text {
+  margin: 0 auto;
+  max-width: 480px;
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: #dceaf3;
+  text-shadow: 0 1px 16px rgba(7, 22, 37, 0.6);
+}
+.ae-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 20px;
+  min-height: 44px;
+  padding: 13px 26px;
+  border-radius: var(--radius-btn, 12px);
+  background: linear-gradient(135deg, var(--color-sea-500), var(--color-ocean-400));
+  font-size: 15.5px;
+  font-weight: 700;
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(43, 127, 184, 0.32);
+}
+
+/* פס התקדמות הטיסה — aqua, מתמלא מימין (RTL), transform בלבד */
+.ae-progress {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 3;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.14);
+}
+.ae-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-aqua), var(--color-sea-400));
+  transform: scaleX(0);
+  transform-origin: right;
+}
+
+@media (min-width: 768px) {
+  .ae-h1 {
+    font-size: 62px;
+    line-height: 1.06;
+  }
+  .ae-h2 {
+    font-size: 38px;
+  }
+  .ae-text {
+    font-size: 17px;
+  }
+  .ae-chapter {
+    bottom: 13vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ae-chapter,
+  .ae-title,
+  .ae-title.is-on {
+    transition: none;
+    transform: none;
+  }
+  .ae-hint {
+    display: none;
+  }
+  .ae-hint svg {
+    animation: none;
+  }
+}
