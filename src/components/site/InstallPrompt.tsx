@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { track } from "@/lib/analytics";
 
 /* באנר "התקינו כאפליקציה" — בקר יחיד ברמת תבנית האתר (לא פר-עמוד).
 
@@ -22,10 +23,6 @@ type BeforeInstallPromptEvent = Event & {
 };
 
 type Mode = "native" | "ios" | "menu";
-
-function track(event: string) {
-  (window as unknown as { dataLayer?: Record<string, unknown>[] }).dataLayer?.push({ event });
-}
 
 function isStandalone(): boolean {
   return (
@@ -77,7 +74,7 @@ export function InstallPrompt() {
         /* noop */
       }
       setMode(m);
-      track("pwa_install_prompt_shown");
+      track({ name: "pwa_install_prompt_shown", platform: m });
     };
 
     const onBip = (e: Event) => {
@@ -93,7 +90,7 @@ export function InstallPrompt() {
       } catch {
         /* noop */
       }
-      track("pwa_installed");
+      track({ name: "pwa_installed" });
       setMode(null);
     };
     window.addEventListener("appinstalled", onInstalled);
@@ -121,24 +118,29 @@ export function InstallPrompt() {
     } catch {
       /* noop */
     }
-    track("pwa_install_dismissed");
+    track({ name: "pwa_install_dismissed" });
     setMode(null);
   };
 
   const install = async () => {
     if (mode === "native" && bipRef.current) {
-      track("pwa_install_clicked");
+      track({ name: "pwa_install_clicked", platform: "native" });
       const bip = bipRef.current;
       bipRef.current = null;
       await bip.prompt();
       const choice = await bip.userChoice.catch(() => null);
       if (choice?.outcome === "accepted") {
-        track("pwa_install_accepted");
+        track({ name: "pwa_install_accepted" });
         setMode(null);
+      } else {
+        /* החלון הנטיבי נדחה — האירוע נוצל ולא יירה שוב בסשן הזה, לכן
+           הכפתור עובר להוראות תפריט כדי שלא יבטיח התקנה שאינה זמינה */
+        setMode("menu");
       }
       return;
     }
-    track("pwa_install_instructions_shown");
+    const platform = mode === "ios" ? "ios" : "menu";
+    if (!showHelp) track({ name: "pwa_install_instructions_shown", platform });
     setShowHelp((v) => !v);
   };
 
@@ -148,14 +150,14 @@ export function InstallPrompt() {
       aria-label="התקנת האפליקציה"
       className="fixed inset-x-3 bottom-3 z-[80] pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <div className="rounded-[16px] border border-black/10 bg-white p-4 shadow-e3">
+      <div className="rounded-card border border-black/10 bg-white p-4 shadow-e3">
         <div className="flex items-center gap-3">
           <Image
             src="/icons/icon-192.png"
             alt=""
             width={44}
             height={44}
-            className="shrink-0 rounded-[10px]"
+            className="shrink-0 rounded-btn"
           />
           <div className="min-w-0 flex-1">
             <p className="text-[15px] font-bold leading-snug text-navy-800">התקינו את מגדל הים</p>
