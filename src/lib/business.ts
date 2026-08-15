@@ -28,6 +28,26 @@ export const BUSINESS = {
   siteUrl: "https://sea-tower.bios.co.il",
 } as const;
 
+/* רשתות חברתיות — כתובות רשמיות שסיפקו הבעלים (2026-08-15). סדר המערך =
+   סדר ה-DOM בפוטר: פייסבוק ראשון (ימני ב-RTL) → לינקדאין אחרון (שמאלי),
+   כך שהסדר הוויזואלי משמאל לימין הוא לינקדאין, יוטיוב, אינסטגרם, פייסבוק */
+export const SOCIAL_LINKS = [
+  { id: "facebook", label: "מגדל הים בפייסבוק", href: "https://www.facebook.com/SeaTowerHaifa" },
+  {
+    id: "instagram",
+    label: "מגדל הים באינסטגרם",
+    href: "https://www.instagram.com/sea_tower_haifa/",
+  },
+  { id: "youtube", label: "מגדל הים ביוטיוב", href: "https://www.youtube.com/@sea-tower" },
+  {
+    id: "linkedin",
+    label: "מגדל הים בלינקדאין",
+    href: "https://www.linkedin.com/in/sea-tower-27999a23b/?skipRedirect=true",
+  },
+] as const;
+
+export type SocialId = (typeof SOCIAL_LINKS)[number]["id"];
+
 export function whatsappUrl(text?: string): string {
   return `https://wa.me/${BUSINESS.whatsappNumber}${
     text ? `?text=${encodeURIComponent(text)}` : ""

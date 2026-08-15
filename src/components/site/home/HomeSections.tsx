@@ -227,9 +227,11 @@ export async function HomeSections() {
               שילוב מושלם בין מגורים בלב העיר השוקקת לבין חופשה על הים. מתאים לנופש, לעבודה,
               לרילוקיישן ולכל תקופה, ללא בירוקרטיה.
             </p>
-            {/* "14+ דירות וסוויטות" הוסר — אין מספר דירות מאומת בריפו (SEO-AUDIT B4) */}
+            {/* מספר הדירות הוחזר עם ערך שמסרו הבעלים במפורש — 22 (2026-08-15;
+                קודם לכן "14+" הוסר באין אסמכתה, SEO-AUDIT B4) */}
             <div className="mt-8 grid grid-cols-2 gap-4">
               <StatCard rev countUp value="34–110" label="מ״ר לכל דירה" />
+              <StatCard rev countUp value="+22" label="דירות וסוויטות" />
               <StatCard rev countUp value="50 מ׳" label="מקו החוף" />
               <StatCard rev countUp value="24/7" label="שירות אישי" />
             </div>
