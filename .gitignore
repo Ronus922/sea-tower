@@ -52,3 +52,7 @@ next-env.d.ts
 /.agents/
 /.claude/skills/
 /skills-lock.json
+
+# קובצי מקור גולמיים של וידאו (DJI וכד׳) — נשארים ב-~/media-sources, לא בריפו
+public/videos/*.MOV
+public/videos/*.mov
