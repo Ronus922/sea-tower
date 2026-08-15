@@ -1,0 +1,134 @@
+/* ============================================================
+   ‏/v3 — "שמש ששוקעת לאורך הגלילה" (feat/home-v3-sun)
+   כל כלל scoped תחת ‎.v3-root‎ — אפס דליפה לשאר האתר.
+   אין מצבי-התחלה מוסתרים: ברירות המחדל של המשתנים נותנות סצנה
+   סטטית קריאה (אור יום + שמש קבועה) — גם no-JS וגם reduced-motion.
+   ============================================================ */
+
+.v3-root {
+  /* ברירת מחדל סטטית: אור יום, טקסט כהה, שמש חמימה — GSAP מנפיש משם */
+  --v3-sky: #e8f4fb;
+  --v3-ink: #0e2540;
+  --v3-sun-c: #ffd98a;
+  isolation: isolate; /* מאפשר לשכבת השמיים לשבת ב-z שלילי בתוך העמוד בלבד */
+}
+
+/* --- שכבת השמיים: fixed מאחורי כל התוכן --- */
+.v3-root .v3-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--v3-sky);
+  pointer-events: none;
+}
+.v3-root .v3-sun-svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* השמש: דיסקה + הילה ב-radial-gradient אחד על div (לא פילטר SVG).
+   מיקום ברירת המחדל = הנקודה הקבועה של reduced-motion/no-JS;
+   ‏MotionPathPlugin (align) מודד אותו ומפצה כשהוא כן רץ */
+.v3-root .v3-sun {
+  position: absolute;
+  top: 14%;
+  inset-inline-start: auto;
+  inset-inline-end: 6.5%;
+  width: 220px;
+  height: 220px;
+  margin: -110px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--v3-sun-c) 0 17%,
+    color-mix(in srgb, var(--v3-sun-c) 55%, transparent) 30%,
+    transparent 68%
+  );
+}
+@media (max-width: 767px) {
+  /* מובייל: שמש קטנה יותר, בלי הילה — רק הדיסקה */
+  .v3-root .v3-sun {
+    width: 84px;
+    height: 84px;
+    margin: -42px;
+    background: radial-gradient(circle, var(--v3-sun-c) 0 46%, transparent 50%);
+  }
+}
+
+/* --- הרקעים: השמיים במקום רקעי המקטעים. shorthand מאפס גם
+   background-image (הגרדיאנטים של hero/צור-קשר) --- */
+.v3-root section {
+  background: transparent !important;
+}
+
+/* --- קריאות: טקסט חופשי שיושב ישירות על השמיים רוכב על ‎--v3-ink‎.
+   מוחל רק על בלוקים המסומנים v3-on-sky — כרטיסים (דירות, פתרונות,
+   טופס, סטטיסטיקות, FAQ) שומרים רקע משלהם ואת צבעיהם המקוריים.
+   חריגים: כפתורים (רקע משלהם) וה-span הגרדיאנטי של ה-H1 --- */
+.v3-root .v3-on-sky {
+  color: var(--v3-ink);
+}
+.v3-root
+  .v3-on-sky
+  :where(h1, h2, h3, p, a, span, div, strong, small):not(
+    [class*="stm-btn"],
+    [class*="stm-btn"] *,
+    .text-transparent
+  ) {
+  color: var(--v3-ink);
+}
+
+/* --- תיקוני ניגודיות (סבב 2): משטחים קבועים.
+   רצועת הדמדומים זהב→לילה עוברת בהירות-ביניים שבה אף צבע טקסט חשוף
+   לא מגיע ל-4.5:1 (מתמטית: כשבהירות השמיים בין ~0.16 ל-~0.26). לכן כל
+   בלוק טקסט חופשי שחוצה אותה מקבל משטח משלו עם צבע טקסט מוצמד —
+   הצמדת --v3-ink מקומית מנתקת את הבלוק מהיפוך הצבע הגלובלי --- */
+.v3-root .v3-scrim {
+  --v3-ink: #0e2540;
+  background: rgba(250, 248, 243, 0.92);
+  border-radius: var(--radius-card-lg);
+  padding: 18px 20px;
+}
+.v3-root .v3-scrim-dark {
+  --v3-ink: #eaf4fb;
+  background: rgba(10, 29, 49, 0.9);
+  border-radius: var(--radius-card-lg);
+  padding: 22px 24px;
+}
+
+/* כפתורים על השמיים (מוחרגים מהיפוך הצבע בכוונה — צבעם קבוע,
+   לכן המשטח שלהם חייב להיות קבוע גם הוא) */
+.v3-root .v3-glass-dark {
+  background: rgba(10, 29, 49, 0.78);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+.v3-root .v3-surface {
+  background: #ffffff;
+}
+.v3-root .stm-link.v3-surface {
+  border-radius: 999px;
+  padding-inline: 16px;
+  color: var(--color-ocean-500);
+}
+
+/* --- אלמנט 2 מוגבר: וידאו בגובה 130% (מהלך 30% מהמיכל) --- */
+.v3-root .v3-media-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.v3-root .v3-media-wrap > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .v3-root .v3-media-wrap > video {
+    top: -30%;
+    bottom: auto;
+    height: 130%;
+  }
+}
