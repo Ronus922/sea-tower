@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
+import { Frank_Ruhl_Libre } from "next/font/google";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading, SectionKicker } from "@/components/ui/SectionHeading";
@@ -12,6 +13,15 @@ import { WaveSeparator } from "@/components/ui/WaveSeparator";
 
 /* רפרנס פנימי של מערכת העיצוב — לפיתוח בלבד: בפרודקשן מחזיר 404,
    ואסור לקשר אליו משום ניווט ציבורי */
+
+/* הסריף של ספר המותג — בשימוש רק כאן, ולכן נטען רק כאן (root layout טוען
+   Open Sans בלבד; ראו ההערה שם) */
+const frank = Frank_Ruhl_Libre({
+  variable: "--font-frank",
+  subsets: ["hebrew", "latin"],
+  display: "swap",
+  preload: false,
+});
 
 const CORE_COLORS = [
   { name: "Deep Sea", hex: "#081625" },
@@ -50,7 +60,7 @@ function DemoSection({ title, children }: { title: string; children: React.React
 export default function DesignSystemPreview() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <main>
+    <main className={frank.variable}>
       {/* כותרת העמוד */}
       <header className="relative overflow-hidden bg-[linear-gradient(120deg,#0a1d31_0%,#143c61_58%,#1d5888_100%)] pt-16 pb-32 text-white">
         <Container className="flex flex-col items-start gap-5">

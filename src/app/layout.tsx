@@ -1,18 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Frank_Ruhl_Libre } from "next/font/google";
 import { openSans } from "@/lib/fonts";
 import { BUSINESS } from "@/lib/business";
 import { Analytics } from "@/components/site/Analytics";
 import "./globals.css";
 
 /* Open Sans = הגופן הראשי של כל האתר (‎--font-sans‎ ב-tokens.css מצביע עליו).
-   Frank Ruhl נשמר כ-‎--font-serif‎ עבור עמוד ה-design-system הפנימי בלבד. */
-const frank = Frank_Ruhl_Libre({
-  variable: "--font-frank",
-  subsets: ["hebrew", "latin"],
-  display: "swap",
-});
-
+   Frank Ruhl (‎--font-serif‎) נטען בעמוד design-system בלבד — קודם לכן הוא
+   נטען כאן ו-61.6KB שלו עברו preload בכל עמוד ציבורי, בתחרות ישירה עם
+   ה-woff2 העברי של Open Sans שקובע את מהירות ה-swap של הטקסט. */
 const TITLE = "מגדל הים — דירות בוטיק וסוויטות על הים בחיפה";
 const DESCRIPTION =
   "מלון דירות בוטיק בבניין אלמוג על חוף הכרמל בחיפה — דירות וסוויטות מאובזרות ברמה מלונאית, 50 מטר מקו המים. לנופש, לעסקים, לרילוקיישן ולכל תקופה.";
@@ -77,7 +72,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="he" dir="rtl" className={`${openSans.variable} ${frank.variable}`}>
+    <html lang="he" dir="rtl" className={openSans.variable}>
       <body className="antialiased">
         <Analytics />
         {children}

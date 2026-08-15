@@ -291,7 +291,7 @@ export function SpecDrawer({
                 src={cover.src}
                 alt={cover.alt}
                 fill
-                sizes="560px"
+                sizes="(max-width: 596px) 94vw, 560px"
                 className="object-cover"
               />
             ) : (

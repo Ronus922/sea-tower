@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { preload } from "react-dom";
 import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { SectionHeading } from "@/components/ui/SectionHeading";
@@ -7,6 +8,7 @@ import { IconTile } from "@/components/ui/IconTile";
 import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { RoomsCarousel } from "@/components/site/RoomsCarousel";
 import { ContactForm } from "@/components/site/ContactForm";
 import { ArticleCard } from "@/components/site/articles/ArticleCard";
@@ -242,6 +244,10 @@ export const metadata = { alternates: { canonical: "/" } };
 export const revalidate = 300;
 
 export default async function Home() {
+  /* הפוסטר של וידאו ה-hero הוא ה-LCP של עמוד הבית; preload=metadata על
+     הווידאו לא מקדים אותו, ולכן מכריזים עליו מפורשות */
+  preload("/videos/hero-sea-poster.jpg", { as: "image", fetchPriority: "high" });
+
   /* GuestHub מחזיר רק חדרים שסומנו לאתר ויש להם גלריה. נפילת השירות מחזירה
      null, ואז המקטע מציג הודעה במקום קרוסלה במקום להפיל את העמוד */
   const rooms = (await fetchWebsiteRooms()) ?? [];
@@ -285,16 +291,16 @@ export default async function Home() {
               />
               מלון דירות מול הים · 50 מ׳ מהחוף
             </div>
-            {/* data-ws: מצב PLUS ברפרנס מפצל גם את ה-H1 למילים, בנוסף ל-heroIn */}
-            <h1
-              data-ws=""
-              className="hero-in-2 mb-5 text-[40px]/[1.1] font-extrabold tracking-heading md:text-display"
-            >
-              לחיות מול הים,
-              <br />
-              <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-                ברמה מלונאית
-              </span>
+            {/* מצב PLUS ברפרנס: פיצול מילים בנוסף ל-heroIn — מפוצל בשרת
+                (SplitWords) כך ששתי האנימציות יוצאות יחד ב-paint הראשון */}
+            <h1 className="hero-in-2 stm-ws-auto mb-5 text-[40px]/[1.1] font-extrabold tracking-heading md:text-display">
+              <SplitWords>
+                לחיות מול הים,
+                <br />
+                <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                  ברמה מלונאית
+                </span>
+              </SplitWords>
             </h1>
             <p className="hero-in-3 mb-8 max-w-[520px] text-lead text-[#cdddea]">
               דירות בוטיק וסוויטות מרווחות בבניין אלמוג, מגדלי חוף הכרמל — מאובזרות עד הפרט

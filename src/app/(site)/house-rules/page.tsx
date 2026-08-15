@@ -75,16 +75,10 @@ export default function HouseRules() {
               חוקי הבית
             </span>
           </nav>
-          <h1
-            data-rev="up"
-            className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
-          >
+          <h1 className="stm-load-up mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]">
             חוקי הבית
           </h1>
-          <p
-            data-rev="up"
-            className="mx-auto max-w-[660px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]"
-          >
+          <p className="stm-load-up stm-d1 mx-auto max-w-[660px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]">
             תנאי אירוח והוראות שימוש בדירה — כדי שכולם ייהנו משהות נעימה ובטוחה. אנא הקפידו על הכללים
             הבאים לאורך כל שהותכם בנכס.
           </p>

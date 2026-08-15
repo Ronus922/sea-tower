@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { ArticleBody } from "@/components/site/articles/ArticleBody";
 import { RelatedArticles } from "@/components/site/articles/RelatedArticles";
 import {
@@ -85,7 +86,7 @@ function MetaRow({ article }: { article: Article }) {
   ].filter(Boolean) as React.ReactNode[];
 
   return (
-    <div className="ar-meta" data-rev="up">
+    <div className="ar-meta stm-load-up stm-d2">
       {items.map((node, i) => (
         <span key={i} className="contents">
           {i > 0 && <span className="ar-dot" aria-hidden="true" />}
@@ -170,11 +171,11 @@ export default async function ArticlePage({
               {article.breadcrumbLabel ?? article.title}
             </span>
           </nav>
-          <div className="ar-tagline" data-rev="up">
+          <div className="ar-tagline stm-load-up">
             {CATEGORY_LABEL[article.category]}
           </div>
-          <h1 className="ar-title" data-ws="">
-            {article.title}
+          <h1 className="ar-title stm-ws-auto">
+            <SplitWords>{article.title}</SplitWords>
           </h1>
           <MetaRow article={article} />
         </div>

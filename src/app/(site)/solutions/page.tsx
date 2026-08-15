@@ -8,6 +8,7 @@ import { IconTile } from "@/components/ui/IconTile";
 import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
 import { VISIBLE_SOLUTIONS } from "@/data/solutions";
 
@@ -112,24 +113,20 @@ export default function Solutions() {
               פתרונות
             </span>
           </nav>
-          <h1
-            data-ws=""
-            className="mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]"
-          >
-            פתרון אירוח
-            <br />
-            <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-              לכל צורך
-            </span>
+          <h1 className="stm-ws-auto mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]">
+            <SplitWords>
+              פתרון אירוח
+              <br />
+              <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                לכל צורך
+              </span>
+            </SplitWords>
           </h1>
-          <p
-            data-rev="up"
-            className="mx-auto mb-[34px] max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]"
-          >
+          <p className="stm-load-up stm-d1 mx-auto mb-[34px] max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]">
             דירה אחת, אינסוף סיבות להגיע. בין אם לנופש קצר, לתקופת עבודה ממושכת או למעבר עיר —
             נתאים לכם בדיוק את מה שצריך, ללא בירוקרטיה.
           </p>
-          <div data-rev="sm" className="flex flex-wrap justify-center gap-2.5">
+          <div className="stm-load-sm stm-d2 flex flex-wrap justify-center gap-2.5">
             {VISIBLE_SOLUTIONS.map((s) => (
               <a
                 key={s.id}

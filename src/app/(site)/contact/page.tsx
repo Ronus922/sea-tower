@@ -7,6 +7,7 @@ import { IconTile } from "@/components/ui/IconTile";
 import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { ContactForm } from "@/components/site/ContactForm";
 import { BUSINESS, MAPS_EMBED, MAPS_LINK, whatsappUrl } from "@/lib/business";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
@@ -203,15 +204,14 @@ export default function Contact() {
               צור קשר
             </span>
           </nav>
-          <h1
-            data-ws=""
-            className="mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]"
-          >
-            בואו נדבר
-            <br />
-            <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-              על האירוח הבא שלכם
-            </span>
+          <h1 className="stm-ws-auto mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]">
+            <SplitWords>
+              בואו נדבר
+              <br />
+              <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                על האירוח הבא שלכם
+              </span>
+            </SplitWords>
           </h1>
           <p className="hero-in-3 mx-auto mb-[34px] max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]">
             בין אם אתם מחפשים חופשה מול הים, אירוח עסקי, מגורים לתקופה או ניהול לדירה שלכם —

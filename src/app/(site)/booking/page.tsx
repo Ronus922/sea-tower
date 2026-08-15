@@ -4,6 +4,7 @@ import { Container } from "@/components/ui/Container";
 import { Button } from "@/components/ui/Button";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { BUSINESS } from "@/lib/business";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
 import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
@@ -162,15 +163,14 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
               בדיקת זמינות והזמנה
             </span>
           </nav>
-          <h1
-            data-ws=""
-            className="mb-4 text-[40px]/[1.1] font-extrabold tracking-heading md:text-[54px]/[1.08]"
-          >
-            בחרו את הדירה
-            <br />
-            <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-              לתאריכים שלכם
-            </span>
+          <h1 className="stm-ws-auto mb-4 text-[40px]/[1.1] font-extrabold tracking-heading md:text-[54px]/[1.08]">
+            <SplitWords>
+              בחרו את הדירה
+              <br />
+              <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                לתאריכים שלכם
+              </span>
+            </SplitWords>
           </h1>
           <p className="hero-in-3 mx-auto max-w-[560px] text-[18px]/[1.6] font-light text-[#cdddea]">
             בחרו תאריכים ומספר אורחים, וצפו במחיר ללילה, בסה״כ לשהייה ובכל הפרטים — הכול
@@ -256,7 +256,7 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
           className="stm-blob absolute -top-[90px] -left-[50px] size-[340px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.25),transparent_70%)]"
         />
         <Container className="relative z-[2] max-w-[760px] text-center text-white">
-          <h2 data-ws="" className="mb-3.5 text-[32px]/[1.12] font-black tracking-heading md:text-[40px]/[1.12]">
+          <h2 data-ws="" className="mb-3.5 text-[32px]/[1.12] font-extrabold tracking-heading md:text-[40px]/[1.12]">
             צריכים עזרה בבחירה?
           </h2>
           <p className="mx-auto mb-[30px] max-w-[600px] text-[17px]/[1.6] text-[#bcd4e6]">

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Container } from "@/components/ui/Container";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { ArticlesBrowser } from "@/components/site/articles/ArticlesBrowser";
 import { LISTED_ARTICLES } from "@/data/articles";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
@@ -94,22 +95,13 @@ export default function ArticlesIndex() {
             </svg>
             <span className="font-semibold text-white">מאמרים</span>
           </nav>
-          <div
-            data-rev="up"
-            className="mb-3.5 text-sm font-semibold tracking-[0.14em] text-[#5fa8d8]"
-          >
+          <div className="stm-load-up mb-3.5 text-sm font-semibold tracking-[0.14em] text-[#5fa8d8]">
             פוסטים מומלצים
           </div>
-          <h1
-            data-ws=""
-            className="mb-[18px] text-[40px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
-          >
-            מאמרים
+          <h1 className="stm-ws-auto mb-[18px] text-[40px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]">
+            <SplitWords>מאמרים</SplitWords>
           </h1>
-          <p
-            data-rev="up"
-            className="mx-auto max-w-[640px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]"
-          >
+          <p className="stm-load-up stm-d1 mx-auto max-w-[640px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]">
             {INTRO}
           </p>
         </Container>

@@ -81,20 +81,14 @@ export default function Faq() {
               שאלות נפוצות
             </span>
           </nav>
-          <h1
-            data-rev="up"
-            className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
-          >
+          <h1 className="stm-load-up mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]">
             שאלות ותשובות
           </h1>
-          <p
-            data-rev="up"
-            className="mx-auto mb-[34px] max-w-[680px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]"
-          >
+          <p className="stm-load-up stm-d1 mx-auto mb-[34px] max-w-[680px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]">
             כל מה שחשוב לדעת לפני ההגעה — השירותים שאנחנו מספקים, ההבדל בין בית מלון למלון דירות, ומה
             מחכה לכם באזור. לא מצאתם תשובה? נשמח שתעדכנו אותנו ונדאג להנגיש אותה לכולם.
           </p>
-          <div data-rev="up" className="faq-search-wrap">
+          <div className="stm-load-up stm-d2 faq-search-wrap">
             <svg
               className="faq-search-ic"
               width="19"
