@@ -75,35 +75,12 @@ export function Footer() {
                 </span>
               </span>
             </div>
-            <p className="mb-[18px] text-sm leading-[1.65]">
+            <p className="text-sm leading-[1.65]">
               מגדל הים בבניין אלמוג בחיפה, הינו מלון דירות להשכרה יומית, המכיל דירות ויחידות נופש
               להשכרה לטווח קצר, בינוני או ארוך. בבניין אלמוג, מגדלי חוף הכרמל (לשעבר מלון מרידיאן),
               בכניסה הדרומית לחיפה ממש על חוף הכרמל, רק כ-50 מטר מקו המים, תוכלו ליהנות מחדרים
               גדולים, יפים ומאובזרים בכל מה שיש בבית, עם נוף עוצר נשימה.
             </p>
-            {/* רשתות חברתיות — הכתובות הרשמיות מהבעלים (2026-08-15; סוגר את
-                DESIGN-AUDIT ממצא 7). סדר DOM: פייסבוק→לינקדאין, שב-RTL נותן
-                את הסדר הוויזואלי לינקדאין, יוטיוב, אינסטגרם, פייסבוק (משמאל
-                לימין) לפי תמונת הרפרנס */}
-            <ul className="flex flex-wrap items-center justify-center gap-3">
-              {SOCIAL_LINKS.map((s) => (
-                <li key={s.id}>
-                  {/* מצב פוקוס: טבעת ה-focus-visible הגלובלית (base.css — ‏2px
-                      sea-500) חלה כאן כמו על כל קישור באתר */}
-                  <a
-                    href={s.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={s.label}
-                    className="flex size-11 items-center justify-center rounded-[10px] border border-white/12 bg-white/6 text-[#9fb6c8] transition-colors hover:bg-white/14 hover:text-white"
-                  >
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                      <path d={SOCIAL_ICON_PATHS[s.id]} />
-                    </svg>
-                  </a>
-                </li>
-              ))}
-            </ul>
           </div>
 
           {/* כותרות העמודות הן div עם aria-labelledby — לא h2: כותרת בפוטר
@@ -175,7 +152,31 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mx-auto mt-[18px] flex max-w-shell flex-wrap items-center justify-between gap-2.5 text-[13px] text-[#6c869a]">
+        {/* רשתות חברתיות — הכתובות הרשמיות מהבעלים (2026-08-15). בתחתית
+            הפוטר, מיושר לימין (flex-start ב-RTL) לפי הנחיית בעלים 2026-08-15.
+            סדר DOM: פייסבוק→לינקדאין, שב-RTL נותן את הסדר הוויזואלי לינקדאין,
+            יוטיוב, אינסטגרם, פייסבוק (משמאל לימין) לפי תמונת הרפרנס */}
+        <ul className="mx-auto mt-5 flex max-w-shell flex-wrap items-center gap-3">
+          {SOCIAL_LINKS.map((s) => (
+            <li key={s.id}>
+              {/* מצב פוקוס: טבעת ה-focus-visible הגלובלית (base.css — ‏2px
+                  sea-500) חלה כאן כמו על כל קישור באתר */}
+              <a
+                href={s.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={s.label}
+                className="flex size-11 items-center justify-center rounded-[10px] border border-white/12 bg-white/6 text-[#9fb6c8] transition-colors hover:bg-white/14 hover:text-white"
+              >
+                <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d={SOCIAL_ICON_PATHS[s.id]} />
+                </svg>
+              </a>
+            </li>
+          ))}
+        </ul>
+
+        <div className="mx-auto mt-4 flex max-w-shell flex-wrap items-center justify-between gap-2.5 border-t border-white/8 pt-4 text-[13px] text-[#6c869a]">
           <span>© 2026 מגדל הים — כל הזכויות שמורות</span>
           {/* "הצהרת נגישות" ו"מדיניות ביטולים" היו ספאנים מתים שנראו כקישורים.
               הוסרו עד שיהיו עמודים אמיתיים (SEO-AUDIT B7) */}
