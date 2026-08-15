@@ -50,6 +50,34 @@ const LINK_COLUMNS: Array<{
   },
 ];
 
+/* רשימת אייקוני הרשתות — מרונדרת פעמיים (מיקום /v2 ומיקום ברירת המחדל);
+   ‏body:has(.v2-root) ב-className של הקוראים קובע איזה עותק מוצג. סדר DOM:
+   פייסבוק→לינקדאין, שב-RTL נותן את הסדר הוויזואלי לינקדאין, יוטיוב,
+   אינסטגרם, פייסבוק (משמאל לימין) לפי תמונת הרפרנס */
+function SocialList({ className }: { className: string }) {
+  return (
+    <ul className={`flex-wrap items-center gap-3 ${className}`}>
+      {SOCIAL_LINKS.map((s) => (
+        <li key={s.id}>
+          {/* מצב פוקוס: טבעת ה-focus-visible הגלובלית (base.css — ‏2px
+              sea-500) חלה כאן כמו על כל קישור באתר */}
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={s.label}
+            className="flex size-11 items-center justify-center rounded-[10px] border border-white/12 bg-white/6 text-[#9fb6c8] transition-colors hover:bg-white/14 hover:text-white"
+          >
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d={SOCIAL_ICON_PATHS[s.id]} />
+            </svg>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function Footer() {
   return (
     /* השוליים השליליים מרימים את גל הפתיחה מעל תחתית המקטע הקודם — כך הגל
@@ -81,6 +109,10 @@ export function Footer() {
               בכניסה הדרומית לחיפה ממש על חוף הכרמל, רק כ-50 מטר מקו המים, תוכלו ליהנות מחדרים
               גדולים, יפים ומאובזרים בכל מה שיש בבית, עם נוף עוצר נשימה.
             </p>
+            {/* ‏/v2 בלבד: האייקונים עוברים מעל הקו המפריד, לאזור הריק שמתחת
+                לתיאור בעמודה הימנית (הראשונה ב-RTL). בשאר העמודים — מוסתר,
+                והעותק התחתון (ברירת המחדל) מוצג */}
+            <SocialList className="mt-6 hidden [body:has(.v2-root)_&]:flex" />
           </div>
 
           {/* כותרות העמודות הן div עם aria-labelledby — לא h2: כותרת בפוטר
@@ -153,30 +185,12 @@ export function Footer() {
         </div>
 
         {/* רשתות חברתיות — הכתובות הרשמיות מהבעלים (2026-08-15). בתחתית
-            הפוטר, מיושר לימין (flex-start ב-RTL) לפי הנחיית בעלים 2026-08-15.
-            סדר DOM: פייסבוק→לינקדאין, שב-RTL נותן את הסדר הוויזואלי לינקדאין,
-            יוטיוב, אינסטגרם, פייסבוק (משמאל לימין) לפי תמונת הרפרנס */}
-        <ul className="mx-auto mt-5 flex max-w-shell flex-wrap items-center gap-3">
-          {SOCIAL_LINKS.map((s) => (
-            <li key={s.id}>
-              {/* מצב פוקוס: טבעת ה-focus-visible הגלובלית (base.css — ‏2px
-                  sea-500) חלה כאן כמו על כל קישור באתר */}
-              <a
-                href={s.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={s.label}
-                className="flex size-11 items-center justify-center rounded-[10px] border border-white/12 bg-white/6 text-[#9fb6c8] transition-colors hover:bg-white/14 hover:text-white"
-              >
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                  <path d={SOCIAL_ICON_PATHS[s.id]} />
-                </svg>
-              </a>
-            </li>
-          ))}
-        </ul>
+            הפוטר, מיושר לימין (flex-start ב-RTL) לפי הנחיית בעלים 2026-08-15 */}
+        <SocialList className="mx-auto mt-5 flex max-w-shell [body:has(.v2-root)_&]:hidden" />
 
-        <div className="mx-auto mt-4 flex max-w-shell flex-wrap items-center justify-between gap-2.5 border-t border-white/8 pt-4 text-[13px] text-[#6c869a]">
+        {/* ‏/v2: בלי שורת האייקונים התחתונה נשארים שני קווים צמודים
+            (border-b של הגריד + border-t כאן) — מבטלים את התחתון */}
+        <div className="mx-auto mt-4 flex max-w-shell flex-wrap items-center justify-between gap-2.5 border-t border-white/8 pt-4 text-[13px] text-[#6c869a] [body:has(.v2-root)_&]:mt-0 [body:has(.v2-root)_&]:border-t-0">
           <span>© 2026 מגדל הים — כל הזכויות שמורות</span>
           {/* "הצהרת נגישות" ו"מדיניות ביטולים" היו ספאנים מתים שנראו כקישורים.
               הוסרו עד שיהיו עמודים אמיתיים (SEO-AUDIT B7) */}
