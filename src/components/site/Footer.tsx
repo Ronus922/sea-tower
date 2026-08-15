@@ -41,7 +41,7 @@ export function Footer() {
   return (
     /* השוליים השליליים מרימים את גל הפתיחה מעל תחתית המקטע הקודם — כך הגל
        עובד מעל כל רקע עמוד. מקטע אחרון בעמוד חייב ריפוד תחתון בגובה הגל
-       (70/120px) — ראו ‎.ed-wave-clear‎ ב-editorial.css */
+       (70/120px) */
     <footer className="-mt-[70px] text-[#9fb6c8] md:-mt-[120px]">
       <WaveSeparator flow position="bottom" fill="var(--color-navy-950)" />
       <div className="bg-navy-950 px-5 pt-14 pb-6 sm:px-8 lg:px-14">
@@ -56,7 +56,7 @@ export function Footer() {
                 className="object-contain opacity-92 brightness-0 invert"
               />
               <span className="flex flex-col leading-[1.05]">
-                <span className="font-serif text-[26px] font-semibold text-white">מגדל הים</span>
+                <span className="text-[26px] font-extrabold text-white">מגדל הים</span>
                 <span className="text-[13px] font-light tracking-[0.12em] text-white">
                   דירות בוטיק על הים
                 </span>

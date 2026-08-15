@@ -4,15 +4,52 @@
    transform + opacity בלבד
    ============================================================ */
 
+@theme {
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-sm: float-sm 5s ease-in-out infinite;
+  --animate-marquee: marquee 30s linear infinite;
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-14px);
+    }
+  }
+  @keyframes float-sm {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(10px);
+    }
+  }
+  /* המסלול dir=ltr עם שתי סדרות זהות (mqqScroll ברפרנס) — נע ל--50% */
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}
+
 /* ============================================================
-   מנוע החשיפה — גרסה מרוסנת: כניסות transform/opacity בלבד,
-   בלי פיצול מילים, בלי מרקיזה, בלי אלמנטים צפים.
+   מנוע החשיפה — פורט 1:1 מהמנוע של הרפרנס (מצב PLUS פעיל):
+   כותרות מילה-אחר-מילה · טקסט 46px/0.9s · מדיה scale 1.06/1s ·
+   כפתורים 20px/0.8s · כרטיסים 30px/0.8s · סטאגר 100ms לקבוצה.
    שער: html.stm-js (סקריפט inline לפני ה-hydration) → אין הבזק.
    MotionEngine.tsx מפעיל דרך IntersectionObserver (פעם אחת).
    ============================================================ */
 
 html.stm-js [data-rev] {
   opacity: 0;
+}
+/* !important: על ה-H1 של ה-Hero רצה גם אנימציית heroIn (שגוברת על הצהרה
+   רגילה בקסקדה) — השער חייב לנצח עד פיצול המילים. reduced-motion למטה גובר */
+html.stm-js [data-ws]:not(.stm-ws-ready) {
+  opacity: 0 !important;
 }
 [data-rev="card"].stm-in {
   animation: stm-rev-card 0.8s var(--ease-brand) both;
@@ -67,21 +104,46 @@ html.stm-js [data-rev] {
   }
 }
 
+/* כותרות מילה-אחר-מילה: כל מילה עולה 0.6em עם blur, השהיה 68ms למילה */
+.stm-w {
+  display: inline-block;
+  opacity: 0;
+  will-change: transform, opacity, filter;
+}
+.stm-w.stm-win {
+  animation: stm-word 0.72s var(--ease-brand) both;
+}
+@keyframes stm-word {
+  0% {
+    opacity: 0;
+    transform: translateY(0.6em) scale(0.965);
+    filter: blur(5px);
+  }
+  62% {
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+
 /* ---------- שפת hover (מהמנוע) ---------- */
 
-/* כפתור ראשי: התרוממות עדינה, חץ זז שמאלה */
+/* כפתור ראשי: התרוממות 3px + זוהר, חץ זז שמאלה */
 .stm-btn-primary {
   transition:
     transform 0.3s var(--ease-brand),
     box-shadow 0.3s var(--ease-brand),
-    background-color 0.3s var(--ease-brand);
+    filter 0.3s var(--ease-brand);
 }
 .stm-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 26px rgba(8, 22, 37, 0.22);
+  transform: translateY(-3px);
+  filter: drop-shadow(0 14px 22px rgba(43, 127, 184, 0.4));
 }
 .stm-btn-primary:active {
-  transform: translateY(0);
+  transform: translateY(-1px);
 }
 .stm-btn-primary svg {
   transition: transform 0.3s var(--ease-brand);
@@ -238,18 +300,66 @@ details[open] > *:not(summary) {
   }
 }
 
+/* עיגולי הילה דקורטיביים "נושמים" */
+.stm-blob {
+  animation: stm-breathe 9s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes stm-breathe {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+}
+
+/* פס התקדמות גלילה (מצב PLUS) — RTL: צומח מימין */
+#stm-prog {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 3px;
+  z-index: 9999;
+  transform-origin: right center;
+  transform: scaleX(0);
+  background: linear-gradient(
+    90deg,
+    var(--color-aqua),
+    var(--color-sea-500),
+    var(--color-ocean-400)
+  );
+  box-shadow: 0 1px 7px rgba(43, 127, 184, 0.45);
+  pointer-events: none;
+  transition: transform 0.12s linear;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-sm,
+  .animate-marquee,
   .stm-in,
+  .stm-w.stm-win,
+  .stm-blob,
   details[open] > *:not(summary) {
     animation: none !important;
   }
-  html.stm-js [data-rev] {
+  html.stm-js [data-rev],
+  html.stm-js [data-ws]:not(.stm-ws-ready),
+  .stm-w {
     opacity: 1 !important;
   }
   .stm-btn-primary:hover,
   .stm-btn-outline:hover,
   .stm-card:hover {
     transform: none;
+  }
+  #stm-prog {
+    display: none !important;
   }
   html {
     scroll-behavior: auto;

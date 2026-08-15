@@ -2,15 +2,67 @@
 
 import { useEffect } from "react";
 
-/* מנוע התנועה — גרסה מרוסנת (DESIGN-AUDIT ממצא 5).
-   נשארו: חשיפות בגלילה (IntersectionObserver, פעם אחת, transform/opacity
-   בלבד) וצל ה-header. הוסרו: פיצול כותרות למילים, מוני ספירה, פרלקסה,
-   פס התקדמות, מכונת כתיבה ומהירות מרקיזה. */
+/* מנוע התנועה של עמוד הבית — פורט מהמנוע האוניברסלי של הרפרנס.
+   ה-CSS ב-motion.css; כאן רק ה-JS: חשיפות (IntersectionObserver, פעם אחת),
+   פיצול כותרות למילים, מוני ספירה, צל header, פרלקסה, פס התקדמות,
+   מהירות מרקיזה וזרימת שליחת טפסים. הכול transform/opacity בלבד. */
 
+const WORD_DELAY_MS = 68;
+const WORD_DELAY_CAP_MS = 780;
 const STAGGER_MS = 100;
 const STAGGER_CAP_MS = 500;
+const MARQUEE_PX_PER_MS = 0.055;
+
+function splitWords(el: HTMLElement) {
+  if (el.dataset.split) return;
+  el.dataset.split = "1";
+  const walk = (node: Node) => {
+    Array.from(node.childNodes).forEach((c) => {
+      if (c.nodeType === Node.TEXT_NODE) {
+        if (!c.nodeValue?.trim()) return;
+        const frag = document.createDocumentFragment();
+        c.nodeValue.split(/(\s+)/).forEach((p) => {
+          if (!p) return;
+          if (!p.trim()) {
+            frag.appendChild(document.createTextNode(p));
+            return;
+          }
+          const s = document.createElement("span");
+          s.className = "stm-w";
+          s.textContent = p;
+          frag.appendChild(s);
+        });
+        node.replaceChild(frag, c);
+      } else if (c.nodeType === Node.ELEMENT_NODE && (c as HTMLElement).tagName !== "BR") {
+        // ביטוי עם bg-clip:text (הגרדיאנט ב-H1) = יחידה אחת, כדי לשמור על המילוי
+        const child = c as HTMLElement;
+        const g = getComputedStyle(child);
+        if (g.webkitBackgroundClip === "text" || g.backgroundClip === "text") {
+          child.classList.add("stm-w");
+        } else {
+          walk(child);
+        }
+      }
+    });
+  };
+  walk(el);
+  el.classList.add("stm-ws-ready");
+}
+
+function revealWords(el: HTMLElement) {
+  if (el.dataset.wdone) return;
+  el.dataset.wdone = "1";
+  el.querySelectorAll<HTMLElement>(".stm-w").forEach((w, i) => {
+    w.style.animationDelay = Math.min(i * WORD_DELAY_MS, WORD_DELAY_CAP_MS) + "ms";
+    w.classList.add("stm-win");
+  });
+}
 
 function revealEl(el: HTMLElement) {
+  if (el.hasAttribute("data-ws")) {
+    revealWords(el);
+    return;
+  }
   if (el.classList.contains("stm-in")) return;
   el.classList.add("stm-in");
   el.addEventListener(
@@ -26,11 +78,46 @@ function revealEl(el: HTMLElement) {
 
 function forceVisible(el: HTMLElement) {
   el.removeAttribute("data-rev");
+  el.classList.add("stm-ws-ready");
+  el.querySelectorAll<HTMLElement>(".stm-w").forEach((w) => {
+    w.style.opacity = "1";
+  });
+}
+
+/* ספירת כל מספר בטקסט (טווחים כמו "34–110", יחסים כמו "24/7") — animNumbers מהרפרנס */
+function countUpText(el: HTMLElement, durMs: number) {
+  if (el.dataset.cu) return;
+  el.dataset.cu = "1";
+  const tpl = el.textContent ?? "";
+  const re = /\d+(?:\.\d+)?/g;
+  const nums = Array.from(tpl.matchAll(re)).map((m) => ({
+    v: parseFloat(m[0]),
+    dec: (m[0].split(".")[1] || "").length,
+  }));
+  if (!nums.length) return;
+  let t0: number | null = null;
+  const frame = (t: number) => {
+    if (t0 === null) t0 = t;
+    const p = Math.min((t - t0) / durMs, 1);
+    const e = 1 - Math.pow(1 - p, 3); // ease-out cubic
+    let i = 0;
+    el.textContent = tpl.replace(re, () => {
+      const n = nums[i++];
+      return (n.v * e).toFixed(n.dec);
+    });
+    if (p < 1) requestAnimationFrame(frame);
+    else el.textContent = tpl;
+  };
+  requestAnimationFrame(frame);
+  window.setTimeout(() => {
+    el.textContent = tpl;
+  }, durMs + 2700); // רשת ביטחון אם rAF הושהה
 }
 
 export function MotionEngine() {
   useEffect(() => {
     const RM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const MOBILE = matchMedia("(max-width: 768px)").matches;
     const cleanups: Array<() => void> = [];
     const timers: number[] = [];
 
@@ -43,14 +130,39 @@ export function MotionEngine() {
       cleanups.push(() => window.removeEventListener("scroll", onScroll));
     }
 
+    /* --- מוני ספירה --- */
+    const countTargets = document.querySelectorAll<HTMLElement>("[data-countup]");
+    const ratingTargets = document.querySelectorAll<HTMLElement>("[data-count]");
+    if (RM) {
+      // סטטי — הטקסט כבר מכיל את הערכים הסופיים
+    } else if (countTargets.length || ratingTargets.length) {
+      const io = new IntersectionObserver(
+        (ents) => {
+          ents.forEach((e) => {
+            if (!e.isIntersecting) return;
+            const el = e.target as HTMLElement;
+            countUpText(el, el.hasAttribute("data-count") ? 1450 : 1500);
+            io.unobserve(el);
+          });
+        },
+        { threshold: 0.4 }
+      );
+      [...countTargets, ...ratingTargets].forEach((el) => io.observe(el));
+      cleanups.push(() => io.disconnect());
+    }
+
     /* --- חשיפות --- */
-    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-rev]"));
+    const targets = Array.from(document.querySelectorAll<HTMLElement>("[data-rev], [data-ws]"));
     if (RM) {
       targets.forEach(forceVisible);
     } else if (targets.length) {
-      // סטאגר לקבוצה (לפי הורה משותף)
+      // פיצול כותרות + סטאגר לקבוצה (לפי הורה משותף)
       const groupIdx = new Map<HTMLElement | null, number>();
       targets.forEach((el) => {
+        if (el.hasAttribute("data-ws")) {
+          splitWords(el);
+          return;
+        }
         const p = el.parentElement;
         const n = groupIdx.get(p) ?? 0;
         groupIdx.set(p, n + 1);
@@ -76,20 +188,87 @@ export function MotionEngine() {
       });
       cleanups.push(() => io.disconnect());
 
-      // רשתות ביטחון: לעולם לא משאירים תוכן מוסתר
+      // רשתות ביטחון (מהרפרנס): לעולם לא משאירים תוכן מוסתר
       timers.push(
         window.setTimeout(() => {
           targets.forEach((el) => {
-            if (
-              el.hasAttribute("data-rev") &&
-              el.getBoundingClientRect().top < (window.innerHeight || 800)
-            ) {
+            const gated =
+              el.hasAttribute("data-rev") ||
+              (el.hasAttribute("data-ws") && !el.dataset.wdone);
+            if (gated && el.getBoundingClientRect().top < (window.innerHeight || 800)) {
               revealEl(el);
             }
           });
         }, 4000),
         window.setTimeout(() => targets.forEach(forceVisible), 14000)
       );
+    }
+
+    /* --- פרלקסה עדינה על תמונת ה-Hero (דסקטופ בלבד) --- */
+    const px = document.querySelector<HTMLElement>("[data-parallax]");
+    if (px && !RM && !MOBILE) {
+      const base = px.getBoundingClientRect().top + window.scrollY;
+      let ticking = false;
+      const upd = () => {
+        ticking = false;
+        const rel = window.scrollY + window.innerHeight * 0.32 - base;
+        const off = Math.max(-20, Math.min(20, rel * 0.04));
+        px.style.transform = `translateY(${-off}px)`;
+      };
+      const onScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(upd);
+        }
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      cleanups.push(() => window.removeEventListener("scroll", onScroll));
+      upd();
+    }
+
+    /* --- פס התקדמות גלילה (PLUS) --- */
+    if (!RM) {
+      let bar = document.getElementById("stm-prog");
+      if (!bar) {
+        bar = document.createElement("div");
+        bar.id = "stm-prog";
+        document.body.appendChild(bar);
+      }
+      const el = bar;
+      let ticking = false;
+      const upd = () => {
+        ticking = false;
+        const h = document.documentElement;
+        const max = h.scrollHeight - h.clientHeight || 1;
+        el.style.transform = `scaleX(${Math.min(1, Math.max(0, window.scrollY / max))})`;
+      };
+      const onScroll = () => {
+        if (!ticking) {
+          ticking = true;
+          requestAnimationFrame(upd);
+        }
+      };
+      window.addEventListener("scroll", onScroll, { passive: true });
+      window.addEventListener("resize", upd, { passive: true });
+      cleanups.push(() => {
+        window.removeEventListener("scroll", onScroll);
+        window.removeEventListener("resize", upd);
+        el.remove();
+      });
+      upd();
+    }
+
+    /* --- מהירות מרקיזה: ‎55px/s קבועים, לפי רוחב סדרה נמדד --- */
+    const track = document.querySelector<HTMLElement>(".mqq-track");
+    if (track && !RM) {
+      const setDur = () => {
+        const set = track.querySelector<HTMLElement>(".mqq-set");
+        const w = set?.getBoundingClientRect().width ?? 0;
+        if (w > 0) track.style.animationDuration = Math.round(w / MARQUEE_PX_PER_MS) + "ms";
+      };
+      setDur();
+      window.addEventListener("resize", setDur, { passive: true });
+      cleanups.push(() => window.removeEventListener("resize", setDur));
     }
 
     return () => {

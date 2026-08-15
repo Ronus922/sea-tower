@@ -31,7 +31,7 @@ function ArrowButton({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className={`absolute top-[30%] z-10 flex size-11 items-center justify-center rounded-full border border-line bg-white/95 p-2 text-navy-800 shadow-e2 backdrop-blur-[2px] transition-[opacity,transform] duration-200 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-500 disabled:pointer-events-none disabled:opacity-0 ${
+      className={`absolute top-[86px] z-10 flex size-11 items-center justify-center rounded-full border border-line bg-white/95 p-2 text-navy-800 shadow-e2 backdrop-blur-[2px] transition-[opacity,transform] duration-200 hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-500 disabled:pointer-events-none disabled:opacity-0 md:top-[104px] ${
         dir === "start" ? "start-1.5" : "end-1.5"
       }`}
     >
