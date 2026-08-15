@@ -2,6 +2,20 @@
    מגדל הים — Base (selection, focus, defaults)
    ============================================================ */
 
+/* fallback מטרי ל-Open Sans על אנדרואיד: ה-fallback האוטומטי של next/font
+   הוא ‎src: local(Arial)‎ — גופן שלא קיים באנדרואיד, ושם הטקסט נופל ל-Roboto
+   בלי שום פיצוי מטרי, וה-swap מזיז את כל הטקסט. ה-face הזה נותן ל-Roboto
+   אותם overrides ש-next/font חישב ל-Arial (Roboto ו-Arial קרובים מטרית;
+   קירוב מכויל עדיף על אפס פיצוי). נצרך דרך --font-sans ב-tokens.css. */
+@font-face {
+  font-family: "Open Sans Fallback Android";
+  src: local("Roboto");
+  size-adjust: 105.15%;
+  ascent-override: 101.65%;
+  descent-override: 27.86%;
+  line-gap-override: 0%;
+}
+
 ::selection {
   background: var(--color-aqua);
   color: var(--color-navy-900);
@@ -16,6 +30,13 @@ body {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background: #fff;
+}
+
+/* מוני הספירה משכתבים ספרות כל פריים — ספרות ברוחב אחיד מונעות ריצוד
+   רוחב של הטקסט בזמן האנימציה (הערך הסופי זהה ויזואלית) */
+[data-countup],
+[data-count] {
+  font-variant-numeric: tabular-nums;
 }
 
 /* הרפרנס משתמש ב-outline:none בלי תחליף — אצלנו תמיד יש focus נראה */

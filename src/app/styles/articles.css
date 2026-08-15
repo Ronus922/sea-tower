@@ -191,24 +191,28 @@
 }
 
 /* חשיפת כרטיסים מדורגת — CSS בלבד, נטען בכל הוספת DOM (סינון/עימוד),
-   כך שכרטיסים חדשים אף פעם לא נותרים מוסתרים. delay לפי מיקום בשורה. */
+   כך שכרטיסים חדשים אף פעם לא נותרים מוסתרים. delay לפי מיקום בשורה.
+   הסלקטור סופר את עוטפי העימוד (ילדי art-wrap הישירים) — כל art-item הוא
+   ילד יחיד של עוטף cotents/art-offpage, ולכן nth-child ישיר עליו תמיד היה 1
+   וכל ההשהיות מתו. nth-child(n+7) מקבע את יתר הכרטיסים על ההשהיה המקסימלית
+   כדי שעמוד של 16 לא ימשוך את הקסקדה לאורך שנייה וחצי. */
 @media (prefers-reduced-motion: no-preference) {
   .art-item {
     animation: artCardIn 0.6s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   }
-  .art-item:nth-child(2) {
+  .art-wrap > :nth-child(2) .art-item {
     animation-delay: 0.06s;
   }
-  .art-item:nth-child(3) {
+  .art-wrap > :nth-child(3) .art-item {
     animation-delay: 0.12s;
   }
-  .art-item:nth-child(4) {
+  .art-wrap > :nth-child(4) .art-item {
     animation-delay: 0.18s;
   }
-  .art-item:nth-child(5) {
+  .art-wrap > :nth-child(5) .art-item {
     animation-delay: 0.24s;
   }
-  .art-item:nth-child(6) {
+  .art-wrap > :nth-child(n + 6) .art-item {
     animation-delay: 0.3s;
   }
 }
@@ -265,7 +269,8 @@
   border-bottom: 1px solid #eef2f6;
   transition: background-color 0.25s ease;
 }
-.art-wrap.is-list .art-item:last-child {
+/* הפריט האחרון נקבע לפי עוטף העימוד — art-item הוא תמיד ילד יחיד של העוטף */
+.art-wrap.is-list > :last-child .art-item {
   border-bottom: none;
 }
 .art-wrap.is-list .art-item:hover {

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { RoomCard } from "@/components/site/RoomCard";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { fetchWebsiteRooms, type PublicRoom } from "@/lib/booking-api";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd, absUrl, businessRef } from "@/lib/seo";
 import { roomBlurb, roomCoverImage } from "@/lib/rooms-view";
@@ -133,20 +134,16 @@ export default async function Rooms() {
               הדירות שלנו
             </span>
           </nav>
-          <h1
-            data-ws=""
-            className="mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]"
-          >
-            הדירות
-            <br />
-            <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-              והסוויטות שלנו
-            </span>
+          <h1 className="stm-ws-auto mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]">
+            <SplitWords>
+              הדירות
+              <br />
+              <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                והסוויטות שלנו
+              </span>
+            </SplitWords>
           </h1>
-          <p
-            data-rev="up"
-            className="mx-auto max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]"
-          >
+          <p className="stm-load-up stm-d1 mx-auto max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]">
             סטודיו זוגי, דירת חדר שינה וסלון או סוויטה משפחתית — כולן במגדל אחד מול הים,
             50 מטר מקו המים. בחרו את מה שמתאים לכם ובדקו זמינות ומחיר לתאריכים שלכם.
           </p>

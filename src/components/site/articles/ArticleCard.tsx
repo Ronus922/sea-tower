@@ -27,7 +27,15 @@ function Chevron({ size }: { size: number }) {
   );
 }
 
-export function ArticleCard({ article }: { article: ArticleCardData }) {
+export function ArticleCard({
+  article,
+  layout = "grid",
+}: {
+  article: ArticleCardData;
+  /* בתצוגת רשימה התמונה היא 172×104 (ו-104×74 בנייד) — sizes של הגריד
+     גרם שם להורדת מועמד גדול פי ~8 בנייד */
+  layout?: "grid" | "list";
+}) {
   return (
     <article className="art-item" data-topic={article.category}>
       <Link className="art-link" href={`/articles/${article.slug}`}>
@@ -37,7 +45,11 @@ export function ArticleCard({ article }: { article: ArticleCardData }) {
             src={article.image}
             alt={article.imageAlt}
             fill
-            sizes="(max-width: 560px) 100vw, (max-width: 820px) 50vw, 360px"
+            sizes={
+              layout === "list"
+                ? "(max-width: 560px) 104px, 172px"
+                : "(max-width: 560px) 100vw, (max-width: 820px) 50vw, 360px"
+            }
           />
         </div>
         <div className="art-body">

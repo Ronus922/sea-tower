@@ -2,7 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { ArticleCard, type ArticleCardData } from "./ArticleCard";
-import type { ArticleCategory } from "@/data/articles";
+import { CATEGORY_LABEL, type ArticleCategory } from "@/data/articles";
+import { isOnPage, totalPagesFor } from "./paging";
 
 /* בקרות המאמרים — סינון לפי קטגוריה, מעבר גריד/רשימה, ועימוד.
    הכול פונקציונלי ונגזר מהנתונים: הספירות, הכרטיסים המוצגים והעמודים.
@@ -12,15 +13,17 @@ import type { ArticleCategory } from "@/data/articles";
    קודם לכן ה-slice החזיר 6 כרטיסים בלבד, כך שכל מאמר מהעמוד השני לא היה
    קיים ב-HTML של /articles ולא היה לו שום קישור נכנס באתר. */
 
-const PAGE_SIZE = 6;
-
 type Topic = "all" | ArticleCategory;
 type View = "grid" | "list";
 
+/* הטאבים נגזרים מ-CATEGORY_LABEL — הוספת קטגוריה ב-articles.ts מוסיפה
+   טאב אוטומטית, בלי רשימה ידנית שמתיישנת */
 const TABS: { topic: Topic; label: string }[] = [
   { topic: "all", label: "הכל" },
-  { topic: "general", label: "כללי" },
-  { topic: "area", label: "בסביבה" },
+  ...(Object.entries(CATEGORY_LABEL) as [ArticleCategory, string][]).map(([topic, label]) => ({
+    topic,
+    label,
+  })),
 ];
 
 function GridIcon() {
@@ -63,24 +66,24 @@ export function ArticlesBrowser({ articles }: { articles: ArticleCardData[] }) {
   const [view, setView] = useState<View>("grid");
   const [page, setPage] = useState(1);
 
-  const counts = useMemo(
-    () => ({
-      all: articles.length,
-      general: articles.filter((a) => a.category === "general").length,
-      area: articles.filter((a) => a.category === "area").length,
-    }),
-    [articles]
-  );
+  const counts = useMemo(() => {
+    const perCategory = Object.fromEntries(
+      (Object.keys(CATEGORY_LABEL) as ArticleCategory[]).map((c) => [
+        c,
+        articles.filter((a) => a.category === c).length,
+      ])
+    ) as Record<ArticleCategory, number>;
+    return { all: articles.length, ...perCategory };
+  }, [articles]);
 
   const filtered = useMemo(
     () => (topic === "all" ? articles : articles.filter((a) => a.category === topic)),
     [articles, topic]
   );
 
-  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const totalPages = totalPagesFor(filtered.length);
   const current = Math.min(page, totalPages);
-  const onPage = (index: number) =>
-    index >= (current - 1) * PAGE_SIZE && index < current * PAGE_SIZE;
+  const onPage = (index: number) => isOnPage(index, current);
 
   function selectTopic(next: Topic) {
     setTopic(next);
@@ -138,7 +141,7 @@ export function ArticlesBrowser({ articles }: { articles: ArticleCardData[] }) {
       >
         {filtered.map((a, i) => (
           <div key={a.slug} className={onPage(i) ? "contents" : "art-offpage"}>
-            <ArticleCard article={a} />
+            <ArticleCard article={a} layout={view} />
           </div>
         ))}
       </div>

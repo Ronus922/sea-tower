@@ -113,6 +113,27 @@ html.stm-js [data-ws]:not(.stm-ws-ready) {
 .stm-w.stm-win {
   animation: stm-word 0.72s var(--ease-brand) both;
 }
+
+/* --- אנימציות "בזמן ה-paint" לאלמנטים שמעל הקיפול (hero) ---
+   אותם keyframes בדיוק, בלי להמתין ל-hydration: המצב ההתחלתי (opacity 0,
+   fill-mode both) חל מהפריים הראשון, כך שאין הופעה→קפיצה→אנימציה.
+   כותרות מפוצלות-שרת (SplitWords) יוצאות מילה-מילה לפי --wi. */
+.stm-ws-auto .stm-w {
+  animation: stm-word 0.72s var(--ease-brand) both;
+  animation-delay: min(calc(var(--wi, 0) * 68ms), 780ms);
+}
+.stm-load-up {
+  animation: stm-rev-up 0.9s var(--ease-brand) both;
+}
+.stm-load-sm {
+  animation: stm-rev-sm 0.8s var(--ease-brand) both;
+}
+.stm-d1 {
+  animation-delay: 0.1s;
+}
+.stm-d2 {
+  animation-delay: 0.2s;
+}
 @keyframes stm-word {
   0% {
     opacity: 0;
@@ -344,13 +365,18 @@ details[open] > *:not(summary) {
   .animate-marquee,
   .stm-in,
   .stm-w.stm-win,
+  .stm-ws-auto .stm-w,
+  .stm-load-up,
+  .stm-load-sm,
   .stm-blob,
   details[open] > *:not(summary) {
     animation: none !important;
   }
   html.stm-js [data-rev],
   html.stm-js [data-ws]:not(.stm-ws-ready),
-  .stm-w {
+  .stm-w,
+  .stm-load-up,
+  .stm-load-sm {
     opacity: 1 !important;
   }
   .stm-btn-primary:hover,

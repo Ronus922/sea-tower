@@ -7,6 +7,7 @@ import { SectionKicker } from "@/components/ui/SectionHeading";
 import { IconTile } from "@/components/ui/IconTile";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { SplitWords } from "@/components/ui/SplitWords";
 import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
 import { cn } from "@/lib/cn";
 
@@ -218,17 +219,16 @@ export default function About() {
               אודות
             </span>
           </nav>
-          <h1
-            data-ws=""
-            className="mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]"
-          >
-            הבית שלכם מול
-            <br />
-            <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
-              הים התיכון
-            </span>
+          <h1 className="stm-ws-auto mb-[22px] text-[40px]/[1.1] font-extrabold tracking-heading md:text-[62px]/[1.06]">
+            <SplitWords>
+              הבית שלכם מול
+              <br />
+              <span className="bg-[linear-gradient(120deg,var(--color-aqua),var(--color-sea-400))] bg-clip-text text-transparent">
+                הים התיכון
+              </span>
+            </SplitWords>
           </h1>
-          <p data-rev="up" className="mx-auto max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]">
+          <p className="stm-load-up stm-d1 mx-auto max-w-[600px] text-[19px]/[1.66] font-light text-[#cdddea]">
             מגדל הים הוא מלון דירות בוטיק בבניין אלמוג, מגדלי חוף הכרמל — מקום שבו אדריכלות,
             נוף ושירות אישי נפגשים, 50 מטר בלבד מקו המים.
           </p>
