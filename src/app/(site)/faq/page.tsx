@@ -1,13 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageIntro } from "@/components/ui/PageIntro";
+import { Container } from "@/components/ui/Container";
+import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { FaqEnhancer } from "@/components/site/FaqEnhancer";
 import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 import { BUSINESS } from "@/lib/business";
 import { FAQ_CATEGORIES, FaqAnswer, FaqPlusIcon, buildFaqJsonLd } from "./faq-data";
 
-/* עמוד שאלות ותשובות — פתיח מסמך שקט + שלד ה-TOC המשותף עם /terms.
+/* עמוד שאלות ותשובות — נבנה 1:1 לפי design-reference/exports/Faq.html.
+   גופן Open Sans גלובלי (‎--font-sans‎). השלד (Hero + גל + כרטיס מסמך + TOC
+   דביק) והתנועה (חשיפת Hero + כרטיס כיחידה + זוהר נושם) משותפים עם /terms;
    האינטראקציה (אקורדיון details נייטיבי, חיפוש חי, singleOpen) ב-FaqEnhancer. */
 
 export const metadata: Metadata = pageMeta({
@@ -47,14 +50,51 @@ export default function Faq() {
       <MotionEngine />
       <FaqEnhancer />
 
-      <PageIntro
-        crumbs={[{ name: "ראשי", href: "/" }, { name: "שאלות נפוצות" }]}
-        kicker="מדריך האירוח"
-        title="שאלות ותשובות"
-        lead="כל מה שחשוב לדעת לפני ההגעה — השירותים שאנחנו מספקים, ההבדל בין בית מלון למלון דירות, ומה מחכה לכם באזור. לא מצאתם תשובה? נשמח שתעדכנו אותנו ונדאג להנגיש אותה לכולם."
-      >
-        <div className="mt-8 max-w-[560px]">
-          <div className="faq-search-wrap">
+      {/* Hero — גרדיאנט אלכסוני, זוהר כחול, פירורי לחם, כותרת, פסקה, שדה חיפוש וגל תחתון */}
+      <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-16 pb-[120px] text-center text-white md:pb-[150px]">
+        <div
+          aria-hidden="true"
+          className="stm-blob absolute -top-[120px] -left-20 size-[420px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.35),transparent_68%)] blur-[10px]"
+        />
+        <div
+          aria-hidden="true"
+          className="stm-blob absolute -right-[60px] bottom-[60px] size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.18),transparent_70%)]"
+        />
+        <Container className="relative z-[2]">
+          <nav
+            aria-label="פירורי לחם"
+            className="mb-6 inline-flex items-center gap-2 text-[13.5px] font-medium text-[#acc8dd]"
+          >
+            <Link href="/" className="stm-link -my-2 inline-flex min-h-11 items-center py-2">
+              ראשי
+            </Link>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span aria-current="page" className="font-semibold text-white">
+              שאלות נפוצות
+            </span>
+          </nav>
+          <h1
+            data-rev="up"
+            className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
+          >
+            שאלות ותשובות
+          </h1>
+          <p
+            data-rev="up"
+            className="mx-auto mb-[34px] max-w-[680px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]"
+          >
+            כל מה שחשוב לדעת לפני ההגעה — השירותים שאנחנו מספקים, ההבדל בין בית מלון למלון דירות, ומה
+            מחכה לכם באזור. לא מצאתם תשובה? נשמח שתעדכנו אותנו ונדאג להנגיש אותה לכולם.
+          </p>
+          <div data-rev="up" className="faq-search-wrap">
             <svg
               className="faq-search-ic"
               width="19"
@@ -85,12 +125,13 @@ export default function Faq() {
             </button>
           </div>
           <div id="faq-count" className="faq-count" role="status" aria-live="polite" hidden />
-        </div>
-      </PageIntro>
+        </Container>
+        <WaveSeparator position="bottom" fill="var(--color-cloud)" />
+      </section>
 
-      {/* מקטע השאלות — TOC דביק + מסמך.
+      {/* מקטע השאלות — רקע תכלת-אפרפר, TOC דביק + כרטיס תוכן.
           ריפוד תחתון = 84px (מרווח הרפרנס) + גובה גל הפוטר המשותף (70/120px) */}
-      <section className="bg-white px-5 pt-[54px] pb-[154px] sm:px-8 md:pb-[204px] lg:px-14">
+      <section className="bg-cloud px-5 pt-[54px] pb-[154px] sm:px-8 md:pb-[204px] lg:px-14">
         <div className="tk-grid">
           <aside className="tk-toc">
             <nav aria-label="קטגוריות">

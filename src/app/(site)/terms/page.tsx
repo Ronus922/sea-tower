@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PageIntro } from "@/components/ui/PageIntro";
+import { Container } from "@/components/ui/Container";
+import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
 import { pageMeta, buildBreadcrumbLd } from "@/lib/seo";
 import { BUSINESS } from "@/lib/business";
 
-/* עמוד תקנון — מסמך שקט: פתיח טיפוגרפי + TOC דביק + גיליון (שלד tk-*) */
+/* עמוד תקנון — נבנה 1:1 לפי design-reference/exports/regulations.html.
+   הגופן Open Sans גלובלי (‎--font-sans‎). התנועה: מנוע התנועה המשותף
+   (חשיפת Hero + כרטיס המסמך כיחידה אחת + זוהר נושם) — ללא מצב PLUS. */
 
 export const metadata: Metadata = pageMeta({
   title: "תקנון — תנאי הזמנה וביטול | מגדל הים",
@@ -65,16 +68,60 @@ export default function Terms() {
       />
       <MotionEngine />
 
-      <PageIntro
-        crumbs={[{ name: "ראשי", href: "/" }, { name: "תקנון" }]}
-        kicker="מסמכי האירוח"
-        title="תקנון — תנאי הזמנה וביטול"
-        lead="תנאי ההזמנה, הביטול והשימוש בשירותי מגדל הים. השימוש באתר ו/או ביצוע הזמנה דרכו מהווים אישור והסכמה מלאה לתנאים אלו."
-      />
+      {/* Hero — גרדיאנט אלכסוני, זוהר כחול עליון-שמאלי ותחתון-ימני, פירורי לחם,
+          כותרת ופסקת פתיחה, וגל תחתון הנמזג לרקע הבהיר של המקטע הבא */}
+      <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-16 pb-[110px] text-center text-white md:pb-[140px]">
+        <div
+          aria-hidden="true"
+          className="stm-blob absolute -top-[120px] -left-20 size-[420px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.35),transparent_68%)] blur-[10px]"
+        />
+        <div
+          aria-hidden="true"
+          className="stm-blob absolute -right-[60px] bottom-[60px] size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.18),transparent_70%)]"
+        />
+        <Container className="relative z-[2]">
+          <nav
+            aria-label="פירורי לחם"
+            className="mb-6 inline-flex items-center gap-2 text-[13.5px] font-medium text-[#acc8dd]"
+          >
+            {/* min-h + margin שלילי: אזור מגע 44px בלי לשנות את הזרימה (Iron Rule #6) */}
+            <Link
+              href="/"
+              className="stm-link -my-2 inline-flex min-h-11 items-center py-2 transition-colors hover:text-white"
+            >
+              ראשי
+            </Link>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M15 6l-6 6 6 6"
+                stroke="#acc8dd"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+            <span className="font-semibold text-white">תקנון</span>
+          </nav>
+          <h1
+            data-rev="up"
+            className="mb-[18px] text-[38px]/[1.08] font-extrabold tracking-[-0.01em] md:text-[54px]/[1.08]"
+          >
+            תקנון — תנאי הזמנה וביטול
+          </h1>
+          <p
+            data-rev="up"
+            className="mx-auto max-w-[640px] text-[17px]/[1.66] font-light text-[#cdddea] md:text-[18px]/[1.66]"
+          >
+            תנאי ההזמנה, הביטול והשימוש בשירותי מגדל הים. השימוש באתר ו/או ביצוע הזמנה דרכו
+            מהווים אישור והסכמה מלאה לתנאים אלו.
+          </p>
+        </Container>
+        <WaveSeparator position="bottom" fill="var(--color-cloud)" />
+      </section>
 
-      {/* מקטע התקנון — פריסת שתי עמודות (TOC דביק + גיליון מסמך).
+      {/* מקטע התקנון — רקע תכלת-אפרפר, פריסת שתי עמודות (TOC דביק + כרטיס מסמך).
           הריפוד התחתון = 84px (מרווח הרפרנס) + גובה גל הפוטר המשותף (70/120px) */}
-      <section className="bg-white px-5 pt-[54px] pb-[154px] sm:px-8 md:pb-[204px] lg:px-14">
+      <section className="bg-cloud px-5 pt-[54px] pb-[154px] sm:px-8 md:pb-[204px] lg:px-14">
         <div className="tk-grid">
           <aside className="tk-toc">
             <nav aria-label="תוכן עניינים">
