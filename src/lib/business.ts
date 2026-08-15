@@ -19,6 +19,12 @@ export const BUSINESS = {
   /* וואטסאפ — נגזר מהנייד הקיים 055-9994880 */
   whatsappNumber: "972559994880",
   hours: "שירות וזמינות 24/7",
+  /* הדומיין הקנוני המיועד הוא https://sea-tower.co.il (SEO-AUDIT B2), אך נכון
+     ל-2026-08 ה-DNS שלו עדיין מצביע לשרת האתר הישן (35.246.215.141) — החלפה
+     לפני העברת ה-DNS תפנה קנוניקלים/sitemap לאתר זר. כל ה-URL-ים המוחלטים
+     (metadataBase, robots, sitemap, JSON-LD @id) נגזרים מהשדה הזה בלבד;
+     כשה-DNS יעבור לשרת הזה: לעדכן כאן → build+deploy → תעודה + vhost
+     ו-301 מ-sea-tower.bios.co.il ב-nginx. */
   siteUrl: "https://sea-tower.bios.co.il",
 } as const;
 
