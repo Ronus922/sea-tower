@@ -2,14 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
-import { Bubbles, type Bubble } from "@/components/site/Bubbles";
 
 /* מנוע ה-scrollytelling של עמוד /aerial — הסרטון "מפורק" לגלילה:
    ההתקדמות בעמוד קובעת את currentTime של הווידאו (סקראב), במקום ניגון רגיל.
 
-   גרסת "מועמד לדף בית": הווידאו הוא רצועה בגובה 500px בראש במה של מסך מלא;
-   מתחת לרצועה — אזור בגרדיאנט ה-hero של הבית (אורבים + בועות) שבו מוצגים
-   כיתובי הפרקים, ובתחתית המסלול גל המעבר של הבית אל מקטעי HomeSections.
+   גרסת "מועמד לדף בית": הווידאו הוא רצועה בגובה 800px (או גובה המסך,
+   הנמוך מביניהם) עם הכיתובים מונחים עליו, גל מעבר בתחתית הרצועה אל רקע
+   ה-cloud, ואחרי המסלול — מקטעי HomeSections של עמוד הבית.
 
    עקרונות, בהמשך לכללי היציבות של PR #10:
    • הווידאו קודד עם keyframe כל 4 פריימים (g=4) — בלעדיו seek דו-כיווני מגמגם.
@@ -22,17 +21,6 @@ import { Bubbles, type Bubble } from "@/components/site/Bubbles";
 const SRC_DESKTOP = "/videos/aerial-scrub-1080.mp4";
 const SRC_MOBILE = "/videos/aerial-scrub-540.mp4";
 const LERP = 0.22;
-
-/* בועות אזור הכיתובים — אותה שפה של רקע ה-hero בבית */
-const AE_BUBBLES: Bubble[] = [
-  { left: "12%", size: 12, dur: 14, delay: 1, v: "a" },
-  { left: "26%", size: 8, dur: 12, delay: 5, v: "b" },
-  { left: "38%", size: 10, dur: 17, delay: 3, v: "c" },
-  { left: "52%", size: 14, dur: 15, delay: 0, v: "b" },
-  { left: "64%", size: 7, dur: 13, delay: 7, v: "c" },
-  { left: "76%", size: 11, dur: 16, delay: 2, v: "a" },
-  { left: "88%", size: 9, dur: 18, delay: 6, v: "b" },
-];
 
 export function AerialScroller() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -136,14 +124,7 @@ export function AerialScroller() {
         />
         <div className="ae-scrim" aria-hidden="true" />
 
-        {/* אזור הכיתובים שמתחת לרצועה — רקע ה-hero של הבית: אורבים ובועות */}
-        <div className="st-bg ae-zone-bg" aria-hidden="true">
-          <div className="st-orb st-orb-b right-[16%] -bottom-10 size-[260px] bg-[radial-gradient(circle,rgba(86,192,240,0.26),transparent_70%)]" />
-          <div className="st-orb st-orb-c left-[22%] bottom-[8%] size-[200px] bg-[radial-gradient(circle,rgba(124,208,247,0.2),transparent_72%)]" />
-          <Bubbles items={AE_BUBBLES} />
-        </div>
-
-        {/* פרק הפתיחה — הכותרת של העמוד, ממורכזת על רצועת הווידאו */}
+        {/* פרק הפתיחה — הכותרת של העמוד, ממורכזת על הווידאו */}
         <div className="ae-chapter ae-title" data-ae-from="0" data-ae-to="0.18">
           <div className="ae-badge">
             <span aria-hidden="true" className="ae-badge-dot" />
@@ -171,7 +152,7 @@ export function AerialScroller() {
           </div>
         </div>
 
-        {/* הפרקים — כיתובים בשפת עמוד הבית, מוצמדים לקטעי ההתקדמות */}
+        {/* הפרקים — כיתובים על הווידאו בשפת עמוד הבית, מוצמדים לקטעי ההתקדמות */}
         <div className="ae-chapter ae-cap" data-ae-from="0.2" data-ae-to="0.42">
           <span className="ae-kicker">קו המים</span>
           <h2 className="ae-h2">50 מ׳ מהחוף והטיילת</h2>
@@ -206,14 +187,14 @@ export function AerialScroller() {
           </a>
         </div>
 
-        {/* פס התקדמות הטיסה — aqua על התפר שבין הרצועה לאזור הכיתובים, RTL */}
+        {/* פס התקדמות הטיסה — aqua בראש הרצועה, מתמלא מימין (RTL) */}
         <div className="ae-progress" aria-hidden="true">
           <div ref={barRef} className="ae-progress-fill" />
         </div>
-      </div>
 
-      {/* מעבר אל מקטעי הבית — אותו גל כמו בתחתית ה-hero של עמוד הבית */}
-      <WaveSeparator position="bottom" fill="var(--color-cloud)" className="z-[3]" />
+        {/* גל המעבר של הבית בתחתית הרצועה — אל רקע ה-cloud ומקטעי HomeSections */}
+        <WaveSeparator position="bottom" fill="var(--color-cloud)" className="z-[3]" />
+      </div>
     </div>
   );
 }
