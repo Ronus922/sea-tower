@@ -52,3 +52,34 @@
     gap: 20px;
   }
 }
+
+/* --- סעיף 5 (v2-polish): ‏hover לכרטיסי הפתרונות — הגבהה עדינה, פינות
+   רכות יותר וזום קל של התמונה בתוך המסגרת (overflow-hidden בכרטיס).
+   רק במכשירים עם עכבר — במגע אין hover ואין מצב תקוע; מצב הבסיס הוא
+   הכרטיס הרגיל ללא שינוי --- */
+@media (hover: hover) and (pointer: fine) {
+  .v2-root .sol-card {
+    transition:
+      transform 0.3s var(--ease-brand),
+      border-radius 0.3s var(--ease-brand),
+      box-shadow 0.3s var(--ease-brand);
+  }
+  .v2-root .sol-card img {
+    transition: transform 0.3s var(--ease-brand);
+  }
+  .v2-root .sol-card:hover {
+    transform: translateY(-6px);
+    border-radius: 32px;
+    box-shadow: 0 42px 84px -30px rgba(14, 37, 64, 0.46);
+  }
+  .v2-root .sol-card:hover img {
+    transform: scale(1.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .v2-root .sol-card,
+  .v2-root .sol-card img {
+    transition: none;
+    transform: none;
+  }
+}

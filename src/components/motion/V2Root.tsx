@@ -95,6 +95,30 @@ export function V2Root({ children }: { children: React.ReactNode }) {
         }).to(imgs, { scale: 1, duration: 0.9, ease: "power2.out", stagger: 0.12 }, 0);
       });
 
+      /* ---- סעיף 5 (v2-polish): כרטיסי הפתרונות — כניסה לפריים ב-stagger
+         ‏0.1ש, fade + הרמה קלה מלמטה. ScrollTrigger.batch: כרטיסים שנכנסים
+         יחד מונפשים בזה אחר זה לפי סדר ה-DOM (הראשון בעברית = הימני, כך
+         שההתקדמות היא מימין לשמאל); כרטיס שנכנס לבד מונפש לבד. clearProps
+         בסיום מפנה את ה-inline transform כדי שה-hover ‏(v2.css) יעבוד ---- */
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const cards = gsap.utils.toArray<HTMLElement>(".sol-card", root);
+        if (!cards.length) return;
+        gsap.set(cards, { autoAlpha: 0, y: 26 });
+        ScrollTrigger.batch(cards, {
+          start: "top 88%",
+          once: true,
+          onEnter: (batch) =>
+            gsap.to(batch, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.7,
+              ease: "power3.out",
+              stagger: 0.1,
+              onComplete: () => gsap.set(batch, { clearProps: "opacity,visibility,transform" }),
+            }),
+        });
+      });
+
       /* ---- סעיף 3 (v2-polish): תמונת החדר ב"למה לבחור בנו" — אותו דפוס
          של אלמנט 3 (clip-path נפתח מלמטה + scale פנימה), והתגית "הכול
          כלול" נכנסת אחרי סיום התמונה בהשהיה של ~0.3ש, fade + החלקה מלמטה ---- */
