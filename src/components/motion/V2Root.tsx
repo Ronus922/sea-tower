@@ -63,6 +63,19 @@ export function V2Root({ children }: { children: React.ReactNode }) {
         });
       });
 
+      /* ---- אלמנט 2: פרלקסה על וידאו ה-hero (דסקטופ בלבד — מתחת ל-768px
+         עלות הביצועים לא מוצדקת) ---- */
+      mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {
+        const hero = root.querySelector("[data-v2-hero]");
+        const video = root.querySelector("[data-v2-video]");
+        if (!hero || !video) return;
+        gsap.to(video, {
+          yPercent: 15,
+          ease: "none",
+          scrollTrigger: { trigger: hero, start: "top top", end: "bottom top", scrub: true },
+        });
+      });
+
       return () => {
         window.removeEventListener("load", onLoad);
       };
