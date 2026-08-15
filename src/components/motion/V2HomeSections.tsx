@@ -19,7 +19,18 @@ import { BUSINESS, MAPS_LINK } from "@/lib/business";
    מהמקור בלבד — V2SectionHeading (כותרות ל-GSAP במקום ws) ו-V2RoomsCarousel
    (חשיפת תמונות ל-GSAP במקום data-rev). כל השאר זהה למקור ביודעין */
 
-const HOME_ARTICLES = LISTED_ARTICLES.slice(0, 3);
+/* סעיף 4 (v2-polish): ארבעה פוסטים אקראיים במקום שלושה קבועים.
+   ערבוב Fisher-Yates בצד השרת — הבחירה מתקבעת למחזור ה-ISR ‏(5 דקות),
+   בכוונה: רנדור שרת שומר על SEO/LCP. בלי כפילויות (דגימה בלי החזרה),
+   ואם יש פחות מ-4 פוסטים — מציגים את מה שיש */
+function pickRandomArticles(count: number) {
+  const pool = [...LISTED_ARTICLES];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
 
 const CONTACT_BUBBLES: Bubble[] = [
   { left: "10%", size: 13, dur: 15, delay: 1, v: "a" },
@@ -187,6 +198,8 @@ export async function V2HomeSections() {
   /* GuestHub מחזיר רק חדרים שסומנו לאתר ויש להם גלריה. נפילת השירות מחזירה
      null, ואז המקטע מציג הודעה במקום קרוסלה במקום להפיל את העמוד */
   const rooms = (await fetchWebsiteRooms()) ?? [];
+  /* בתוך הקומפוננטה (לא ברמת המודול) כדי שכל רגנרציית ISR תגריל מחדש */
+  const homeArticles = pickRandomArticles(4);
 
   return (
     <>
@@ -452,8 +465,13 @@ export async function V2HomeSections() {
             </Button>
           </div>
           <div className="art-wrap is-grid">
-            {HOME_ARTICLES.map((article) => (
-              <ArticleCard key={article.slug} article={article} />
+            {/* עטיפת data-rev="card" — אותה כניסה (MotionEngine) כמו שאר
+                הכרטיסים בעמוד; העוטף הוא ילד ישיר של art-wrap כך שהשהיות
+                ה-nth-child של artCardIn ממשיכות לחול */}
+            {homeArticles.map((article) => (
+              <div key={article.slug} data-rev="card">
+                <ArticleCard article={article} />
+              </div>
             ))}
           </div>
         </Container>

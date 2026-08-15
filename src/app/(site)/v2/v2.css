@@ -35,3 +35,20 @@
 .v2-root .v2-why-media {
   overflow: hidden;
 }
+
+/* --- סעיף 4 (v2-polish): גריד הבלוג עם 4 כרטיסים — עמודות מפורשות
+   (1→2→4) במקום auto-fill, כדי שלא יישאר כרטיס יתום בשורה משלו --- */
+.v2-root .art-wrap.is-grid {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .v2-root .art-wrap.is-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (min-width: 1100px) {
+  .v2-root .art-wrap.is-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
