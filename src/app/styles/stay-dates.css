@@ -367,6 +367,58 @@
   box-shadow: var(--shadow-e2), 0 24px 60px -18px rgba(14, 37, 64, 0.35);
 }
 
+/* גלילה פנימית קיימת רק במפלט האחרון (scrolly — ‏viewport נמוך גם
+   ממצב compact); הצמדת שורות מחייבת נועלת כל מצב מנוחה — כולל
+   הפתיחה — על שורת ימים שלמה, והדהייה מתקשחת לרצועה אטומה של 16px
+   שמסתירה כל שריד שורה ומספקת את מרווח הנשימה מעל הקצה המעוגל */
+.stm-sd-float .stm-sd-panel.scrolly {
+  scroll-snap-type: y mandatory;
+  scroll-padding-block: 8px 19px;
+}
+.stm-sd-float .stm-sd-panel.scrolly .stm-sd-day {
+  scroll-snap-align: end;
+}
+/* בלי נקודות הצמדה לכותרת ולפוטר — ההצמדה לשורות הימים הייתה מונעת
+   מהם להיראות לעולם: הכותרת נדחפת החוצה כבר בפתיחה, וכפתורי
+   סגור/ביטול לא נגישים בקצה הגלילה */
+.stm-sd-float .stm-sd-panel.scrolly .stm-sd-head {
+  scroll-snap-align: start;
+}
+.stm-sd-float .stm-sd-panel.scrolly .stm-sd-foot {
+  scroll-snap-align: end;
+}
+.stm-sd-float .stm-sd-panel.scrolly::after {
+  height: 40px;
+  margin-top: -40px;
+  background: linear-gradient(to top, #fff 16px, rgba(255, 255, 255, 0));
+}
+
+/* מצב מצומצם — JS מוסיף אותו כשהגובה הטבעי לא נכנס במסך גם בחפיפה
+   מלאה על השדה: חודש אחד, פאנל צר ותאים נמוכים יותר. אישור הבעלים:
+   "אפשר להקטין את החלון ככל שנדרש" */
+.stm-sd-float .stm-sd-panel.compact {
+  width: min(370px, calc(100vw - 16px));
+}
+.stm-sd-float .stm-sd-panel.compact .stm-sd-month:last-child {
+  display: none;
+}
+.stm-sd-float .stm-sd-panel.compact .stm-sd-head {
+  margin-bottom: 10px;
+}
+.stm-sd-float .stm-sd-panel.compact .stm-sd-mtitle {
+  min-height: 38px;
+}
+.stm-sd-float .stm-sd-panel.compact .stm-sd-navbtn {
+  width: 38px;
+  height: 38px;
+}
+.stm-sd-float .stm-sd-panel.compact .stm-sd-day {
+  height: 31px;
+}
+.stm-sd-float .stm-sd-panel.compact .stm-sd-foot {
+  padding-top: 10px;
+}
+
 /* בגלילה פנימית התוכן נחתך בקו ישר צמוד לקצה, והפינות המעוגלות של
    התחתית נראות מרובעות — דהייה דביקה מרככת את קו החיתוך ומשאירה את
    העיגול נקי; בסוף הגלילה היא מתיישבת בתוך הריפוד ונעלמת מאליה */

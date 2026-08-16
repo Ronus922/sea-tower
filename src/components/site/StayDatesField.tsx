@@ -99,9 +99,12 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
 
   useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
-  /* מצב צף: מיקום הפאנל יחסית לשדה — מתחתיו, ומתהפך מעליו כשאין מקום;
-     הצמדה אופקית לגבולות המסך כך שלעולם אין גלילה אופקית. רץ גם על
-     resize/scroll כי המרווח מהשוליים תלוי ב-viewport */
+  /* מצב צף: הפאנל נפתח תמיד בגובהו הטבעי — בלי גלילה פנימית: מתחת
+     לשדה, מעליו, ואם אף צד לא מספיק — חופף את השדה (הוא צף, מותר לו).
+     כשגם המסך כולו נמוך מהגובה הטבעי: מצב compact (חודש אחד, תאים
+     מוקטנים), וגלילה פנימית נשארת מפלט אחרון בלבד. הצמדה אופקית
+     לגבולות המסך כך שלעולם אין גלילה אופקית. רץ גם על resize/scroll
+     כי המרווח מהשוליים תלוי ב-viewport */
   useLayoutEffect(() => {
     if (!floating || !open) return;
     const update = () => {
@@ -109,19 +112,55 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
       const panel = panelRef.current;
       const field = fieldRef.current;
       if (!rootEl || !panel || !field) return;
+      const M = 12; /* שוליים מקצות ה-viewport */
       const fr = field.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - fr.bottom - 12;
-      const spaceAbove = fr.top - 12;
-      const up = panel.scrollHeight > spaceBelow && spaceAbove > spaceBelow;
-      /* גובה מקסימלי לפי הצד שנבחר — הפאנל נגלל פנימית במסכים נמוכים */
-      panel.style.maxHeight = `${Math.max(up ? spaceAbove : spaceBelow, 220)}px`;
-      if (up) {
-        panel.style.top = "auto";
-        panel.style.bottom = `${rootEl.offsetHeight - field.offsetTop + 8}px`;
+      /* ה-header הדביק של האתר (z-50) מכסה את הפאנל (z-40) — הקצה
+         העליון הבטוח מתחיל מתחתיו */
+      const hdr = document.querySelector("header");
+      const hr = hdr?.getBoundingClientRect();
+      const topSafe = hr && hr.top <= 0 && hr.bottom > 0 ? hr.bottom + 8 : M;
+      /* מדידת הגובה הטבעי דורשת איפוס אילוצי הסבב הקודם; האיפוס מוחק
+         את מצב הגלילה הפנימית (המפלט האחרון) ולכן משמרים ומחזירים */
+      const st = panel.scrollTop;
+      panel.style.maxHeight = "";
+      panel.classList.remove("compact", "scrolly");
+      let h = panel.offsetHeight;
+      const viewportMax = window.innerHeight - topSafe - M;
+      let vpTop;
+      if (h <= window.innerHeight - fr.bottom - 8 - M) {
+        vpTop = fr.bottom + 8; /* נכנס שלם מתחת לשדה */
+      } else if (h <= fr.top - 8 - topSafe) {
+        vpTop = fr.top - 8 - h; /* נכנס שלם מעל השדה */
       } else {
-        panel.style.bottom = "auto";
-        panel.style.top = `${field.offsetTop + field.offsetHeight + 8}px`;
+        if (h > viewportMax) {
+          panel.classList.add("compact");
+          h = panel.offsetHeight;
+        }
+        if (h > viewportMax) {
+          /* מפלט אחרון — גלילה פנימית. הגובה מקוצץ כך שהקצה התחתון
+             נופל בדיוק 16px אחרי שורת הימים האחרונה שנכנסת שלמה —
+             אף תא לא נחתך במצב הפתיחה, וההצמדה (scrolly) שומרת על
+             שורות שלמות בכל מצב מנוחה של הגלילה */
+          panel.classList.add("scrolly");
+          panel.style.maxHeight = `${viewportMax}px`;
+          /* הקצה נקבע 19px אחרי שורת הימים האחרונה שנכנסת שלמה:
+             רצועת הלבן האטומה (16px, ב-CSS) מסתירה את קצה השורה הבאה
+             שמתחיל 3px אחריה — אף מספר לא נחתך ולא דהוי בפריים */
+          const pr0 = panel.getBoundingClientRect();
+          let best = 0;
+          for (const cell of panel.querySelectorAll(".stm-sd-day")) {
+            const b = cell.getBoundingClientRect().bottom - pr0.top + panel.scrollTop;
+            if (b + 19 <= viewportMax && b > best) best = b;
+          }
+          if (best) panel.style.maxHeight = `${Math.ceil(best) + 19}px`;
+          h = panel.offsetHeight;
+          if (st) panel.scrollTop = st;
+        }
+        /* מיושר לתחתית המסך (פחות השוליים) — חופף את השדה לפי הצורך */
+        vpTop = Math.max(topSafe, window.innerHeight - M - h);
       }
+      panel.style.bottom = "auto";
+      panel.style.top = `${field.offsetTop + (vpTop - fr.top)}px`;
       panel.style.transform = "";
       const pr = panel.getBoundingClientRect();
       const dx =
@@ -133,11 +172,17 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
       if (dx) panel.style.transform = `translateX(${dx}px)`;
     };
     update();
+    /* ‏capture תופס גם את הגלילה הפנימית של הפאנל עצמו — אסור למדוד
+       מחדש עליה (איפוס ה-maxHeight היה מקפיץ את הגלילה להתחלה) */
+    const onScroll = (e: Event) => {
+      if (e.target instanceof Node && panelRef.current?.contains(e.target)) return;
+      update();
+    };
     window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
+    window.addEventListener("scroll", onScroll, true);
     return () => {
       window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("scroll", onScroll, true);
     };
   }, [floating, open, view, arrival, departure]);
 
