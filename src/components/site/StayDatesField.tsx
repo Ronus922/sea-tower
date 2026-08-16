@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   HE_MONTHS,
   HE_WEEKDAYS,
@@ -16,8 +16,10 @@ import {
 
 /* תאריכון "תאריכי שהות" לטופס הצעת המחיר — לפי תמונת רפרנס מהבעלים
    (2026-08-15): שדה טווח + מונה לילות בשורה אחת, ומתחתיהם פאנל נפתח
-   אינליין עם סיכום, לוח דו-חודשי RTL וכפתורי סגור/ביטול. הערכים מוחלים
-   על הטופס בזמן אמת ("ביטול" משחזר את מצב הפתיחה). העיצוב (stm-sd-*)
+   אינליין עם סיכום, לוח של חודש אחד (ניווט בחיצים) וכפתורי סגור/ביטול.
+   הפאנל בזרימת המסמך — נפתח מתחת לשדה ודוחף את המשך הטופס, כך שהוא
+   לעולם לא מכסה את כפתור השליחה ולעולם לא נחתך. הערכים מוחלים על
+   הטופס בזמן אמת ("ביטול" משחזר את מצב הפתיחה). העיצוב (stm-sd-*)
    ב-styles/stay-dates.css. children — שדות נוספים באותה שורה (אורחים) */
 
 type Props = {
@@ -25,9 +27,6 @@ type Props = {
   arrival: string;
   departure: string;
   onChange: (arrival: string, departure: string) => void;
-  /* פאנל צף מעל התוכן (popover) במקום אינליין שדוחף את העמוד — ‏/v2.
-     ברירת המחדל (אינליין) נשארת זהה לחלוטין ל-/ ול-/contact */
-  floating?: boolean;
   children?: React.ReactNode;
 };
 
@@ -54,25 +53,21 @@ function MoonIcon({ size = 15 }: { size?: number }) {
   );
 }
 
-export function StayDatesField({ idPrefix, arrival, departure, onChange, floating, children }: Props) {
+export function StayDatesField({ idPrefix, arrival, departure, onChange, children }: Props) {
   const today = todayInIsrael();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<string>(() => monthStart(arrival || today));
   const [active, setActive] = useState<"in" | "out">("in");
   const snapshot = useRef<{ arrival: string; departure: string }>({ arrival, departure });
-  const rootRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<HTMLButtonElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const closeTimer = useRef<number | undefined>(undefined);
   const panelId = useId();
 
   const nights = arrival && departure ? nightsBetween(arrival, departure) : 0;
 
-  /* סגירה עם החזרת פוקוס לשדה — מקלדת, כפתורי הפאנל והשלמת טווח (במצב צף).
-     לחיצה מחוץ לפאנל סוגרת בלי לגנוב את הפוקוס מהיעד שנלחץ */
+  /* סגירה עם החזרת פוקוס לשדה — מקלדת וכפתורי הפאנל */
   const close = (returnFocus: boolean) => {
     setOpen(false);
-    if (returnFocus && floating) fieldRef.current?.focus();
+    if (returnFocus) fieldRef.current?.focus();
   };
 
   useEffect(() => {
@@ -80,111 +75,12 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setOpen(false);
-        if (floating) fieldRef.current?.focus();
+        fieldRef.current?.focus();
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [open, floating]);
-
-  /* מצב צף: סגירה בלחיצה מחוץ לרכיב */
-  useEffect(() => {
-    if (!floating || !open) return;
-    const onDown = (e: PointerEvent) => {
-      if (e.target instanceof Node && !rootRef.current?.contains(e.target)) setOpen(false);
-    };
-    document.addEventListener("pointerdown", onDown);
-    return () => document.removeEventListener("pointerdown", onDown);
-  }, [floating, open]);
-
-  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
-
-  /* מצב צף: הפאנל נפתח תמיד בגובהו הטבעי — בלי גלילה פנימית: מתחת
-     לשדה, מעליו, ואם אף צד לא מספיק — חופף את השדה (הוא צף, מותר לו).
-     כשגם המסך כולו נמוך מהגובה הטבעי: מצב compact (חודש אחד, תאים
-     מוקטנים), וגלילה פנימית נשארת מפלט אחרון בלבד. הצמדה אופקית
-     לגבולות המסך כך שלעולם אין גלילה אופקית. רץ גם על resize/scroll
-     כי המרווח מהשוליים תלוי ב-viewport */
-  useLayoutEffect(() => {
-    if (!floating || !open) return;
-    const update = () => {
-      const rootEl = rootRef.current;
-      const panel = panelRef.current;
-      const field = fieldRef.current;
-      if (!rootEl || !panel || !field) return;
-      const M = 12; /* שוליים מקצות ה-viewport */
-      const fr = field.getBoundingClientRect();
-      /* ה-header הדביק של האתר (z-50) מכסה את הפאנל (z-40) — הקצה
-         העליון הבטוח מתחיל מתחתיו */
-      const hdr = document.querySelector("header");
-      const hr = hdr?.getBoundingClientRect();
-      const topSafe = hr && hr.top <= 0 && hr.bottom > 0 ? hr.bottom + 8 : M;
-      /* מדידת הגובה הטבעי דורשת איפוס אילוצי הסבב הקודם; האיפוס מוחק
-         את מצב הגלילה הפנימית (המפלט האחרון) ולכן משמרים ומחזירים */
-      const st = panel.scrollTop;
-      panel.style.maxHeight = "";
-      panel.classList.remove("compact", "scrolly");
-      let h = panel.offsetHeight;
-      const viewportMax = window.innerHeight - topSafe - M;
-      let vpTop;
-      if (h <= window.innerHeight - fr.bottom - 8 - M) {
-        vpTop = fr.bottom + 8; /* נכנס שלם מתחת לשדה */
-      } else if (h <= fr.top - 8 - topSafe) {
-        vpTop = fr.top - 8 - h; /* נכנס שלם מעל השדה */
-      } else {
-        if (h > viewportMax) {
-          panel.classList.add("compact");
-          h = panel.offsetHeight;
-        }
-        if (h > viewportMax) {
-          /* מפלט אחרון — גלילה פנימית. הגובה מקוצץ כך שהקצה התחתון
-             נופל בדיוק 16px אחרי שורת הימים האחרונה שנכנסת שלמה —
-             אף תא לא נחתך במצב הפתיחה, וההצמדה (scrolly) שומרת על
-             שורות שלמות בכל מצב מנוחה של הגלילה */
-          panel.classList.add("scrolly");
-          panel.style.maxHeight = `${viewportMax}px`;
-          /* הקצה נקבע 19px אחרי שורת הימים האחרונה שנכנסת שלמה:
-             רצועת הלבן האטומה (16px, ב-CSS) מסתירה את קצה השורה הבאה
-             שמתחיל 3px אחריה — אף מספר לא נחתך ולא דהוי בפריים */
-          const pr0 = panel.getBoundingClientRect();
-          let best = 0;
-          for (const cell of panel.querySelectorAll(".stm-sd-day")) {
-            const b = cell.getBoundingClientRect().bottom - pr0.top + panel.scrollTop;
-            if (b + 19 <= viewportMax && b > best) best = b;
-          }
-          if (best) panel.style.maxHeight = `${Math.ceil(best) + 19}px`;
-          h = panel.offsetHeight;
-          if (st) panel.scrollTop = st;
-        }
-        /* מיושר לתחתית המסך (פחות השוליים) — חופף את השדה לפי הצורך */
-        vpTop = Math.max(topSafe, window.innerHeight - M - h);
-      }
-      panel.style.bottom = "auto";
-      panel.style.top = `${field.offsetTop + (vpTop - fr.top)}px`;
-      panel.style.transform = "";
-      const pr = panel.getBoundingClientRect();
-      const dx =
-        pr.left < 8
-          ? 8 - pr.left
-          : pr.right > window.innerWidth - 8
-            ? window.innerWidth - 8 - pr.right
-            : 0;
-      if (dx) panel.style.transform = `translateX(${dx}px)`;
-    };
-    update();
-    /* ‏capture תופס גם את הגלילה הפנימית של הפאנל עצמו — אסור למדוד
-       מחדש עליה (איפוס ה-maxHeight היה מקפיץ את הגלילה להתחלה) */
-    const onScroll = (e: Event) => {
-      if (e.target instanceof Node && panelRef.current?.contains(e.target)) return;
-      update();
-    };
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", onScroll, true);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", onScroll, true);
-    };
-  }, [floating, open, view, arrival, departure]);
+  }, [open]);
 
   const toggle = () => {
     if (!open) {
@@ -217,11 +113,6 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
     } else {
       onChange(arrival, d);
       setActive("in");
-      /* מצב צף: הטווח הושלם — הפאנל נסגר מעצמו (השהיה קצרה כדי שהבחירה תיראה) */
-      if (floating) {
-        window.clearTimeout(closeTimer.current);
-        closeTimer.current = window.setTimeout(() => close(true), 350);
-      }
     }
   };
 
@@ -278,7 +169,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
   const prevDisabled = view <= monthStart(today);
 
   return (
-    <div ref={rootRef} className={`stm-sd${floating ? " stm-sd-float" : ""}`}>
+    <div className="stm-sd">
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="min-w-0 flex-1">
           <label htmlFor={`${idPrefix}-dates`} className="mb-[7px] block text-[13px] font-semibold text-ink-dim">
@@ -347,7 +238,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
       </div>
 
       {open && (
-        <div ref={panelRef} id={panelId} className="stm-sd-panel" role="group" aria-label="בחירת תאריכי שהות">
+        <div id={panelId} className="stm-sd-panel" role="group" aria-label="בחירת תאריכי שהות">
           <div className="stm-sd-head">
             <div className="stm-sd-sum">
               <span className="stm-sd-sumicon">
@@ -376,6 +267,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
             )}
           </div>
 
+          {/* חודש אחד תמיד — ניווט בחיצים. ‏RTL: "קודם" מימין, "הבא" משמאל */}
           <div className="stm-sd-nav">
             <button
               type="button"
@@ -388,10 +280,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, floatin
                 <path d="M9 6l6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </button>
-            <div className="stm-sd-months">
-              {renderMonth(view)}
-              {renderMonth(addMonths(view, 1))}
-            </div>
+            <div className="stm-sd-months">{renderMonth(view)}</div>
             <button
               type="button"
               className="stm-sd-navbtn next"

@@ -52,12 +52,9 @@ function todayLocal(): string {
 export function ContactForm({
   variant = "full",
   idPrefix = "cf",
-  floatingDates,
 }: {
   variant?: "full" | "compact";
   idPrefix?: string;
-  /* תאריכון צף (popover) במקום אינליין — מודלק רק ב-/v2 */
-  floatingDates?: boolean;
 } = {}) {
   const compact = variant === "compact";
   const [form, setForm] = useState<FormState>(EMPTY);
@@ -333,7 +330,6 @@ export function ContactForm({
         idPrefix={idPrefix}
         arrival={form.arrival}
         departure={form.departure}
-        floating={floatingDates}
         onChange={(arrival, departure) => setForm((f) => ({ ...f, arrival, departure }))}
       >
         <div className="sm:w-[150px]">
