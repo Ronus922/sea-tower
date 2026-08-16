@@ -95,6 +95,54 @@ export function V2Root({ children }: { children: React.ReactNode }) {
         }).to(imgs, { scale: 1, duration: 0.9, ease: "power2.out", stagger: 0.12 }, 0);
       });
 
+      /* ---- סעיף 5 (v2-polish): כרטיסי הפתרונות — כניסה לפריים ב-stagger
+         ‏0.1ש, fade + הרמה קלה מלמטה. ScrollTrigger.batch: כרטיסים שנכנסים
+         יחד מונפשים בזה אחר זה לפי סדר ה-DOM (הראשון בעברית = הימני, כך
+         שההתקדמות היא מימין לשמאל); כרטיס שנכנס לבד מונפש לבד. clearProps
+         בסיום מפנה את ה-inline transform כדי שה-hover ‏(v2.css) יעבוד ---- */
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const cards = gsap.utils.toArray<HTMLElement>(".sol-card", root);
+        if (!cards.length) return;
+        gsap.set(cards, { autoAlpha: 0, y: 26 });
+        ScrollTrigger.batch(cards, {
+          start: "top 88%",
+          once: true,
+          onEnter: (batch) =>
+            gsap.to(batch, {
+              autoAlpha: 1,
+              y: 0,
+              duration: 0.7,
+              ease: "power3.out",
+              stagger: 0.1,
+              onComplete: () => gsap.set(batch, { clearProps: "opacity,visibility,transform" }),
+            }),
+        });
+      });
+
+      /* ---- סעיף 3 (v2-polish): תמונת החדר ב"למה לבחור בנו" — אותו דפוס
+         של אלמנט 3 (clip-path נפתח מלמטה + scale פנימה), והתגית "הכול
+         כלול" נכנסת אחרי סיום התמונה בהשהיה של ~0.3ש, fade + החלקה מלמטה ---- */
+      mm.add("(prefers-reduced-motion: no-preference)", () => {
+        const media = root.querySelector<HTMLElement>(".v2-why-media");
+        if (!media) return;
+        const img = media.querySelector("img");
+        const tag = root.querySelector<HTMLElement>("[data-v2-tag]");
+        gsap.set(media, { clipPath: "inset(0 0 100% 0)" });
+        if (img) gsap.set(img, { scale: 1.08 });
+        if (tag) gsap.set(tag, { autoAlpha: 0, y: 14 });
+        const tl = gsap.timeline({
+          scrollTrigger: { trigger: media, start: "top 80%", once: true },
+          onComplete: () => {
+            gsap.set(media, { clearProps: "clipPath" });
+            if (img) gsap.set(img, { clearProps: "transform" });
+            if (tag) gsap.set(tag, { clearProps: "all" });
+          },
+        });
+        tl.to(media, { clipPath: "inset(0% 0% 0% 0%)", duration: 0.9, ease: "power2.out" });
+        if (img) tl.to(img, { scale: 1, duration: 0.9, ease: "power2.out" }, 0);
+        if (tag) tl.to(tag, { autoAlpha: 1, y: 0, duration: 0.5, ease: "power2.out" }, ">0.3");
+      });
+
       /* ---- אלמנט 2: פרלקסה על וידאו ה-hero (דסקטופ בלבד — מתחת ל-768px
          עלות הביצועים לא מוצדקת) ---- */
       mm.add("(min-width: 768px) and (prefers-reduced-motion: no-preference)", () => {

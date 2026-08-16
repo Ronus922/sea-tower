@@ -345,3 +345,23 @@
     padding: 14px;
   }
 }
+
+/* --- מצב צף (stm-sd-float, ‏/v2): הפאנל מרחף מעל התוכן מחוץ לזרימת
+   המסמך — העמוד לא זז כשהוא נפתח. ‏RTL: ‏inset-inline-start:0 מצמיד את
+   קצה הפאנל לקצה הימני של השדה. top/bottom/max-height/clamp אופקי
+   מחושבים ב-JS ‏(StayDatesField) לפי המקום הפנוי ב-viewport.
+   הרוחב מתכווץ עם המסך — מתחת ל-~520px פנימיים ה-auto-fit של
+   ‎.stm-sd-months‎ עובר לבד לחודש אחד --- */
+.stm-sd-float {
+  position: relative;
+}
+.stm-sd-float .stm-sd-panel {
+  position: absolute;
+  inset-inline-start: 0;
+  z-index: 40;
+  margin-top: 0;
+  width: min(540px, calc(100vw - 16px));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow: var(--shadow-e2), 0 24px 60px -18px rgba(14, 37, 64, 0.35);
+}

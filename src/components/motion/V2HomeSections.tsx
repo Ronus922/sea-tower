@@ -19,7 +19,18 @@ import { BUSINESS, MAPS_LINK } from "@/lib/business";
    מהמקור בלבד — V2SectionHeading (כותרות ל-GSAP במקום ws) ו-V2RoomsCarousel
    (חשיפת תמונות ל-GSAP במקום data-rev). כל השאר זהה למקור ביודעין */
 
-const HOME_ARTICLES = LISTED_ARTICLES.slice(0, 3);
+/* סעיף 4 (v2-polish): ארבעה פוסטים אקראיים במקום שלושה קבועים.
+   ערבוב Fisher-Yates בצד השרת — הבחירה מתקבעת למחזור ה-ISR ‏(5 דקות),
+   בכוונה: רנדור שרת שומר על SEO/LCP. בלי כפילויות (דגימה בלי החזרה),
+   ואם יש פחות מ-4 פוסטים — מציגים את מה שיש */
+function pickRandomArticles(count: number) {
+  const pool = [...LISTED_ARTICLES];
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+  return pool.slice(0, count);
+}
 
 const CONTACT_BUBBLES: Bubble[] = [
   { left: "10%", size: 13, dur: 15, delay: 1, v: "a" },
@@ -187,6 +198,8 @@ export async function V2HomeSections() {
   /* GuestHub מחזיר רק חדרים שסומנו לאתר ויש להם גלריה. נפילת השירות מחזירה
      null, ואז המקטע מציג הודעה במקום קרוסלה במקום להפיל את העמוד */
   const rooms = (await fetchWebsiteRooms()) ?? [];
+  /* בתוך הקומפוננטה (לא ברמת המודול) כדי שכל רגנרציית ISR תגריל מחדש */
+  const homeArticles = pickRandomArticles(4);
 
   return (
     <>
@@ -349,34 +362,42 @@ export async function V2HomeSections() {
             </div>
           </div>
           <div className="relative w-full lg:flex-[0.95]">
-            <Image
-              src="/images/suite-details.jpg"
-              alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
-              width={1376}
-              height={768}
-              data-rev="media"
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"
-            />
-            <div className="absolute -bottom-6 right-4 flex animate-float items-center gap-3 rounded-card bg-white px-5 py-3.5 shadow-e4 [animation-duration:6.5s] md:-right-5">
-              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <rect
-                  x="3"
-                  y="6"
-                  width="18"
-                  height="13"
-                  rx="2"
-                  stroke="var(--color-ocean-400)"
-                  strokeWidth="1.7"
-                />
-                <path d="M3 10h18" stroke="var(--color-ocean-400)" strokeWidth="1.7" />
-              </svg>
-              <div>
-                <div className="text-[15px] leading-[1.1] font-extrabold text-navy-800">
-                  הכול כלול
-                </div>
-                <div className="text-[12.5px] font-semibold text-ink-dim">
-                  חשבונות · ניקיון · נטפליקס
+            {/* סעיף 3 (v2-polish): חשיפת GSAP באותו דפוס של תמונות הדירות
+                (clip-path מלמטה + scale פנימה, v2-why-media ב-V2Root) —
+                ‏data-rev הוסר כדי ש-MotionEngine לא ינפיש אותה במקביל */}
+            <div className="v2-why-media rounded-card-lg">
+              <Image
+                src="/images/suite-details.jpg"
+                alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
+                width={1376}
+                height={768}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"
+              />
+            </div>
+            {/* התגית בעטיפה נפרדת: המיקום וכניסת ה-GSAP על העטיפה, ריחוף
+                ה-animate-float על הפנימי — שני ה-transform לא מתנגשים */}
+            <div data-v2-tag="" className="absolute -bottom-6 right-4 md:-right-5">
+              <div className="flex animate-float items-center gap-3 rounded-card bg-white px-5 py-3.5 shadow-e4 [animation-duration:6.5s]">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                  <rect
+                    x="3"
+                    y="6"
+                    width="18"
+                    height="13"
+                    rx="2"
+                    stroke="var(--color-ocean-400)"
+                    strokeWidth="1.7"
+                  />
+                  <path d="M3 10h18" stroke="var(--color-ocean-400)" strokeWidth="1.7" />
+                </svg>
+                <div>
+                  <div className="text-[15px] leading-[1.1] font-extrabold text-navy-800">
+                    הכול כלול
+                  </div>
+                  <div className="text-[12.5px] font-semibold text-ink-dim">
+                    חשבונות · ניקיון · נטפליקס
+                  </div>
                 </div>
               </div>
             </div>
@@ -444,8 +465,13 @@ export async function V2HomeSections() {
             </Button>
           </div>
           <div className="art-wrap is-grid">
-            {HOME_ARTICLES.map((article) => (
-              <ArticleCard key={article.slug} article={article} />
+            {/* עטיפת data-rev="card" — אותה כניסה (MotionEngine) כמו שאר
+                הכרטיסים בעמוד; העוטף הוא ילד ישיר של art-wrap כך שהשהיות
+                ה-nth-child של artCardIn ממשיכות לחול */}
+            {homeArticles.map((article) => (
+              <div key={article.slug} data-rev="card">
+                <ArticleCard article={article} />
+              </div>
             ))}
           </div>
         </Container>
@@ -502,7 +528,7 @@ export async function V2HomeSections() {
             className="w-full rounded-img bg-white p-6 shadow-[0_30px_60px_rgba(0,0,0,0.3)] md:p-8 lg:flex-1"
           >
             <h3 className="mb-5 text-[23px] font-extrabold text-navy-800">בקשת הצעה מהירה</h3>
-            <ContactForm variant="compact" idPrefix="lf" />
+            <ContactForm variant="compact" idPrefix="lf" floatingDates />
           </div>
         </Container>
         {/* גל הפתיחה של הפוטר מגיע מה-Footer המשותף (חופף לריפוד התחתון כאן) */}
