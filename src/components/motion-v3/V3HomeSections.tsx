@@ -449,16 +449,14 @@ export async function V3HomeSections() {
         </Container>
       </section>
 
-      {/* צור קשר */}
+      {/* צור קשר — בלי overflow-hidden על המקטע: פאנל התאריכון צף וגולש
+          מתחת לגבולו; הדקורציות נחתכות ממילא בתוך .st-bg */}
       <section
         id="contact"
-        className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900),var(--color-ocean-700)_70%,var(--color-ocean-600))] py-28 md:py-[150px]"
+        className="relative bg-[linear-gradient(120deg,var(--color-navy-900),var(--color-ocean-700)_70%,var(--color-ocean-600))] py-28 md:py-[150px]"
       >
-        <div
-          aria-hidden="true"
-          className="stm-blob absolute -top-[90px] -left-[50px] size-[340px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.25),transparent_70%)]"
-        />
         <div className="st-bg" aria-hidden="true">
+          <div className="stm-blob absolute -top-[90px] -left-[50px] size-[340px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.25),transparent_70%)]" />
           <div className="st-orb st-orb-b right-[18%] top-[6%] size-[280px] bg-[radial-gradient(circle,rgba(86,192,240,0.26),transparent_70%)]" />
           <div className="st-orb st-orb-c left-[30%] bottom-[4%] size-[220px] bg-[radial-gradient(circle,rgba(124,208,247,0.2),transparent_72%)]" />
           <Bubbles items={CONTACT_BUBBLES} />

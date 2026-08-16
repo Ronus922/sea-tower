@@ -16,10 +16,10 @@ import {
 
 /* תאריכון "תאריכי שהות" לטופס הצעת המחיר — לפי תמונת רפרנס מהבעלים
    (2026-08-15): שדה טווח + מונה לילות בשורה אחת, ומתחתיהם פאנל נפתח
-   אינליין עם סיכום, לוח של חודש אחד (ניווט בחיצים) וכפתורי סגור/ביטול.
-   הפאנל בזרימת המסמך — נפתח מתחת לשדה ודוחף את המשך הטופס, כך שהוא
-   לעולם לא מכסה את כפתור השליחה ולעולם לא נחתך. הערכים מוחלים על
-   הטופס בזמן אמת ("ביטול" משחזר את מצב הפתיחה). העיצוב (stm-sd-*)
+   עם סיכום ולוח של חודש אחד (ניווט בחיצים). הפאנל צף מעל המשך הטופס
+   (overlay, לא בזרימה) כך שפתיחתו לא מזיזה אף שדה; אין כפתורי סגירה —
+   הוא נסגר לבד אחרי בחירת טווח שלם, בלחיצה מחוץ לו או ב-Escape.
+   הערכים מוחלים על הטופס בזמן אמת. העיצוב (stm-sd-*)
    ב-styles/stay-dates.css. children — שדות נוספים באותה שורה (אורחים) */
 
 type Props = {
@@ -58,42 +58,78 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<string>(() => monthStart(arrival || today));
   const [active, setActive] = useState<"in" | "out">("in");
-  const snapshot = useRef<{ arrival: string; departure: string }>({ arrival, departure });
+  const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   const fieldRef = useRef<HTMLButtonElement>(null);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const panelId = useId();
 
   const nights = arrival && departure ? nightsBetween(arrival, departure) : 0;
 
-  /* סגירה עם החזרת פוקוס לשדה — מקלדת וכפתורי הפאנל */
+  const clearCloseTimer = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+      closeTimer.current = null;
+    }
+  };
+
   const close = (returnFocus: boolean) => {
+    clearCloseTimer();
     setOpen(false);
     if (returnFocus) fieldRef.current?.focus();
   };
 
+  /* ‏Escape — סגירה עם החזרת פוקוס; לחיצה מחוץ לשדה/לפאנל — סגירה שקטה */
   useEffect(() => {
     if (!open) return;
+    const stopTimer = () => {
+      if (closeTimer.current) {
+        clearTimeout(closeTimer.current);
+        closeTimer.current = null;
+      }
+    };
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
+        stopTimer();
         setOpen(false);
         fieldRef.current?.focus();
       }
     };
+    const onPointerDown = (e: PointerEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) {
+        stopTimer();
+        setOpen(false);
+      }
+    };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("pointerdown", onPointerDown);
+    };
+  }, [open]);
+
+  /* ניקוי טיימר הסגירה האוטומטית ב-unmount (למשל מעבר למסך ההצלחה) */
+  useEffect(() => {
+    return () => {
+      if (closeTimer.current) clearTimeout(closeTimer.current);
+    };
+  }, []);
+
+  /* הפאנל צף ולא דוחף את העמוד — במסכים קטנים הוא עלול להיפתח מתחת לקו
+     המסך; גלילה מינימלית (nearest) רק אם הוא לא נראה, בכבוד ל-reduced-motion */
+  useEffect(() => {
+    if (!open) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    panelRef.current?.scrollIntoView({ block: "nearest", behavior: reduce ? "auto" : "smooth" });
   }, [open]);
 
   const toggle = () => {
     if (!open) {
-      snapshot.current = { arrival, departure };
       setView(monthStart(arrival || today));
       setActive(arrival && !departure ? "out" : "in");
     }
     setOpen(!open);
-  };
-
-  const cancel = () => {
-    onChange(snapshot.current.arrival, snapshot.current.departure);
-    close(true);
   };
 
   /* המונה מזיז את תאריך היציאה בלבד; בלי תאריכים — מתחיל מהיום */
@@ -107,12 +143,15 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
   };
 
   const pick = (d: string) => {
+    clearCloseTimer();
     if (active === "in" || (arrival && departure) || !arrival || d <= arrival) {
       onChange(d, "");
       setActive("out");
     } else {
       onChange(arrival, d);
       setActive("in");
+      /* הטווח הושלם — השהיה קצרה כדי שהבחירה תיראה, ואז סגירה אוטומטית */
+      closeTimer.current = setTimeout(() => close(true), 350);
     }
   };
 
@@ -169,7 +208,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
   const prevDisabled = view <= monthStart(today);
 
   return (
-    <div className="stm-sd">
+    <div ref={rootRef} className="stm-sd">
       <div className="flex flex-col gap-4 sm:flex-row">
         <div className="min-w-0 flex-1">
           <label htmlFor={`${idPrefix}-dates`} className="mb-[7px] block text-[13px] font-semibold text-ink-dim">
@@ -238,7 +277,7 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
       </div>
 
       {open && (
-        <div id={panelId} className="stm-sd-panel" role="group" aria-label="בחירת תאריכי שהות">
+        <div ref={panelRef} id={panelId} className="stm-sd-panel" role="group" aria-label="בחירת תאריכי שהות">
           <div className="stm-sd-head">
             <div className="stm-sd-sum">
               <span className="stm-sd-sumicon">
@@ -293,17 +332,6 @@ export function StayDatesField({ idPrefix, arrival, departure, onChange, childre
             </button>
           </div>
 
-          <div className="stm-sd-foot">
-            <p className="stm-sd-note">התאריכים עודכנו בטופס — לשליחה לחצו ״שלחו לי הצעה״</p>
-            <span className="stm-sd-actions">
-              <button type="button" className="stm-sd-cancel" onClick={cancel}>
-                ביטול
-              </button>
-              <button type="button" className="stm-sd-close" onClick={() => close(true)}>
-                סגור
-              </button>
-            </span>
-          </div>
         </div>
       )}
     </div>
