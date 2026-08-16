@@ -95,8 +95,9 @@
 
 /* --- הפאנל הנפתח --- */
 .stm-sd-panel {
+  --sd-pad: 18px;
   margin-top: 14px;
-  padding: 18px;
+  padding: var(--sd-pad);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   background: #fff;
@@ -342,7 +343,7 @@
 
 @media (max-width: 480px) {
   .stm-sd-panel {
-    padding: 14px;
+    --sd-pad: 14px;
   }
 }
 
@@ -364,4 +365,21 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   box-shadow: var(--shadow-e2), 0 24px 60px -18px rgba(14, 37, 64, 0.35);
+}
+
+/* בגלילה פנימית התוכן נחתך בקו ישר צמוד לקצה, והפינות המעוגלות של
+   התחתית נראות מרובעות — דהייה דביקה מרככת את קו החיתוך ומשאירה את
+   העיגול נקי; בסוף הגלילה היא מתיישבת בתוך הריפוד ונעלמת מאליה */
+.stm-sd-float .stm-sd-panel::after {
+  content: "";
+  position: sticky;
+  /* מסגרת ההצמדה של sticky מצטמצמת בריפוד הקונטיינר — הערך השלילי
+     מחזיר את הדהייה עד קו החיתוך האמיתי בקצה הפנימי */
+  bottom: calc(var(--sd-pad) * -1);
+  display: block;
+  height: 34px;
+  margin: -34px calc(var(--sd-pad) * -1) 0;
+  background: linear-gradient(to top, #fff 26%, rgba(255, 255, 255, 0));
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+  pointer-events: none;
 }
