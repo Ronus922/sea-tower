@@ -72,15 +72,19 @@ function CtaLink({ className }: { className?: string }) {
         className
       )}
     >
-      <span className="grid" aria-hidden="true">
-        {/* רוחות-רפאים לקיבוע הרוחב על הטקסט הרחב מבין השניים */}
+      <span className="relative grid" aria-hidden="true">
+        {/* רוחות-רפאים לקיבוע הרוחב על הטקסט הרחב מבין השניים — כולל
+           רוחב הסמן, אחרת הקופסה גדלה ב-3px בסוף כל הקלדה וכל שורת
+           התפריט נדחפת איתה */}
         {CTA_TEXTS.map((text) => (
           <span key={text} className="invisible col-start-1 row-start-1">
             {text}
+            <span className="ms-0.5 inline-block w-px" />
           </span>
         ))}
-        {/* השורה החיה: הטקסט המוקלד + סמן מהבהב, מעוגן לימין (RTL) */}
-        <span className="col-start-1 row-start-1 flex items-center justify-start">
+        {/* השורה החיה מחוץ לזרימת הפריסה (absolute) — הטקסט המוקלד
+           לעולם לא משפיע על רוחב הקופסה; הסמן מהבהב ב-opacity בלבד */}
+        <span className="absolute inset-0 flex items-center justify-start">
           {display}
           <span className="ms-0.5 inline-block h-[1.05em] w-px animate-pulse bg-white/90" />
         </span>
@@ -196,7 +200,7 @@ export function Header() {
 
         <nav
           aria-label="ניווט ראשי"
-          className="hidden items-center gap-7 text-[15px] font-medium text-ink-strong lg:flex"
+          className="hidden items-center gap-6 text-[17px] font-medium text-ink-strong lg:flex xl:gap-7"
         >
           {NAV.map((item) => (
             <Link
@@ -204,7 +208,7 @@ export function Header() {
               href={item.href}
               aria-current={item.href === pathname ? "page" : undefined}
               className={cn(
-                "stm-link py-2 hover:text-navy-800",
+                "stm-link py-2 whitespace-nowrap hover:text-navy-800",
                 item.href === pathname && "font-bold text-navy-800"
               )}
             >
@@ -281,7 +285,7 @@ export function Header() {
               href={item.href}
               onClick={() => setOpen(false)}
               aria-current={item.href === pathname ? "page" : undefined}
-              className="rounded-[10px] px-4 py-3 text-[16px] font-semibold text-ink-strong hover:bg-mist"
+              className="rounded-[10px] px-4 py-3 text-[17px] font-medium text-ink-strong hover:bg-mist"
             >
               {item.label}
             </Link>
