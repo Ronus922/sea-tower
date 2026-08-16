@@ -93,9 +93,12 @@
   color: var(--color-navy-800);
 }
 
-/* --- הפאנל הנפתח --- */
+/* --- הפאנל הנפתח: בזרימת המסמך, מתחת לשדה — דוחף את המשך הטופס
+   ולא מכסה אותו. רוחב מוגבל כך שחודש בודד לא נמתח בטפסים רחבים
+   (RTL: נצמד לימין, מתחת לשדה) --- */
 .stm-sd-panel {
   --sd-pad: 18px;
+  max-width: 470px;
   margin-top: 14px;
   padding: var(--sd-pad);
   border: 1px solid var(--color-line);
@@ -181,8 +184,8 @@
   color: var(--color-ocean-400);
 }
 
-/* --- הלוח: חצי הניווט צפים בגובה כותרות החודשים (כמו ברפרנס) ולא
-   גוזלים רוחב עמודות — כך שני חודשים נכנסים זה לצד זה גם בפאנלים צרים --- */
+/* --- הלוח: חודש אחד תמיד; חצי הניווט צפים בגובה כותרת החודש
+   (RTL: "קודם" מימין, "הבא" משמאל) ולא גוזלים רוחב מהלוח --- */
 .stm-sd-nav {
   position: relative;
 }
@@ -217,12 +220,9 @@
   opacity: 0.32;
   cursor: default;
 }
-/* שני חודשים כשהרוחב מאפשר, אחד מתחת לשני כשלא (מובייל). ‏min(230px, 100%)
-   — בפאנל צר מ-230px פנימיים העמודה מתכווצת במקום לגלוש אופקית */
 .stm-sd-months {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
-  gap: 20px 24px;
+  grid-template-columns: 1fr;
 }
 /* גובה 44px מפנה את שורת הכותרת לחצים הצפים משני הצדדים */
 .stm-sd-mtitle {
@@ -345,93 +345,4 @@
   .stm-sd-panel {
     --sd-pad: 14px;
   }
-}
-
-/* --- מצב צף (stm-sd-float, ‏/v2): הפאנל מרחף מעל התוכן מחוץ לזרימת
-   המסמך — העמוד לא זז כשהוא נפתח. ‏RTL: ‏inset-inline-start:0 מצמיד את
-   קצה הפאנל לקצה הימני של השדה. top/bottom/max-height/clamp אופקי
-   מחושבים ב-JS ‏(StayDatesField) לפי המקום הפנוי ב-viewport.
-   הרוחב מתכווץ עם המסך — מתחת ל-~520px פנימיים ה-auto-fit של
-   ‎.stm-sd-months‎ עובר לבד לחודש אחד --- */
-.stm-sd-float {
-  position: relative;
-}
-.stm-sd-float .stm-sd-panel {
-  position: absolute;
-  inset-inline-start: 0;
-  z-index: 40;
-  margin-top: 0;
-  width: min(540px, calc(100vw - 16px));
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  box-shadow: var(--shadow-e2), 0 24px 60px -18px rgba(14, 37, 64, 0.35);
-}
-
-/* גלילה פנימית קיימת רק במפלט האחרון (scrolly — ‏viewport נמוך גם
-   ממצב compact); הצמדת שורות מחייבת נועלת כל מצב מנוחה — כולל
-   הפתיחה — על שורת ימים שלמה, והדהייה מתקשחת לרצועה אטומה של 16px
-   שמסתירה כל שריד שורה ומספקת את מרווח הנשימה מעל הקצה המעוגל */
-.stm-sd-float .stm-sd-panel.scrolly {
-  scroll-snap-type: y mandatory;
-  scroll-padding-block: 8px 19px;
-}
-.stm-sd-float .stm-sd-panel.scrolly .stm-sd-day {
-  scroll-snap-align: end;
-}
-/* בלי נקודות הצמדה לכותרת ולפוטר — ההצמדה לשורות הימים הייתה מונעת
-   מהם להיראות לעולם: הכותרת נדחפת החוצה כבר בפתיחה, וכפתורי
-   סגור/ביטול לא נגישים בקצה הגלילה */
-.stm-sd-float .stm-sd-panel.scrolly .stm-sd-head {
-  scroll-snap-align: start;
-}
-.stm-sd-float .stm-sd-panel.scrolly .stm-sd-foot {
-  scroll-snap-align: end;
-}
-.stm-sd-float .stm-sd-panel.scrolly::after {
-  height: 40px;
-  margin-top: -40px;
-  background: linear-gradient(to top, #fff 16px, rgba(255, 255, 255, 0));
-}
-
-/* מצב מצומצם — JS מוסיף אותו כשהגובה הטבעי לא נכנס במסך גם בחפיפה
-   מלאה על השדה: חודש אחד, פאנל צר ותאים נמוכים יותר. אישור הבעלים:
-   "אפשר להקטין את החלון ככל שנדרש" */
-.stm-sd-float .stm-sd-panel.compact {
-  width: min(370px, calc(100vw - 16px));
-}
-.stm-sd-float .stm-sd-panel.compact .stm-sd-month:last-child {
-  display: none;
-}
-.stm-sd-float .stm-sd-panel.compact .stm-sd-head {
-  margin-bottom: 10px;
-}
-.stm-sd-float .stm-sd-panel.compact .stm-sd-mtitle {
-  min-height: 38px;
-}
-.stm-sd-float .stm-sd-panel.compact .stm-sd-navbtn {
-  width: 38px;
-  height: 38px;
-}
-.stm-sd-float .stm-sd-panel.compact .stm-sd-day {
-  height: 31px;
-}
-.stm-sd-float .stm-sd-panel.compact .stm-sd-foot {
-  padding-top: 10px;
-}
-
-/* בגלילה פנימית התוכן נחתך בקו ישר צמוד לקצה, והפינות המעוגלות של
-   התחתית נראות מרובעות — דהייה דביקה מרככת את קו החיתוך ומשאירה את
-   העיגול נקי; בסוף הגלילה היא מתיישבת בתוך הריפוד ונעלמת מאליה */
-.stm-sd-float .stm-sd-panel::after {
-  content: "";
-  position: sticky;
-  /* מסגרת ההצמדה של sticky מצטמצמת בריפוד הקונטיינר — הערך השלילי
-     מחזיר את הדהייה עד קו החיתוך האמיתי בקצה הפנימי */
-  bottom: calc(var(--sd-pad) * -1);
-  display: block;
-  height: 34px;
-  margin: -34px calc(var(--sd-pad) * -1) 0;
-  background: linear-gradient(to top, #fff 26%, rgba(255, 255, 255, 0));
-  border-radius: 0 0 var(--radius-card) var(--radius-card);
-  pointer-events: none;
 }
