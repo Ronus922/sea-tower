@@ -226,7 +226,7 @@
   min-height: 44px;
   padding: 13px 26px;
   border-radius: var(--radius-btn, 12px);
-  background: linear-gradient(135deg, var(--color-sea-500), var(--color-ocean-400));
+  background: var(--gradient-cta);
   font-size: 15.5px;
   font-weight: 700;
   color: #fff;

@@ -84,7 +84,7 @@ export function Confirmation({
       <div className="flex flex-wrap justify-center gap-3">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 rounded-xl bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-[26px] py-[13px] text-[15.5px] font-bold text-white shadow-[0_10px_24px_rgba(43,127,184,0.3)]"
+          className="inline-flex items-center gap-2 rounded-xl bg-[image:var(--gradient-cta)] px-[26px] py-[13px] text-[15.5px] font-bold text-white shadow-[0_10px_24px_rgba(43,127,184,0.3)]"
         >
           חזרה לדף הבית
         </Link>

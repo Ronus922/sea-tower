@@ -84,7 +84,7 @@ export function BookingSearchBar({ checkIn, checkOut, rooms: initialRooms }: Pro
         <button
           type="button"
           onClick={submit}
-          className="flex shrink-0 items-center justify-center gap-2.5 bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-[38px] py-4 text-[16.5px] font-bold text-white md:py-0"
+          className="flex shrink-0 items-center justify-center gap-2.5 bg-[image:var(--gradient-cta)] px-[38px] py-4 text-[16.5px] font-bold text-white md:py-0"
         >
           <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true">
             <circle cx="11" cy="11" r="6.5" stroke="#fff" strokeWidth="1.9" />

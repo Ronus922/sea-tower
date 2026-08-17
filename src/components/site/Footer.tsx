@@ -52,7 +52,7 @@ const LINK_COLUMNS: Array<{
 
 /* רשימת אייקוני הרשתות — מיקום אחיד בכל העמודים (הנחיית בעלים 2026-08-17):
    בעמודה הראשונה (הימנית ב-RTL), מתחת לתיאור העסק ומעל הקו המפריד — המיקום
-   שהיה עד כה ב-/v2 בלבד. סדר DOM: פייסבוק→לינקדאין, שב-RTL נותן את הסדר
+   שהיה עד כה בעמוד הבית בלבד. סדר DOM: פייסבוק→לינקדאין, שב-RTL נותן את הסדר
    הוויזואלי לינקדאין, יוטיוב, אינסטגרם, פייסבוק (משמאל לימין) לפי הרפרנס */
 function SocialList({ className }: { className: string }) {
   return (
@@ -124,7 +124,7 @@ export function Footer() {
               >
                 {col.title}
               </div>
-              <ul className="flex flex-col gap-[11px] text-sm">
+              <ul className="stm-footer-links flex flex-col gap-[11px] text-sm">
                 {col.links.map((link) => (
                   <li key={link.label}>
                     <Link href={link.href} className="stm-link hover:text-white">
@@ -138,7 +138,7 @@ export function Footer() {
 
           <div>
             <div className="mb-4 text-sm font-bold tracking-[0.03em] text-white">דברו איתנו</div>
-            <ul className="flex flex-col gap-[11px] text-sm">
+            <ul className="stm-footer-links flex flex-col gap-[11px] text-sm">
               <li>
                 <a
                   href={BUSINESS.phones.office.tel}

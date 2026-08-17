@@ -164,7 +164,7 @@ export function GuestsPopover({ open, rooms, onChange, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-[11px] bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-[30px] py-3 text-[15px] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)]"
+            className="rounded-[11px] bg-[image:var(--gradient-cta)] px-[30px] py-3 text-[15px] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)]"
           >
             אישור
           </button>

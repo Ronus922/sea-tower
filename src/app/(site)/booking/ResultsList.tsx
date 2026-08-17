@@ -166,7 +166,7 @@ function BookCta({ href, compact }: { href: string; compact?: boolean }) {
     <Link
       href={href}
       onClick={(e) => e.stopPropagation()}
-      className={`flex items-center justify-center gap-2 rounded-[11px] bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)] ${
+      className={`flex items-center justify-center gap-2 rounded-[11px] bg-[image:var(--gradient-cta)] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)] ${
         compact ? "px-4 py-2.5 text-[14px] whitespace-nowrap" : "px-[18px] py-3 text-[15px]"
       }`}
     >

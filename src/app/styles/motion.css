@@ -218,6 +218,25 @@ html.stm-js [data-ws]:not(.stm-ws-ready) {
 .stm-link:hover::after {
   transform: scaleX(1);
 }
+/* אזור מגע 44px לקישורי הפוטר במכשירי מגע. הטקסט עצמו נשאר 19px — רק שטח
+   הלחיצה גדל דרך padding, וה-gap מתאפס כדי שהאזורים לא יחפפו. הקו התחתון
+   מוזז ב-11px כדי להישאר צמוד לטקסט ולא לצנוח לתחתית התיבה המורחבת.
+   בדסקטופ (pointer: fine) שום דבר לא משתנה. */
+@media (pointer: coarse) {
+  .stm-footer-links {
+    gap: 0;
+  }
+
+  .stm-footer-links .stm-link {
+    display: inline-block;
+    padding-block: 13px;
+  }
+
+  .stm-footer-links .stm-link::after {
+    bottom: 11px;
+  }
+}
+
 .stm-link svg {
   transition: transform 0.3s var(--ease-brand);
 }
