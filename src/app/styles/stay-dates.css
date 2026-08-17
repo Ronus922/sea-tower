@@ -93,18 +93,25 @@
   color: var(--color-navy-800);
 }
 
-/* --- הפאנל הנפתח: בזרימת המסמך, מתחת לשדה — דוחף את המשך הטופס
-   ולא מכסה אותו. רוחב מוגבל כך שחודש בודד לא נמתח בטפסים רחבים
-   (RTL: נצמד לימין, מתחת לשדה) --- */
+/* --- הפאנל הנפתח: צף מעל המשך הטופס (overlay) ולא דוחף אותו — פתיחה
+   לא מזיזה אף שדה. מעוגן לשורש (position:relative על .stm-sd) ונצמד
+   לימין מתחת לשורת השדות; רוחב מוגבל כך שחודש בודד לא נמתח.
+   z-index מעל שדות הטופס ומתחת ל-Header הדביק (z-50) --- */
+.stm-sd {
+  position: relative;
+}
 .stm-sd-panel {
   --sd-pad: 18px;
-  max-width: 470px;
-  margin-top: 14px;
+  position: absolute;
+  top: calc(100% + 10px);
+  inset-inline-start: 0;
+  width: min(470px, 100%);
+  z-index: 30;
   padding: var(--sd-pad);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
   background: #fff;
-  box-shadow: var(--shadow-e2);
+  box-shadow: var(--shadow-e3);
 }
 
 /* כותרת: סיכום לילות מימין, מתאריך/עד־תאריך משמאל */
@@ -288,57 +295,6 @@
   background: var(--color-ocean-400);
   color: #fff;
   font-weight: 800;
-}
-
-/* --- תחתית הפאנל --- */
-.stm-sd-foot {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px 16px;
-  border-top: 1px solid var(--color-chip);
-  margin-top: 16px;
-  padding-top: 14px;
-}
-.stm-sd-note {
-  font-size: 12.5px;
-  color: var(--color-ink-dim);
-}
-.stm-sd-actions {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-}
-.stm-sd-cancel {
-  border: 0;
-  background: none;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--color-ink-dim);
-  cursor: pointer;
-  min-height: 44px;
-  padding: 0 6px;
-}
-.stm-sd-cancel:hover {
-  color: var(--color-navy-800);
-}
-.stm-sd-close {
-  border: 0;
-  border-radius: var(--radius-btn);
-  background: var(--color-navy-800);
-  color: #fff;
-  font-family: inherit;
-  font-size: 14.5px;
-  font-weight: 800;
-  cursor: pointer;
-  min-height: 44px;
-  padding: 0 26px;
-  transition: background 0.2s;
-}
-.stm-sd-close:hover {
-  background: var(--color-ocean-500);
 }
 
 @media (max-width: 480px) {
