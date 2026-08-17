@@ -39,7 +39,15 @@ export type SiteEvent =
   | { name: "phone_click"; phone_line: "office" | "mobile"; link_location: string }
   | { name: "whatsapp_click"; link_location: string }
   | { name: "email_click"; link_location: string }
-  | { name: "article_click"; article_slug: string };
+  | { name: "article_click"; article_slug: string }
+  /* אירועי באנר ההתקנה (InstallPrompt) — platform מבחין בין מסלול נטיבי
+     (beforeinstallprompt), הוראות iOS והוראות תפריט-דפדפן */
+  | { name: "pwa_install_prompt_shown"; platform: "native" | "ios" | "menu" }
+  | { name: "pwa_install_clicked"; platform: "native" }
+  | { name: "pwa_install_instructions_shown"; platform: "ios" | "menu" }
+  | { name: "pwa_install_accepted" }
+  | { name: "pwa_install_dismissed" }
+  | { name: "pwa_installed" };
 
 type DataLayerWindow = Window & { dataLayer?: Array<Record<string, unknown>> };
 
