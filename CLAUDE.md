@@ -49,9 +49,17 @@ All public Sea Tower pages must be created inside `src/app/(site)/`. The shared 
   3. its final content clears the footer wave on desktop, tablet, and mobile;
   4. the page has no horizontal overflow or visible seam above the Footer.
 
+## Brand system — gradients in Tailwind
+
+Always `bg-[image:var(--gradient-cta)]`, **never** `bg-[var(--gradient-cta)]`. Tailwind cannot tell whether a `var()` holds a colour or an image, and without the `image:` prefix it emits **no rule at all** — the button ships with no background whatsoever, with no build error and no warning. The same applies to any custom property holding a gradient.
+
+CTA gradient contrast is locked at **≥ 4.5:1** against white text by `src/app/styles/tokens.test.ts`. Changing `--gradient-cta` without keeping that ratio fails CI.
+
 ## Deploy
 
-`npm run build && cp -r .next/static .next/standalone/.next/ && cp -r public .next/standalone/ && sudo systemctl restart sea-tower.service` (port 3005).
+Use `scripts/deploy-worktree.sh` — it refuses to deploy a branch that does not contain `origin/main` (which would silently revert merged work), builds in the current worktree, asserts the standalone layout, swaps `.next` atomically and restarts only `sea-tower.service` (port 3005). Keeps `.next.rollback` as the rollback path.
+
+One deploy per logical change — never two stages in one deploy, so a break is attributable.
 
 
 ---
