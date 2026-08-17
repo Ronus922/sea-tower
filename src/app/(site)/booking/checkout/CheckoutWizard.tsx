@@ -369,7 +369,7 @@ function GuestStep({
         onClick={() => {
           if (validate()) onNext();
         }}
-        className="flex w-full items-center justify-center gap-[9px] rounded-xl bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-4 py-[15px] text-[16.5px] font-bold text-white shadow-[0_12px_26px_rgba(43,127,184,0.32)]"
+        className="flex w-full items-center justify-center gap-[9px] rounded-xl bg-[image:var(--gradient-cta)] px-4 py-[15px] text-[16.5px] font-bold text-white shadow-[0_12px_26px_rgba(43,127,184,0.32)]"
       >
         המשך לתשלום
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" aria-hidden="true">

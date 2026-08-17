@@ -33,7 +33,7 @@ const base =
   "inline-flex items-center justify-center gap-[9px] focus-visible:outline-2 focus-visible:outline-offset-2";
 
 const primary =
-  "stm-btn-primary rounded-btn bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-7 py-[15px] text-[16px] font-bold text-white shadow-glow";
+  "stm-btn-primary rounded-btn bg-[image:var(--gradient-cta)] px-7 py-[15px] text-[16px] font-bold text-white shadow-glow";
 /* min-h + margin שלילי: אזור מגע 44px בלי לשנות את הזרימה הוויזואלית (Iron Rule #6) */
 const linkHitArea = "-my-2 min-h-11 py-2";
 

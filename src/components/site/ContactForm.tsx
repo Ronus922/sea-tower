@@ -414,7 +414,7 @@ export function ContactForm({
         <button
           type="submit"
           disabled={status === "submitting"}
-          className="stm-btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-[9px] rounded-btn bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-7 py-[15px] text-[16px] font-bold text-white shadow-glow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-500 disabled:pointer-events-none disabled:opacity-85"
+          className="stm-btn-primary inline-flex min-h-12 flex-1 items-center justify-center gap-[9px] rounded-btn bg-[image:var(--gradient-cta)] px-7 py-[15px] text-[16px] font-bold text-white shadow-glow focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sea-500 disabled:pointer-events-none disabled:opacity-85"
         >
           {status === "submitting" ? (
             <>

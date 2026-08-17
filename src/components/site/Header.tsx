@@ -68,7 +68,7 @@ function CtaLink({ className }: { className?: string }) {
       href="/booking"
       aria-label="הזמינו עכשיו — בדיקת זמינות"
       className={cn(
-        "stm-btn-primary inline-flex items-center gap-2 rounded-[10px] bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-[22px] py-3 text-[15px] font-bold whitespace-nowrap text-white shadow-[0_8px_20px_rgba(43,127,184,0.32)]",
+        "stm-btn-primary inline-flex items-center gap-2 rounded-[10px] bg-[image:var(--gradient-cta)] px-[22px] py-3 text-[15px] font-bold whitespace-nowrap text-white shadow-[0_8px_20px_rgba(43,127,184,0.32)]",
         className
       )}
     >

@@ -344,7 +344,7 @@ export function SpecDrawer({
           </div>
           <Link
             href={checkoutHref}
-            className="flex items-center gap-2 rounded-[11px] bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] px-[26px] py-[13px] text-[15px] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)]"
+            className="flex items-center gap-2 rounded-[11px] bg-[image:var(--gradient-cta)] px-[26px] py-[13px] text-[15px] font-bold text-white shadow-[0_8px_18px_rgba(43,127,184,0.28)]"
           >
             הזמינו עכשיו
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -393,7 +393,7 @@ export function CardStep({
         className={`flex w-full items-center justify-center gap-[9px] rounded-xl px-4 py-[15px] text-[16.5px] font-bold text-white transition-all ${
           !consentsOk || sending
             ? "cursor-not-allowed bg-[#c2d2df]"
-            : "bg-[linear-gradient(135deg,var(--color-sea-500),var(--color-ocean-400))] shadow-[0_12px_26px_rgba(43,127,184,0.32)]"
+            : "bg-[image:var(--gradient-cta)] shadow-[0_12px_26px_rgba(43,127,184,0.32)]"
         }`}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
