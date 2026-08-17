@@ -16,13 +16,21 @@ export function RoomCard({
   className,
   sizes,
   imagePriority = false,
+  reveal = "engine",
 }: {
   room: PublicRoom;
   className?: string;
   sizes: string;
   /* לתמונות מעל הקפל (הכרטיסים הראשונים ב-/rooms) — LCP (SEO-AUDIT A2) */
   imagePriority?: boolean;
+  /* מי חושף את הכרטיס בכניסה לפריים:
+     "engine" — MotionEngine דרך data-rev (ברירת המחדל, /rooms).
+     "gsap"   — HomeMotionRoot חושף את התמונה (clip-path + scale) דרך
+                המחלקה home-room-media. אז data-rev חייב לרדת, אחרת שני
+                המנועים מנפישים את אותו כרטיס */
+  reveal?: "engine" | "gsap";
 }) {
+  const gsapReveal = reveal === "gsap";
   const cover = roomCoverImage(room);
   const badge = roomTypeBadge(room);
   const chips = roomChips(room);
@@ -30,13 +38,18 @@ export function RoomCard({
 
   return (
     <article
-      data-rev="card"
+      data-rev={gsapReveal ? undefined : "card"}
       className={cn(
         "stm-card flex flex-col overflow-hidden rounded-card-lg bg-white shadow-e2",
         className
       )}
     >
-      <div className="relative h-[200px] w-full bg-chip md:h-[220px]">
+      <div
+        className={cn(
+          "relative h-[200px] w-full bg-chip md:h-[220px]",
+          gsapReveal && "home-room-media"
+        )}
+      >
         {cover && (
           <Image
             src={cover.src}
