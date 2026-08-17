@@ -6,6 +6,7 @@ import { MotionEngine } from "@/components/site/MotionEngine";
 import { SplitWords } from "@/components/ui/SplitWords";
 import { Bubbles, type Bubble } from "@/components/site/Bubbles";
 import { HomeSections } from "@/components/site/home/HomeSections";
+import { HomeMotionRoot } from "@/components/site/home/HomeMotionRoot";
 import { buildSiteJsonLd } from "@/lib/seo";
 import { BUSINESS } from "@/lib/business";
 
@@ -46,7 +47,7 @@ export default function Home() {
   preload("/videos/hero-sea-poster.jpg", { as: "image", fetchPriority: "high" });
 
   return (
-    <>
+    <HomeMotionRoot>
       {/* שער חשיפות: רץ לפני ה-hydration כך שתוכן מסומן לא מהבהב לפני האנימציה */}
       <script
         dangerouslySetInnerHTML={{
@@ -60,7 +61,10 @@ export default function Home() {
       />
       <MotionEngine />
       {/* Hero */}
-      <section className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-12 pb-28 text-white md:pt-[78px] md:pb-[150px]">
+      <section
+        data-hero-parallax=""
+        className="relative overflow-hidden bg-[linear-gradient(120deg,var(--color-navy-900)_0%,var(--color-ocean-700)_58%,var(--color-ocean-600)_100%)] pt-12 pb-28 text-white md:pt-[78px] md:pb-[150px]"
+      >
         <div className="st-bg" aria-hidden="true">
           <div className="st-orb st-orb-a right-[8%] -top-[60px] size-[320px] bg-[radial-gradient(circle,rgba(86,192,240,0.34),transparent_68%)]" />
           <div className="st-orb st-orb-b left-[14%] -bottom-10 size-[260px] bg-[radial-gradient(circle,rgba(58,155,214,0.28),transparent_70%)]" />
@@ -116,18 +120,22 @@ export default function Home() {
             </div>
           </div>
           <div className="hero-img-in relative w-full lg:flex-[0.95]">
-            <video
-              src="/videos/hero-sea.mp4"
-              poster="/videos/hero-sea-poster.jpg"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label="נוף לים התיכון ממגדלי חוף הכרמל"
-              data-parallax=""
-              className="h-[280px] w-full rounded-img object-cover shadow-[0_30px_60px_rgba(0,0,0,0.4)] md:h-[460px]"
-            />
+            {/* עטיפה יחידה סביב הווידאו (overflow hidden) — הפרלקסה עברה
+                מ-MotionEngine ל-GSAP, והווידאו מקבל עודף גובה ב-home-motion.css
+                כדי שה-scrub לא יחשוף פס ריק. הגובה, העיגול והצל עברו לעטיפה */}
+            <div className="home-media-wrap h-[280px] w-full rounded-img shadow-[0_30px_60px_rgba(0,0,0,0.4)] md:h-[460px]">
+              <video
+                data-hero-video=""
+                src="/videos/hero-sea.mp4"
+                poster="/videos/hero-sea-poster.jpg"
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+                aria-label="נוף לים התיכון ממגדלי חוף הכרמל"
+              />
+            </div>
             <div className="absolute -bottom-6 right-4 animate-float rounded-card bg-white px-5 py-4 shadow-e4 md:-right-5">
               <div className="text-[26px] leading-none font-extrabold text-navy-800 md:text-[30px]">
                 {/* ספירה 0→50 ב-CSS (cnt50); "50" סטטי ל-reduced-motion דרך ה-media query */}
@@ -163,7 +171,7 @@ export default function Home() {
       </section>
 
       {/* כל שאר מקטעי הבית — קומפוננטה משותפת עם טיוטת /aerial */}
-      <HomeSections />
-    </>
+      <HomeSections reveal="lines" />
+    </HomeMotionRoot>
   );
 }

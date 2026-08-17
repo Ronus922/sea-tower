@@ -189,10 +189,19 @@ const CONTACT_DETAILS = [
   },
 ];
 
-export async function HomeSections() {
+export async function HomeSections({
+  reveal = "words",
+}: {
+  /* מי מנפיש את המקטעים האלה. "words" — MotionEngine בלבד (ברירת המחדל,
+     וזה מה ש-/aerial מקבל). "lines" — עמוד הבית, שעטוף ב-HomeMotionRoot:
+     הכותרות נחשפות שורה-שורה ב-GSAP, ותמונות הדירות ותמונת "למה לבחור בנו"
+     נחשפות ב-clip-path. שני המנועים לעולם לא נוגעים באותו אלמנט */
+  reveal?: "words" | "lines";
+} = {}) {
   /* GuestHub מחזיר רק חדרים שסומנו לאתר ויש להם גלריה. נפילת השירות מחזירה
      null, ואז המקטע מציג הודעה במקום קרוסלה במקום להפיל את העמוד */
   const rooms = (await fetchWebsiteRooms()) ?? [];
+  const gsapReveal = reveal === "lines";
 
   return (
     <>
@@ -214,6 +223,7 @@ export async function HomeSections() {
           <div className="w-full lg:flex-[1.1]">
             <SectionHeading
               ws
+              reveal={reveal}
               kicker="אודות מגדל הים"
               title={
                 <>
@@ -245,6 +255,7 @@ export async function HomeSections() {
           <SectionHeading
             center
             ws
+            reveal={reveal}
             kicker="הפתרונות שלנו"
             title="פתרון אירוח לכל צורך"
             lead="דירה אחת, אינסוף סיבות להגיע — בחרו את הפתרון שמתאים בדיוק לכם"
@@ -305,9 +316,9 @@ export async function HomeSections() {
       {/* הדירות שלנו — כרטיסים חיים מ-GuestHub */}
       <section id="apartments" className="bg-cloud py-14 md:py-20">
         <Container>
-          <SectionHeading ws kicker="הדירות שלנו" title="סוויטות נבחרות מול הים" className="mb-10" />
+          <SectionHeading ws reveal={reveal} kicker="הדירות שלנו" title="סוויטות נבחרות מול הים" className="mb-10" />
           {rooms.length > 0 ? (
-            <RoomsCarousel rooms={rooms} />
+            <RoomsCarousel rooms={rooms} reveal={gsapReveal ? "gsap" : "engine"} />
           ) : (
             /* GuestHub לא זמין — העמוד לא נופל, והמבקר ממשיך למנוע ההזמנות */
             <div className="rounded-card-lg border border-line bg-white p-6 text-center text-[15.5px] leading-relaxed text-ink-dim md:p-10">
@@ -339,6 +350,7 @@ export async function HomeSections() {
             <SectionHeading
               dark
               ws
+              reveal={reveal}
               kicker="למה לבחור בנו"
               title={<>ההבדל נמצא <br />בפרטים הקטנים</>}
             />
@@ -361,16 +373,23 @@ export async function HomeSections() {
             </div>
           </div>
           <div className="relative w-full lg:flex-[0.95]">
-            <Image
-              src="/images/suite-details.jpg"
-              alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
-              width={1376}
-              height={768}
-              data-rev="media"
-              sizes="(min-width: 1024px) 45vw, 100vw"
-              className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"
-            />
-            <div className="absolute -bottom-6 right-4 flex animate-float items-center gap-3 rounded-card bg-white px-5 py-3.5 shadow-e4 [animation-duration:6.5s] md:-right-5">
+            {/* העטיפה חותכת את ה-scale של חשיפת ה-clip-path. מחוץ ל-.home-motion
+                (למשל /aerial) היא div ריק בלי שום כלל CSS — אפס שינוי ויזואלי */}
+            <div className={gsapReveal ? "home-why-media" : undefined}>
+              <Image
+                src="/images/suite-details.jpg"
+                alt="חדר שינה בסוויטה מוכן לאירוח — מגבות מקופלות, עלי ורדים ויין"
+                width={1376}
+                height={768}
+                data-rev={gsapReveal ? undefined : "media"}
+                sizes="(min-width: 1024px) 45vw, 100vw"
+                className="h-[320px] w-full rounded-card-lg object-cover md:h-[480px]"
+              />
+            </div>
+            <div
+              data-tag-reveal={gsapReveal ? "" : undefined}
+              className="absolute -bottom-6 right-4 flex animate-float items-center gap-3 rounded-card bg-white px-5 py-3.5 shadow-e4 [animation-duration:6.5s] md:-right-5"
+            >
               <svg width="30" height="30" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                 <rect
                   x="3"
@@ -401,7 +420,7 @@ export async function HomeSections() {
       <section id="process" className="bg-white py-14 md:py-20">
         <Container className="flex flex-col gap-14 lg:flex-row">
           <div className="lg:flex-1">
-            <SectionHeading ws kicker="פשוט להתארח" title={<>שלושה צעדים <br />עד הים</>} />
+            <SectionHeading ws reveal={reveal} kicker="פשוט להתארח" title={<>שלושה צעדים <br />עד הים</>} />
             {/* רצף אנכי 1→2→3 */}
             <div className="mt-8 flex flex-col gap-3.5">
               {STEPS.map((step, i) => (
@@ -422,7 +441,7 @@ export async function HomeSections() {
             </div>
           </div>
           <div className="lg:flex-1">
-            <SectionHeading ws kicker="שאלות נפוצות" title="כל מה שרציתם לדעת" />
+            <SectionHeading ws reveal={reveal} kicker="שאלות נפוצות" title="כל מה שרציתם לדעת" />
             <div className="mt-8 flex flex-col gap-3">
               {FAQS.map((faq) => (
                 <details
@@ -456,7 +475,7 @@ export async function HomeSections() {
       <section id="blog" className="bg-white py-14 md:py-20">
         <Container>
           <div className="mb-10 flex flex-wrap items-end justify-between gap-6">
-            <SectionHeading ws kicker="מאמרים ותובנות" title="מהבלוג של מגדל הים" />
+            <SectionHeading ws reveal={reveal} kicker="מאמרים ותובנות" title="מהבלוג של מגדל הים" />
             <Button href="/articles" variant="link">
               לכל המאמרים
             </Button>
@@ -489,7 +508,7 @@ export async function HomeSections() {
         </div>
         <Container className="relative z-[2] flex flex-col items-center gap-12 lg:flex-row">
           <div className="w-full text-white lg:flex-1">
-            <SectionHeading dark ws kicker="בואו נתחיל" title={<>מתכננים הגעה <br />לחיפה?</>} />
+            <SectionHeading dark ws reveal={reveal} kicker="בואו נתחיל" title={<>מתכננים הגעה <br />לחיפה?</>} />
             <p data-rev="up" className="mt-4 mb-7 max-w-[440px] text-[17.5px] leading-[1.65] text-[#bcd4e6]">
               השאירו פרטים ונחזור אליכם עם הצעה אישית לדירה המושלמת — לנופש, לעסקים או לתקופה
               ארוכה.

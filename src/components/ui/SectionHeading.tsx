@@ -30,6 +30,7 @@ export function SectionHeading({
   dark = false,
   center = false,
   ws = false,
+  reveal = "words",
   className,
 }: {
   kicker?: string;
@@ -37,15 +38,21 @@ export function SectionHeading({
   lead?: string;
   dark?: boolean;
   center?: boolean;
-  /* חשיפת מילה-אחר-מילה ע"י MotionEngine (מצב PLUS של הרפרנס) */
+  /* חשיפת הכותרת בכניסה לפריים. ws מפעיל אותה; reveal בוחר מי מנפיש:
+     "words" — MotionEngine, מילה-אחר-מילה (ברירת המחדל, כל האתר).
+     "lines" — HomeMotionRoot, שורה-אחר-שורה ב-GSAP SplitText (עמוד הבית).
+     שני המנועים קוראים attributes שונים, ולעולם לא את שניהם על אותו אלמנט */
   ws?: boolean;
+  reveal?: "words" | "lines";
   className?: string;
 }) {
+  const lines = ws && reveal === "lines";
   return (
     <div className={cn("flex flex-col gap-3.5", center && "items-center text-center", className)}>
       {kicker && <SectionKicker dark={dark}>{kicker}</SectionKicker>}
       <h2
-        data-ws={ws ? "" : undefined}
+        data-ws={ws && !lines ? "" : undefined}
+        data-line-reveal={lines ? "" : undefined}
         className={cn(
           "text-[32px]/[1.2] font-extrabold tracking-heading md:text-h2",
           dark ? "text-white" : "text-navy-800"

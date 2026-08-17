@@ -40,7 +40,16 @@ function ArrowButton({
   );
 }
 
-export function RoomsCarousel({ rooms }: { rooms: PublicRoom[] }) {
+export function RoomsCarousel({
+  rooms,
+  reveal = "engine",
+}: {
+  rooms: PublicRoom[];
+  /* "gsap" מסמן את המיכל ב-data-card-reveal — טריגר יחיד לחשיפת הכרטיסים
+     ע"י HomeMotionRoot. הקרוסלה אופקית ו-ScrollTrigger אנכי, ולכן הטריגר
+     יושב על המיכל ולא על כרטיס בודד */
+  reveal?: "engine" | "gsap";
+}) {
   const scroller = useRef<HTMLDivElement>(null);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(false);
@@ -76,7 +85,7 @@ export function RoomsCarousel({ rooms }: { rooms: PublicRoom[] }) {
   };
 
   return (
-    <div className="relative">
+    <div className="relative" data-card-reveal={reveal === "gsap" ? "" : undefined}>
       <ArrowButton dir="start" label="הדירה הקודמת" disabled={!canPrev} onClick={() => go(false)} />
       <ArrowButton dir="end" label="הדירה הבאה" disabled={!canNext} onClick={() => go(true)} />
 
@@ -93,6 +102,7 @@ export function RoomsCarousel({ rooms }: { rooms: PublicRoom[] }) {
             key={room.id}
             room={room}
             sizes={CARD_SIZES}
+            reveal={reveal}
             className="w-[86%] shrink-0 snap-start md:w-[calc((100%-24px)/2)] lg:w-[calc((100%-48px)/3)] xl:w-[calc((100%-72px)/4)]"
           />
         ))}

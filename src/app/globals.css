@@ -4,6 +4,7 @@
 @import "./styles/base.css";
 @import "./styles/motion.css";
 @import "./styles/home.css";
+@import "./styles/home-motion.css";
 @import "./styles/about.css";
 @import "./styles/contact.css";
 @import "./styles/terms.css";

@@ -1,0 +1,72 @@
+/* ============================================================
+   תנועת GSAP של עמוד הבית — נספח ל-HomeMotionRoot.
+
+   כל כלל כאן חייב להיות scoped תחת ‎.home-motion‎ — אפס דליפה לשאר האתר,
+   ובכללו ‎/aerial‎ שמרנדר את אותם ‎HomeSections‎ בלי מעטפת התנועה.
+
+   חשוב: אין כאן מצבי-התחלה מוסתרים! ברירת המחדל היא תוכן גלוי; ההסתרה
+   מוחלת רק ב-JS ‏(gsap.set / SplitText) אחרי ש-GSAP נטען.
+   ============================================================ */
+
+/* --- פרלקסת וידאו ה-hero ---
+   העטיפה חותכת; במובייל הווידאו ממלא 1:1 (אין פרלקסה מתחת ל-768px).
+   בדסקטופ עם תנועה מותרת: עודף גובה 20% שמכסה את מלוא מהלך ה-scrub —
+   ‏yPercent 15 על גובה 120% = ‏18% מהמיכל, ההיסט העליון ‎-19%‎ סופג אותו */
+.home-motion .home-media-wrap {
+  position: relative;
+  overflow: hidden;
+}
+.home-motion .home-media-wrap > video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+}
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  .home-motion .home-media-wrap > video {
+    top: -19%;
+    bottom: auto;
+    height: 120%;
+  }
+}
+
+/* --- עוטף תמונת החדר ב"למה לבחור בנו" — חותך את ה-scale של החשיפה
+   (כמו home-room-media). העיגול יושב כאן ולא על התמונה, אחרת ה-clip-path
+   של העטיפה היה חושף פינות חדות. מחוץ ל-.home-motion העטיפה היא div ריק
+   לחלוטין — אפס שינוי ויזואלי ב-/aerial --- */
+.home-motion .home-why-media {
+  overflow: hidden;
+  border-radius: var(--radius-card-lg);
+}
+
+/* --- hover לכרטיסי הפתרונות — הגבהה עדינה, פינות רכות יותר וזום קל של
+   התמונה בתוך המסגרת (overflow-hidden בכרטיס). רק במכשירים עם עכבר —
+   במגע אין hover ואין מצב תקוע; מצב הבסיס הוא הכרטיס הרגיל ללא שינוי --- */
+@media (hover: hover) and (pointer: fine) {
+  .home-motion .sol-card {
+    transition:
+      transform 0.3s var(--ease-brand),
+      border-radius 0.3s var(--ease-brand),
+      box-shadow 0.3s var(--ease-brand);
+  }
+  .home-motion .sol-card img {
+    transition: transform 0.3s var(--ease-brand);
+  }
+  .home-motion .sol-card:hover {
+    transform: translateY(-6px);
+    border-radius: 32px;
+    box-shadow: 0 42px 84px -30px rgba(14, 37, 64, 0.46);
+  }
+  .home-motion .sol-card:hover img {
+    transform: scale(1.04);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-motion .sol-card,
+  .home-motion .sol-card img {
+    transition: none;
+    transform: none;
+  }
+}
