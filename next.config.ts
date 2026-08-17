@@ -9,6 +9,11 @@ const GUESTHUB = process.env.GUESTHUB_API_URL ?? "http://127.0.0.1:3007";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  /* בלי זה Next מנחש את שורש ה-workspace לפי קובצי lock סמוכים. בבנייה מתוך worktree
+     תחת ‎~/dev‎ הוא בוחר את ‎/home/ubuntu‎ (יש שם pnpm-lock.yaml זר) ומקנן את הפלט תחת
+     ‎.next/standalone/dev/<worktree>/server.js‎ — נתיב שלא תואם את ExecStart של השירות.
+     קיבוע השורש לתיקיית הפרויקט הופך את מבנה הפלט לזהה מכל מיקום בנייה */
+  outputFileTracingRoot: import.meta.dirname,
   images: {
     /* AVIF לפני WebP — ברירת המחדל של Next היא WebP בלבד (SEO-AUDIT A3) */
     formats: ["image/avif", "image/webp"],
