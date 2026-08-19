@@ -8,17 +8,31 @@ import { IconTile } from "@/components/ui/IconTile";
 import { CheckItem } from "@/components/ui/CheckItem";
 import { WaveSeparator } from "@/components/ui/WaveSeparator";
 import { MotionEngine } from "@/components/site/MotionEngine";
+import { PageMotionRoot } from "@/components/site/PageMotionRoot";
 import { SplitWords } from "@/components/ui/SplitWords";
-import { pageMeta, buildBreadcrumbLd, buildWebPageLd } from "@/lib/seo";
+import { pageMeta, buildBreadcrumbLd, buildServiceListLd } from "@/lib/seo";
 import { VISIBLE_SOLUTIONS } from "@/data/solutions";
 
-/* עמוד פתרונות — נבנה 1:1 לפי design-reference/exports/Solutions.html */
+/* עמוד פתרונות — נבנה 1:1 לפי design-reference/exports/Solutions.html.
+   התנועה בגוף העמוד מנוהלת ע"י PageMotionRoot (GSAP): כל שורת פתרון היא
+   בלוק כוריאוגרפי אחד. ה-Hero נשאר על האנימציה שרצה ב-CSS בזמן ה-paint. */
+
+const PAGE_TITLE = "פתרונות אירוח — מגדל הים | דירות בוטיק מול הים בחיפה";
+const PAGE_DESC =
+  "פתרון אירוח לכל צורך במגדל הים: נופש מול הים, אירוח לעסקים, רילוקיישן והשכרה לטווח קצר — דירות בוטיק 50 מ׳ מהטיילת בחיפה, ללא בירוקרטיה.";
 
 export const metadata: Metadata = pageMeta({
-  title: "פתרונות אירוח — מגדל הים | דירות בוטיק מול הים בחיפה",
-  description:
-    "פתרון אירוח לכל צורך במגדל הים: נופש מול הים, אירוח לעסקים, רילוקיישן והשכרה לטווח קצר — דירות בוטיק 50 מ׳ מהטיילת בחיפה, ללא בירוקרטיה.",
+  title: PAGE_TITLE,
+  description: PAGE_DESC,
   path: "/solutions",
+  /* תמונת שיתוף ייעודית לעמוד — ברירת המחדל (hero-terrace) שייכת לעמוד
+     הבית, וכרטיס שיתוף שלא מראה את נושא העמוד נחתך בתצוגות AI ובסושיאל */
+  image: {
+    url: VISIBLE_SOLUTIONS[0].img.src,
+    width: VISIBLE_SOLUTIONS[0].img.width,
+    height: VISIBLE_SOLUTIONS[0].img.height,
+    alt: VISIBLE_SOLUTIONS[0].img.alt,
+  },
 });
 
 /* ---------- תוכן ---------- */
@@ -65,16 +79,22 @@ export default function Solutions() {
           ),
         }}
       />
-      {/* WebPage — מקושר לגרף הישויות של העסק (SEO-AUDIT A8) */}
+      {/* CollectionPage + ItemList של Service — כל פתרון הוא ישות ממוענת
+          עם עוגן משלו, מקושרת לגרף הישויות של העסק (SEO-AUDIT A8) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify(
-            buildWebPageLd({
+            buildServiceListLd({
               name: "פתרונות אירוח במגדל הים",
-              description:
-                "פתרון אירוח לכל צורך במגדל הים: נופש מול הים, אירוח לעסקים, רילוקיישן והשכרה לטווח קצר.",
+              description: PAGE_DESC,
               path: "/solutions",
+              services: VISIBLE_SOLUTIONS.map((s) => ({
+                anchor: s.id,
+                name: s.title,
+                description: s.text,
+                image: s.img.src,
+              })),
             })
           ),
         }}
@@ -141,137 +161,151 @@ export default function Solutions() {
         <WaveSeparator position="bottom" fill="var(--color-cloud)" />
       </section>
 
-      {/* הפתרונות — שורות תמונה/טקסט מתחלפות */}
-      <section className="bg-cloud pt-14 pb-8 md:pt-20 md:pb-[30px]">
-        <Container className="flex flex-col gap-14 md:gap-[72px]">
-          {VISIBLE_SOLUTIONS.map((s, i) => (
-            <div
-              id={s.id}
-              key={s.id}
-              className={
-                "group flex scroll-mt-24 flex-col items-center gap-8 lg:gap-14 " +
-                (i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row")
-              }
-            >
-              <div className="w-full overflow-hidden rounded-img shadow-[0_22px_50px_rgba(14,37,64,0.14)] lg:flex-1">
-                <Image
-                  src={s.img.src}
-                  alt={s.img.alt}
-                  width={s.img.width}
-                  height={s.img.height}
-                  data-rev="media"
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="h-[260px] w-full object-cover transition-transform duration-[1200ms] ease-pop group-hover:scale-[1.03] md:h-[420px]"
-                />
-              </div>
-              <div className="w-full lg:flex-[1.04]">
-                <div data-rev="sm" className="mb-4 flex items-center gap-4">
-                  <IconTile size={54}>{s.icon}</IconTile>
-                  <span
-                    aria-hidden="true"
-                    className="text-[44px] leading-none font-extrabold tracking-[-0.02em] text-[#dde6ee]"
+      <PageMotionRoot>
+        {/* הפתרונות — שורות תמונה/טקסט מתחלפות */}
+        <section className="bg-cloud pt-14 pb-8 md:pt-20 md:pb-[30px]">
+          <Container className="flex flex-col gap-14 md:gap-[72px]">
+            {VISIBLE_SOLUTIONS.map((s, i) => (
+              <div
+                id={s.id}
+                key={s.id}
+                data-motion-group
+                className={
+                  "group flex scroll-mt-24 flex-col items-center gap-8 lg:gap-14 " +
+                  (i % 2 === 1 ? "lg:flex-row-reverse" : "lg:flex-row")
+                }
+              >
+                {/* הצל על העוטף החיצוני; ה-clip-path של החשיפה על הפנימי —
+                    אחרת החיתוך בולע את הצל והוא "קופץ" פנימה בסיום */}
+                <div className="w-full rounded-img shadow-[0_22px_50px_rgba(14,37,64,0.14)] lg:flex-1">
+                  <div data-motion-media className="overflow-hidden rounded-img">
+                    <Image
+                      src={s.img.src}
+                      alt={s.img.alt}
+                      width={s.img.width}
+                      height={s.img.height}
+                      sizes="(min-width: 1024px) 50vw, 100vw"
+                      className="h-[260px] w-full object-cover transition-transform duration-[1200ms] ease-pop group-hover:scale-[1.03] md:h-[420px]"
+                    />
+                  </div>
+                </div>
+                <div className="w-full lg:flex-[1.04]">
+                  <div data-motion-item className="mb-4 flex items-center gap-4">
+                    <IconTile size={54}>{s.icon}</IconTile>
+                    <span
+                      aria-hidden="true"
+                      className="text-[44px] leading-none font-extrabold tracking-[-0.02em] text-[#dde6ee]"
+                    >
+                      {s.num}
+                    </span>
+                  </div>
+                  <h2
+                    data-line-reveal
+                    className="mb-3.5 text-[28px]/[1.15] font-extrabold tracking-heading text-navy-800 md:text-[34px]/[1.15]"
                   >
-                    {s.num}
-                  </span>
+                    {s.title}
+                  </h2>
+                  <p data-motion-item className="mb-[22px] text-[16.5px] leading-[1.75] text-ink">
+                    {s.text}
+                  </p>
+                  <div className="flex flex-col gap-[13px]">
+                    {s.checks.map((c) => (
+                      <CheckItem key={c} reveal>
+                        {c}
+                      </CheckItem>
+                    ))}
+                  </div>
+                  <div data-motion-item className="mt-[22px]">
+                    <Button href="/contact" variant="link">
+                      לפרטים והזמנה
+                    </Button>
+                  </div>
                 </div>
-                <h2
-                  data-ws=""
-                  className="mb-3.5 text-[28px]/[1.15] font-extrabold tracking-heading text-navy-800 md:text-[34px]/[1.15]"
+              </div>
+            ))}
+          </Container>
+        </section>
+
+        {/* שלושה צעדים — כרטיסי תהליך על רקע לבן */}
+        <section className="border-t border-[#eef2f6] bg-white py-14 md:py-20">
+          <Container>
+            <div
+              data-motion-group
+              className="mb-[46px] flex flex-col items-center gap-3.5 text-center"
+            >
+              <SectionKicker reveal>
+                פשוט להתארח
+                <span aria-hidden="true" className="h-0.5 w-[22px] rounded-full bg-current" />
+              </SectionKicker>
+              <h2
+                data-line-reveal
+                className="text-[32px]/[1.2] font-extrabold tracking-heading text-navy-800 md:text-[40px]/[1.14]"
+              >
+                שלושה צעדים עד הים
+              </h2>
+            </div>
+            <div data-motion-batch className="grid grid-cols-1 gap-[22px] md:grid-cols-3">
+              {STEPS.map((step) => (
+                <div
+                  key={step.num}
+                  data-motion-card
+                  className="rounded-card border border-line bg-mist px-7 py-8"
                 >
-                  {s.title}
-                </h2>
-                <p data-rev="up" className="mb-[22px] text-[16.5px] leading-[1.75] text-ink">
-                  {s.text}
-                </p>
-                <div data-rev="up" className="flex flex-col gap-[13px]">
-                  {s.checks.map((c) => (
-                    <CheckItem key={c}>{c}</CheckItem>
-                  ))}
+                  <div
+                    aria-hidden="true"
+                    className="mb-4 flex size-[46px] items-center justify-center rounded-xl bg-navy-800 text-xl font-extrabold text-aqua"
+                  >
+                    {step.num}
+                  </div>
+                  <h3 className="mb-2 text-[19px] font-bold text-navy-800">{step.title}</h3>
+                  <p className="text-[14.5px] leading-[1.6] text-ink-dim">{step.text}</p>
                 </div>
-                <div data-rev="sm" className="mt-[22px]">
-                  <Button href="/contact" variant="link">
-                    לפרטים והזמנה
+              ))}
+            </div>
+          </Container>
+        </section>
+
+        {/* CTA — באנר גרדיאנט מעוגל. הריפוד התחתון כולל את גובה גל הפוטר (70/120px)
+            שחופף למקטע האחרון — כך הבאנר שומר על מרווח 56/84px מהקימור */}
+        <section className="bg-cloud pb-[126px] md:pb-[204px]">
+          <Container>
+            <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(120deg,var(--color-navy-900),var(--color-ocean-700)_70%,var(--color-ocean-600))] px-6 py-10 md:px-[60px] md:py-16">
+              <div
+                aria-hidden="true"
+                className="stm-blob absolute -top-20 -left-10 size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.22),transparent_70%)]"
+              />
+              <div
+                data-motion-group
+                className="relative z-[2] flex flex-wrap items-center justify-between gap-10"
+              >
+                <div className="min-w-[280px] flex-1">
+                  <h2
+                    data-line-reveal
+                    className="mb-3 text-[30px]/[1.12] font-extrabold tracking-heading text-white md:text-[38px]/[1.12]"
+                  >
+                    לא בטוחים איזה פתרון מתאים לכם?
+                  </h2>
+                  <p
+                    data-motion-item
+                    className="max-w-[460px] text-[17px] leading-[1.6] font-light text-[#bcd4e6]"
+                  >
+                    ספרו לנו על הצרכים שלכם ונמצא יחד את הדירה והפתרון המושלמים — לכל תקופה ולכל
+                    מטרה.
+                  </p>
+                </div>
+                <div data-motion-item className="flex flex-wrap items-center gap-3.5">
+                  <Button href="/contact" surface="dark">
+                    דברו איתנו
+                  </Button>
+                  <Button href="/#apartments" variant="outline" surface="dark" className="px-6">
+                    לדירות שלנו
                   </Button>
                 </div>
               </div>
             </div>
-          ))}
-        </Container>
-      </section>
-
-      {/* שלושה צעדים — כרטיסי תהליך על רקע לבן */}
-      <section className="border-t border-[#eef2f6] bg-white py-14 md:py-20">
-        <Container>
-          <div className="mb-[46px] flex flex-col items-center gap-3.5 text-center">
-            <SectionKicker>
-              פשוט להתארח
-              <span aria-hidden="true" className="h-0.5 w-[22px] rounded-full bg-current" />
-            </SectionKicker>
-            <h2
-              data-ws=""
-              className="text-[32px]/[1.2] font-extrabold tracking-heading text-navy-800 md:text-[40px]/[1.14]"
-            >
-              שלושה צעדים עד הים
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 gap-[22px] md:grid-cols-3">
-            {STEPS.map((step) => (
-              <div
-                key={step.num}
-                data-rev="card"
-                className="rounded-card border border-line bg-mist px-7 py-8"
-              >
-                <div
-                  aria-hidden="true"
-                  className="mb-4 flex size-[46px] items-center justify-center rounded-xl bg-navy-800 text-xl font-extrabold text-aqua"
-                >
-                  {step.num}
-                </div>
-                <h3 className="mb-2 text-[19px] font-bold text-navy-800">{step.title}</h3>
-                <p className="text-[14.5px] leading-[1.6] text-ink-dim">{step.text}</p>
-              </div>
-            ))}
-          </div>
-        </Container>
-      </section>
-
-      {/* CTA — באנר גרדיאנט מעוגל. הריפוד התחתון כולל את גובה גל הפוטר (70/120px)
-          שחופף למקטע האחרון — כך הבאנר שומר על מרווח 56/84px מהקימור */}
-      <section className="bg-cloud pb-[126px] md:pb-[204px]">
-        <Container>
-          <div className="relative overflow-hidden rounded-[26px] bg-[linear-gradient(120deg,var(--color-navy-900),var(--color-ocean-700)_70%,var(--color-ocean-600))] px-6 py-10 md:px-[60px] md:py-16">
-            <div
-              aria-hidden="true"
-              className="stm-blob absolute -top-20 -left-10 size-[300px] rounded-full bg-[radial-gradient(circle,rgba(58,155,214,0.22),transparent_70%)]"
-            />
-            <div className="relative z-[2] flex flex-wrap items-center justify-between gap-10">
-              <div className="min-w-[280px] flex-1">
-                <h2
-                  data-ws=""
-                  className="mb-3 text-[30px]/[1.12] font-extrabold tracking-heading text-white md:text-[38px]/[1.12]"
-                >
-                  לא בטוחים איזה פתרון מתאים לכם?
-                </h2>
-                <p
-                  data-rev="up"
-                  className="max-w-[460px] text-[17px] leading-[1.6] font-light text-[#bcd4e6]"
-                >
-                  ספרו לנו על הצרכים שלכם ונמצא יחד את הדירה והפתרון המושלמים — לכל תקופה ולכל
-                  מטרה.
-                </p>
-              </div>
-              <div data-rev="sm" className="flex flex-wrap items-center gap-3.5">
-                <Button href="/contact" surface="dark">
-                  דברו איתנו
-                </Button>
-                <Button href="/#apartments" variant="outline" surface="dark" className="px-6">
-                  לדירות שלנו
-                </Button>
-              </div>
-            </div>
-          </div>
-        </Container>
-      </section>
+          </Container>
+        </section>
+      </PageMotionRoot>
     </>
   );
 }

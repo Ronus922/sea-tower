@@ -2,15 +2,19 @@ import { cn } from "@/lib/cn";
 
 export function SectionKicker({
   dark = false,
+  reveal = false,
   className,
   children,
 }: {
   dark?: boolean;
+  /* מסמן את הקיקר כפריט תנועה עבור PageMotionRoot. ברירת מחדל: ללא תנועה */
+  reveal?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <span
+      data-motion-item={reveal ? "" : undefined}
       className={cn(
         "inline-flex items-center gap-2 text-[13.5px] font-bold tracking-label",
         dark ? "text-aqua" : "text-kicker",

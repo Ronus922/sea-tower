@@ -219,3 +219,63 @@ export function buildSiteJsonLd() {
     ],
   };
 }
+
+/* עמוד אוסף של שירותים (‎/solutions‎) — ‎CollectionPage‎ שה-mainEntity שלו
+   הוא ‎ItemList‎ של ישויות ‎Service‎, אחת לכל פתרון אירוח.
+
+   למה זה חשוב ל-GEO: בלי זה מנועי החיפוש והתשובה רואים בעמוד גוש שיווקי
+   אחד. עם זה כל פתרון הוא ישות ממוענת בפני עצמה — שם, תיאור, ספק (העסק
+   דרך ‎@id‎), אזור שירות ועוגן ‎URL‎ ישיר — כלומר יחידה שניתן לצטט בתשובה
+   ("מגדל הים מציע אירוח לעסקים בחיפה") ולקשר חזרה לעוגן הנכון בעמוד.
+   ה-position נשמר לפי סדר התצוגה בעמוד, כדי שהרשימה המובנית והרשימה
+   הנראית לא יסתרו זו את זו. */
+export function buildServiceListLd({
+  name,
+  description,
+  path,
+  services,
+}: {
+  name: string;
+  description: string;
+  path: string;
+  services: Array<{
+    anchor: string;
+    name: string;
+    description: string;
+    image?: string;
+  }>;
+}) {
+  const url = absUrl(path);
+  return withEntityAnchors({
+    "@type": "CollectionPage",
+    "@id": `${url}#webpage`,
+    url,
+    name,
+    description,
+    inLanguage: "he-IL",
+    isPartOf: { "@id": WEBSITE_ID },
+    about: businessRef,
+    mainEntity: {
+      "@type": "ItemList",
+      "@id": `${url}#solutions`,
+      name,
+      numberOfItems: services.length,
+      itemListOrder: "https://schema.org/ItemListOrderAscending",
+      itemListElement: services.map((s, i) => ({
+        "@type": "ListItem",
+        position: i + 1,
+        item: {
+          "@type": "Service",
+          "@id": `${url}#${s.anchor}`,
+          url: `${url}#${s.anchor}`,
+          name: s.name,
+          description: s.description,
+          serviceType: s.name,
+          provider: businessRef,
+          areaServed: { "@type": "City", name: BUSINESS.address.city },
+          ...(s.image ? { image: absUrl(s.image) } : {}),
+        },
+      })),
+    },
+  });
+}

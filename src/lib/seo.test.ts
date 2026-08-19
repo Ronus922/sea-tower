@@ -3,8 +3,16 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { BUSINESS } from "./business";
-import { absUrl, buildBreadcrumbLd, buildSiteJsonLd, buildWebPageLd, pageMeta } from "./seo";
+import {
+  absUrl,
+  buildBreadcrumbLd,
+  buildServiceListLd,
+  buildSiteJsonLd,
+  buildWebPageLd,
+  pageMeta,
+} from "./seo";
 import { ARTICLES, LISTED_ARTICLES } from "@/data/articles";
+import { VISIBLE_SOLUTIONS } from "@/data/solutions";
 import { buildFaqJsonLd } from "@/app/(site)/faq/faq-data";
 import sitemap from "@/app/sitemap";
 import robots from "@/app/robots";
@@ -183,6 +191,7 @@ describe("JSON-LD", () => {
       buildFaqJsonLd(),
       buildWebPageLd({ name: "n", description: "d", path: "/contact" }),
       buildBreadcrumbLd([{ name: "ראשי", path: "/" }]),
+      solutionsLd(),
     ].map((b) => JSON.stringify(b));
     for (const b of blobs) {
       for (const banned of ["aggregateRating", "ratingValue", "reviewCount", '"Review"']) {
@@ -303,5 +312,64 @@ describe("אין תוכן זמני או מומצא בייצור", () => {
     expect(src).not.toContain("setupForm");
     expect(src).not.toContain("נשלח, נחזור אליכם");
     expect(src).not.toContain("נרשמת");
+  });
+});
+
+/* ‏/solutions‏ — עמוד האוסף היחיד שמתאר ישויות Service. הבדיקות נועלות את
+   שלוש התכונות שמנועי תשובה נשענים עליהן: ישות אחת לכל פתרון, עוגן URL
+   שקיים בפועל בעמוד, וספק שמצביע לישות העסק ולא מגדיר ארגון מתחרה. */
+function solutionsLd() {
+  return buildServiceListLd({
+    name: "פתרונות אירוח במגדל הים",
+    description: "תיאור",
+    path: "/solutions",
+    services: VISIBLE_SOLUTIONS.map((s) => ({
+      anchor: s.id,
+      name: s.title,
+      description: s.text,
+      image: s.img.src,
+    })),
+  });
+}
+
+describe("רשימת השירותים של /solutions", () => {
+  const ld = JSON.parse(JSON.stringify(solutionsLd()));
+  const page = ld["@graph"][0];
+  const list = page.mainEntity;
+  const items = list.itemListElement;
+
+  it("היא CollectionPage שמצביעה לאתר ולעסק", () => {
+    expect(page["@type"]).toBe("CollectionPage");
+    expect(page["@id"]).toBe(`${SITE}/solutions#webpage`);
+    expect(page.isPartOf["@id"]).toBe(`${SITE}/#website`);
+    expect(page.about["@id"]).toBe(`${SITE}/#business`);
+  });
+
+  it("מכילה ישות Service אחת לכל פתרון גלוי, בסדר התצוגה", () => {
+    expect(list["@type"]).toBe("ItemList");
+    expect(list.numberOfItems).toBe(VISIBLE_SOLUTIONS.length);
+    expect(items).toHaveLength(VISIBLE_SOLUTIONS.length);
+    items.forEach((entry: { position: number; item: { name: string } }, i: number) => {
+      expect(entry.position).toBe(i + 1);
+      expect(entry.item.name).toBe(VISIBLE_SOLUTIONS[i].title);
+    });
+  });
+
+  it("כל שירות נושא עוגן מוחלט התואם למזהה שקיים בעמוד", () => {
+    const ids = VISIBLE_SOLUTIONS.map((s) => s.id);
+    for (const entry of items) {
+      const anchor = entry.item.url.split("#")[1];
+      expect(ids).toContain(anchor);
+      expect(entry.item.url).toBe(`${SITE}/solutions#${anchor}`);
+      expect(entry.item["@id"]).toBe(entry.item.url);
+    }
+  });
+
+  it("הספק הוא ישות העסק היחידה, ואינו מגדיר ארגון חדש", () => {
+    for (const entry of items) {
+      expect(entry.item.provider).toEqual({ "@id": `${SITE}/#business` });
+      expect(entry.item.areaServed).toEqual({ "@type": "City", name: BUSINESS.address.city });
+      expect(entry.item.image.startsWith(SITE)).toBe(true);
+    }
   });
 });
