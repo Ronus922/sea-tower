@@ -1,7 +1,15 @@
-/* שורת יתרון עם וי — כמו בכרטיסי הפתרונות ברפרנס */
-export function CheckItem({ children }: { children: React.ReactNode }) {
+/* שורת יתרון עם וי — כמו בכרטיסי הפתרונות ברפרנס.
+   reveal מסמן את השורה כפריט תנועה עבור PageMotionRoot, כך שרשימת יתרונות
+   נחשפת שורה-אחר-שורה ולא כגוש אחד. ברירת המחדל: ללא תנועה. */
+export function CheckItem({
+  reveal = false,
+  children,
+}: {
+  reveal?: boolean;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex items-center gap-[11px]">
+    <div data-motion-item={reveal ? "" : undefined} className="flex items-center gap-[11px]">
       <span
         aria-hidden="true"
         className="flex size-[23px] shrink-0 items-center justify-center rounded-full bg-sea-500/15"
