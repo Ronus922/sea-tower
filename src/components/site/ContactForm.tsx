@@ -107,11 +107,15 @@ export function ContactForm({
     }
     setStatus("submitting");
     try {
-      const honeypot = formRef.current?.querySelector<HTMLInputElement>('input[name="company"]');
+      const honeypot = formRef.current?.querySelector<HTMLInputElement>(
+        'input[name="ref_token"]'
+      );
       const res = await fetch("/api/leads", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, company: honeypot?.value ?? "" }),
+        /* variant נשלח כדי ש-source בטבלה יבחין בין עמוד צור קשר
+           לכרטיס המהיר בעמוד הבית */
+        body: JSON.stringify({ ...form, ref_token: honeypot?.value ?? "", variant }),
       });
       const data: { ok?: boolean; error?: string; fieldErrors?: Record<string, string> } | null =
         await res.json().catch(() => null);
@@ -192,10 +196,18 @@ export function ContactForm({
       aria-label="טופס פנייה לקבלת הצעת אירוח"
       className={`flex flex-col ${compact ? "gap-3.5" : "gap-4"}`}
     >
-      {/* honeypot — מוסתר מאנשים, בוטים ממלאים */}
+      {/* honeypot — מוסתר מאנשים, בוטים ממלאים. השם חסר משמעות סמנטית
+          בכוונה: כשהשדה נקרא company ותווית "חברה", ה-autofill של Chrome
+          זיהה אותו כשדה ארגון ומילא אותו עבור משתמשים אמיתיים — והפנייה
+          נפסלה. אין תווית, אין שם מוכר, אין מה למלא אוטומטית. */}
       <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
-        <label htmlFor={`${idPrefix}-company`}>חברה</label>
-        <input id={`${idPrefix}-company`} name="company" type="text" tabIndex={-1} autoComplete="off" />
+        <input
+          id={`${idPrefix}-ref-token`}
+          name="ref_token"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
       </div>
 
       <div className="flex flex-col gap-4 sm:flex-row">
