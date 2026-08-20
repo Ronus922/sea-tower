@@ -37,13 +37,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "בקשה לא תקינה" }, { status: 400 });
   }
 
-  /* honeypot — בוטים ממלאים את השדה הנסתר; מחזירים "הצלחה" בלי לשמור */
-  if (sanitize(body.company, 100)) {
-    return NextResponse.json({ ok: true });
-  }
-
   /* rate limit לפי IP */
   const ip = (req.headers.get("x-forwarded-for") ?? "unknown").split(",")[0].trim();
+
+  /* honeypot — השדה הנסתר מסמן ולא מוחק. קודם לכן ענף זה החזיר {ok:true}
+     בלי insert ובלי לוג, ופנייה אמיתית נמחקה בשקט כשהדפדפן מילא את השדה
+     אוטומטית. מכאן: הפנייה עוברת את אותו אימות ואותו insert, ונשמרת עם
+     is_spam=true. הסינון עובר לצד הקריאה, שם טעות ניתנת לשחזור. */
+  const spam = Boolean(sanitize(body.ref_token, 100));
+  if (spam) {
+    /* בלי שם, טלפון או תוכן הודעה — IP בלבד */
+    console.warn("leads: honeypot triggered", { ip });
+  }
+
   const now = Date.now();
   const hits = (rateHits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS);
   if (hits.length >= RATE_MAX) {
@@ -64,6 +70,11 @@ export async function POST(req: NextRequest) {
   const guestsRaw = sanitize(body.guests, 4);
   const message = sanitize(body.message, 1500);
   const privacy = body.privacy === true;
+
+  /* מאיזה טופס הגיעה הפנייה. עד כה שני הטפסים נשמרו כ-"contact-page"
+     ולא היה אפשר להשוות ביניהם. "full" נשאר בערך הקיים כדי לא לשבור את
+     השורות הישנות; כל ערך לא מוכר נופל ל-full ולא נכתב לטבלה כפי שהוא. */
+  const source = sanitize(body.variant, 20) === "compact" ? "home-compact" : "contact-page";
 
   const errors: FieldErrors = {};
   const today = todayInIsrael();
@@ -102,6 +113,9 @@ export async function POST(req: NextRequest) {
   const dupKey = `${phone}|${name}|${inquiryType}|${message}`;
   const dupAt = recentSubmissions.get(dupKey);
   if (dupAt && now - dupAt < DUP_WINDOW_MS) {
+    /* המסלול היחיד שנותר שמחזיר הצלחה בלי insert — ולכן הוא מתועד.
+       IP בלבד, בלי שם/טלפון/תוכן */
+    console.info("leads: duplicate within window", { ip });
     return NextResponse.json({ ok: true, duplicate: true });
   }
 
@@ -129,7 +143,8 @@ export async function POST(req: NextRequest) {
     departure_date: departure || null,
     guests,
     message: message || null,
-    source: "contact-page",
+    is_spam: spam,
+    source,
     ip,
     user_agent: sanitize(req.headers.get("user-agent"), 300) || null,
   });
