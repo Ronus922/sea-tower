@@ -23,6 +23,18 @@ vi.mock("@supabase/supabase-js", () => ({
   }),
 }));
 
+/* ה-mailer מזויף ברמת הקובץ: doMock בתוך בדיקה לא משפיע על ראוט שכבר יובא.
+   הראוט מתעלם מהתוצאה, ולכן גם כשל שליחה מדומה כאן אינו משנה את התשובה */
+const sent: unknown[][] = [];
+let mailResult: { ok: boolean; code?: string; messageId?: string } = { ok: true, messageId: "test" };
+
+vi.mock("@/lib/mailer", () => ({
+  sendLeadNotification: (...a: unknown[]) => {
+    sent.push(a);
+    return Promise.resolve(mailResult);
+  },
+}));
+
 const { POST } = await import("./route");
 
 /* ה-headers היחידים שהראוט קורא הם x-forwarded-for ו-user-agent */
@@ -59,6 +71,8 @@ function validBody(extra: Record<string, unknown> = {}) {
 beforeEach(() => {
   inserts.length = 0;
   insertError = null;
+  sent.length = 0;
+  mailResult = { ok: true, messageId: "test" };
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://db.example.test";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "service-key";
   vi.restoreAllMocks();
@@ -137,17 +151,8 @@ describe("POST /api/leads — honeypot", () => {
   });
 
   it("פנייה שסומנה כספאם לא מפעילה שליחת מייל", async () => {
-    /* אין עדיין mailer בפרויקט; הבדיקה נועלת את הכלל מראש, כדי שהוספת
-       ההתראה בשלב הבא לא תשלח מייל על ספאם. אם ייווצר src/lib/mailer.ts
-       והראוט יקרא לו — הבדיקה תיכשל אלא אם הקריאה מותנית ב-is_spam=false */
-    const sent: unknown[] = [];
+    /* הפנייה נשמרת (מסומנת), אבל ההתראה מותנית ב-is_spam=false */
     vi.spyOn(console, "warn").mockImplementation(() => {});
-    vi.doMock("@/lib/mailer", () => ({
-      sendLeadNotification: (...a: unknown[]) => {
-        sent.push(a);
-        return Promise.resolve();
-      },
-    }));
 
     await POST(request(validBody({ ref_token: "bot" }), "203.0.113.8"));
 
@@ -167,13 +172,53 @@ describe("POST /api/leads — אין מסלול שקט", () => {
 
     const second = await POST(request(body, "203.0.113.20"));
     await expect(second.json()).resolves.toEqual({ ok: true, duplicate: true });
-    /* לא נוספה שורה — אבל כן נוספה שורת לוג */
+    /* לא נוספה שורה ולא נשלח מייל שני — אבל כן נוספה שורת לוג */
     expect(inserts).toHaveLength(1);
+    expect(sent).toHaveLength(1);
 
     const logged = JSON.stringify(info.mock.calls);
     expect(logged).toContain("203.0.113.20");
     expect(logged).not.toContain(body.name);
     expect(logged).not.toContain(body.phone);
     expect(logged).not.toContain(body.message);
+  });
+});
+
+describe("POST /api/leads — התראה במייל", () => {
+  it("פנייה רגילה מפעילה התראה אחת עם פרטי הפונה, אחרי ה-insert", async () => {
+    const res = await POST(request(validBody({ variant: "compact" }), "203.0.113.30"));
+    expect(res.status).toBe(200);
+
+    expect(inserts).toHaveLength(1);
+    expect(sent).toHaveLength(1);
+    expect(sent[0][0]).toMatchObject({
+      name: "ישראל ישראלי",
+      phone: "050-1234567",
+      email: "lead@example.com",
+      inquiryType: "שאלה כללית",
+      source: "home-compact",
+    });
+  });
+
+  it("בלי דוא״ל של הפונה — email הוא null (ולא מחרוזת ריקה)", async () => {
+    await POST(request(validBody({ email: "" }), "203.0.113.31"));
+    expect(sent[0][0]).toMatchObject({ email: null });
+  });
+
+  it("כשל insert לא שולח מייל", async () => {
+    insertError = { message: "boom" };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await POST(request(validBody(), "203.0.113.32"));
+
+    expect(sent).toHaveLength(0);
+  });
+
+  it("כשל בשליחת המייל לא משנה את התשובה למשתמש", async () => {
+    mailResult = { ok: false, code: "EAUTH" };
+    const res = await POST(request(validBody(), "203.0.113.33"));
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ ok: true });
+    expect(inserts).toHaveLength(1);
   });
 });
