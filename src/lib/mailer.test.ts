@@ -1,11 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 /* בדיקות ה-mailer. nodemailer מזויף — בודקים מה הפונקציה מחליטה לשלוח ואיך היא
-   מתנהגת בכשל, לא את Gmail. השליחה האמיתית מאומתת ידנית מהשרת לפני פריסה. */
+   מתנהגת בכשל, לא את Google. השליחה האמיתית מאומתת ידנית מהשרת לפני פריסה. */
 
 const { sendMail, createTransport } = vi.hoisted(() => {
   const sendMail = vi.fn();
-  return { sendMail, createTransport: vi.fn(() => ({ sendMail })) };
+  const createTransport = vi.fn<(opts: Record<string, unknown>) => { sendMail: typeof sendMail }>(
+    () => ({ sendMail })
+  );
+  return { sendMail, createTransport };
 });
 
 vi.mock("nodemailer", () => ({ default: { createTransport } }));
@@ -28,12 +31,18 @@ async function load() {
   return import("./mailer");
 }
 
+const transportOptions = () => createTransport.mock.calls[0][0];
+
 beforeEach(() => {
   createTransport.mockClear();
   sendMail.mockReset();
   sendMail.mockResolvedValue({ messageId: "<abc@test>" });
+  /* ברירת המחדל בבדיקות = הקונפיגורציה של הייצור: relay בלי סיסמה */
+  vi.stubEnv("SMTP_HOST", "smtp-relay.example.test");
+  vi.stubEnv("SMTP_PORT", "587");
+  vi.stubEnv("SMTP_SECURE", "false");
   vi.stubEnv("GMAIL_USER", "sender@example.com");
-  vi.stubEnv("GMAIL_APP_PASSWORD", "app-password");
+  vi.stubEnv("GMAIL_APP_PASSWORD", "");
   vi.spyOn(console, "error").mockImplementation(() => {});
   vi.spyOn(console, "info").mockImplementation(() => {});
 });
@@ -43,20 +52,47 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("sendLeadNotification — חיבור", () => {
-  it("מתחברת ל-smtp.gmail.com:465 עם TLS ועם GMAIL_USER / GMAIL_APP_PASSWORD", async () => {
+describe("sendLeadNotification — קונפיגורציית החיבור", () => {
+  it("relay: SMTP_HOST/PORT/SECURE מה-env, STARTTLS חובה, ובלי auth כשאין GMAIL_APP_PASSWORD", async () => {
     const { sendLeadNotification } = await load();
     await sendLeadNotification(lead);
 
     expect(createTransport).toHaveBeenCalledTimes(1);
-    expect(createTransport).toHaveBeenCalledWith(
-      expect.objectContaining({
-        host: "smtp.gmail.com",
-        port: 465,
-        secure: true,
-        auth: { user: "sender@example.com", pass: "app-password" },
-      })
-    );
+    expect(transportOptions()).toMatchObject({
+      host: "smtp-relay.example.test",
+      port: 587,
+      secure: false,
+      requireTLS: true,
+    });
+    expect(transportOptions()).not.toHaveProperty("auth");
+  });
+
+  it("עם GMAIL_APP_PASSWORD — מתחברים עם אימות של GMAIL_USER", async () => {
+    vi.stubEnv("GMAIL_APP_PASSWORD", "app-password");
+    const { sendLeadNotification } = await load();
+    await sendLeadNotification(lead);
+
+    expect(transportOptions()).toMatchObject({
+      auth: { user: "sender@example.com", pass: "app-password" },
+    });
+  });
+
+  it("SMTP_SECURE=true — TLS מלא, בלי requireTLS", async () => {
+    vi.stubEnv("SMTP_PORT", "465");
+    vi.stubEnv("SMTP_SECURE", "true");
+    const { sendLeadNotification } = await load();
+    await sendLeadNotification(lead);
+
+    expect(transportOptions()).toMatchObject({ port: 465, secure: true });
+    expect(transportOptions()).not.toHaveProperty("requireTLS");
+  });
+
+  it("SMTP_PORT ריק — ברירת מחדל 587", async () => {
+    vi.stubEnv("SMTP_PORT", "");
+    const { sendLeadNotification } = await load();
+    await sendLeadNotification(lead);
+
+    expect(transportOptions()).toMatchObject({ port: 587 });
   });
 
   it("transport אחד לכל התהליך — שתי שליחות, בנייה אחת", async () => {
@@ -70,18 +106,12 @@ describe("sendLeadNotification — חיבור", () => {
 });
 
 describe("sendLeadNotification — המעטפה", () => {
-  it("from הוא GMAIL_USER בדיוק, היעד קבוע, ו-replyTo הוא דוא״ל הפונה", async () => {
+  it("from הוא GMAIL_USER בדיוק, היעד קבוע, replyTo הוא דוא״ל הפונה, והלוג עם messageId בלבד", async () => {
     const { sendLeadNotification, LEAD_NOTIFY_TO } = await load();
     const result = await sendLeadNotification(lead);
 
     expect(result).toEqual({ ok: true, messageId: "<abc@test>" });
     expect(LEAD_NOTIFY_TO).toBe("r@bios.co.il");
-    /* ההצלחה מתועדת עם messageId בלבד — בלי פרטי הפונה */
-    const logged = JSON.stringify(vi.mocked(console.info).mock.calls);
-    expect(logged).toContain("<abc@test>");
-    for (const pii of [lead.name, lead.phone, lead.email, lead.message]) {
-      expect(logged).not.toContain(pii);
-    }
     const mail = sendMail.mock.calls[0][0];
     expect(mail.from).toBe("sender@example.com");
     expect(mail.to).toBe("r@bios.co.il");
@@ -89,6 +119,12 @@ describe("sendLeadNotification — המעטפה", () => {
     expect(mail.subject).toContain("שאלה כללית");
     for (const field of [lead.name, lead.phone, lead.email, lead.message, "2026-10-01", "2026-10-03"]) {
       expect(mail.text).toContain(field);
+    }
+    /* ההצלחה מתועדת עם messageId בלבד — בלי פרטי הפונה */
+    const logged = JSON.stringify(vi.mocked(console.info).mock.calls);
+    expect(logged).toContain("<abc@test>");
+    for (const pii of [lead.name, lead.phone, lead.email, lead.message]) {
+      expect(logged).not.toContain(pii);
     }
   });
 
@@ -100,26 +136,39 @@ describe("sendLeadNotification — המעטפה", () => {
   });
 });
 
-describe("sendLeadNotification — כשלים", () => {
-  it("בלי GMAIL_USER / GMAIL_APP_PASSWORD: לא נוצר transport, הלוג מכיל קוד בלבד", async () => {
-    vi.stubEnv("GMAIL_APP_PASSWORD", "");
+describe("sendLeadNotification — קונפיגורציה חסרה או שגויה", () => {
+  it.each([
+    ["SMTP_HOST", "ENV_MISSING"],
+    ["GMAIL_USER", "ENV_MISSING"],
+  ])("בלי %s: לא נוצר transport, הלוג מכיל את הקוד %s בלבד", async (key, code) => {
+    vi.stubEnv(key, "");
     const { sendLeadNotification } = await load();
     const result = await sendLeadNotification(lead);
 
-    expect(result).toEqual({ ok: false, code: "ENV_MISSING" });
+    expect(result).toEqual({ ok: false, code });
     expect(createTransport).not.toHaveBeenCalled();
     expect(console.error).toHaveBeenCalledTimes(1);
     const logged = JSON.stringify(vi.mocked(console.error).mock.calls);
-    expect(logged).toContain("ENV_MISSING");
+    expect(logged).toContain(code);
     for (const pii of [lead.name, lead.phone, lead.email, lead.message]) {
       expect(logged).not.toContain(pii);
     }
   });
 
-  const eauth = () =>
-    Object.assign(new Error("Invalid login: lead@example.com 535 BadCredentials"), {
-      code: "EAUTH",
-      responseCode: 535,
+  it("SMTP_PORT לא מספרי — ENV_INVALID, בלי transport", async () => {
+    vi.stubEnv("SMTP_PORT", "five-eight-seven");
+    const { sendLeadNotification } = await load();
+
+    await expect(sendLeadNotification(lead)).resolves.toEqual({ ok: false, code: "ENV_INVALID" });
+    expect(createTransport).not.toHaveBeenCalled();
+  });
+});
+
+describe("sendLeadNotification — כשלים בשליחה", () => {
+  const relayReject = () =>
+    Object.assign(new Error("550-5.7.1 Invalid credentials for relay [2001:db8::1] lead@example.com"), {
+      code: "EENVELOPE",
+      responseCode: 550,
     });
 
   /* ה-backoff האמיתי הוא שניות — מריצים אותו על טיימרים מזויפים */
@@ -134,8 +183,8 @@ describe("sendLeadNotification — כשלים", () => {
     }
   }
 
-  it("דחייה חולפת של Gmail: הניסיון השני מצליח, בלי שורת שגיאה בלוג", async () => {
-    sendMail.mockRejectedValueOnce(eauth()).mockResolvedValueOnce({ messageId: "<retry@test>" });
+  it("דחייה חולפת: הניסיון השני מצליח, בלי שורת שגיאה בלוג", async () => {
+    sendMail.mockRejectedValueOnce(relayReject()).mockResolvedValueOnce({ messageId: "<retry@test>" });
     const { sendLeadNotification } = await load();
     const result = await sendWithFakeTimers(() => sendLeadNotification(lead));
 
@@ -145,18 +194,18 @@ describe("sendLeadNotification — כשלים", () => {
     expect(JSON.stringify(vi.mocked(console.info).mock.calls)).toContain('"attempts":2');
   });
 
-  it("כשל SMTP עקבי: 4 ניסיונות, לא זורקת, קוד השגיאה בלבד בלוג — בלי PII ובלי הודעת השרת", async () => {
-    sendMail.mockRejectedValue(eauth());
+  it("כשל עקבי: 4 ניסיונות, לא זורקת, קוד השגיאה בלבד בלוג — בלי PII ובלי הודעת השרת", async () => {
+    sendMail.mockRejectedValue(relayReject());
     const { sendLeadNotification } = await load();
     const result = await sendWithFakeTimers(() => sendLeadNotification(lead));
 
-    expect(result).toEqual({ ok: false, code: "EAUTH" });
+    expect(result).toEqual({ ok: false, code: "EENVELOPE" });
     expect(sendMail).toHaveBeenCalledTimes(4);
     expect(console.error).toHaveBeenCalledTimes(1);
     const logged = JSON.stringify(vi.mocked(console.error).mock.calls);
-    expect(logged).toContain("EAUTH");
+    expect(logged).toContain("EENVELOPE");
     expect(logged).toContain('"attempts":4');
-    expect(logged).not.toContain("Invalid login");
+    expect(logged).not.toContain("Invalid credentials");
     for (const pii of [lead.name, lead.phone, lead.email, lead.message]) {
       expect(logged).not.toContain(pii);
     }
