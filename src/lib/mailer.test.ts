@@ -35,6 +35,7 @@ beforeEach(() => {
   vi.stubEnv("GMAIL_USER", "sender@example.com");
   vi.stubEnv("GMAIL_APP_PASSWORD", "app-password");
   vi.spyOn(console, "error").mockImplementation(() => {});
+  vi.spyOn(console, "info").mockImplementation(() => {});
 });
 
 afterEach(() => {
@@ -75,6 +76,12 @@ describe("sendLeadNotification — המעטפה", () => {
 
     expect(result).toEqual({ ok: true, messageId: "<abc@test>" });
     expect(LEAD_NOTIFY_TO).toBe("r@bios.co.il");
+    /* ההצלחה מתועדת עם messageId בלבד — בלי פרטי הפונה */
+    const logged = JSON.stringify(vi.mocked(console.info).mock.calls);
+    expect(logged).toContain("<abc@test>");
+    for (const pii of [lead.name, lead.phone, lead.email, lead.message]) {
+      expect(logged).not.toContain(pii);
+    }
     const mail = sendMail.mock.calls[0][0];
     expect(mail.from).toBe("sender@example.com");
     expect(mail.to).toBe("r@bios.co.il");
