@@ -85,7 +85,10 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<Send
       subject: `פנייה חדשה מאתר מגדל הים: ${lead.inquiryType} · ${lead.name}`,
       text: renderText(lead),
     });
-    return { ok: true, messageId: info.messageId ?? null };
+    /* messageId הוא מזהה שנוצר בשליחה — לא PII. זו הראיה בלוג שמייל יצא */
+    const messageId = info.messageId ?? null;
+    console.info("leads: mail sent", { messageId });
+    return { ok: true, messageId };
   } catch (e) {
     const code = errorCode(e);
     console.error("leads: mail failed", { code });
