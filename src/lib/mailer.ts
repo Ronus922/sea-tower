@@ -30,6 +30,15 @@ export type SendResult =
   | { ok: true; messageId: string | null }
   | { ok: false; code: string };
 
+/* Gmail דוחה לסירוגין סיסמת אפליקציה תקינה (535 BadCredentials בכמחצית
+   מהחיבורים, בלי תלות בפורט או ב-IPv4/IPv6 — נמדד 2026-09-04). כל ניסיון
+   פותח חיבור חדש, ולכן ניסיון חוזר קצר פותר את זה בפועל. הראוט לא ממתין,
+   כך שה-backoff לא מעכב את התשובה למשתמש */
+const MAX_ATTEMPTS = 4;
+const BACKOFF_MS = [500, 1000, 2000];
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+
 /* transport אחד לכל התהליך — כמו ב-pms. נבנה בקריאה הראשונה שיש לה הרשאות */
 let transporter: Transporter | null = null;
 
@@ -76,22 +85,29 @@ export async function sendLeadNotification(lead: LeadNotification): Promise<Send
     return { ok: false, code: "ENV_MISSING" };
   }
 
-  try {
-    const info = await getTransporter(user, pass).sendMail({
-      /* from = GMAIL_USER בדיוק. Gmail ממילא דורס from שאינו החשבון המאומת */
-      from: user,
-      to: LEAD_NOTIFY_TO,
-      replyTo: lead.email ?? undefined,
-      subject: `פנייה חדשה מאתר מגדל הים: ${lead.inquiryType} · ${lead.name}`,
-      text: renderText(lead),
-    });
-    /* messageId הוא מזהה שנוצר בשליחה — לא PII. זו הראיה בלוג שמייל יצא */
-    const messageId = info.messageId ?? null;
-    console.info("leads: mail sent", { messageId });
-    return { ok: true, messageId };
-  } catch (e) {
-    const code = errorCode(e);
-    console.error("leads: mail failed", { code });
-    return { ok: false, code };
+  const transporter = getTransporter(user, pass);
+  const mail = {
+    /* from = GMAIL_USER בדיוק. Gmail ממילא דורס from שאינו החשבון המאומת */
+    from: user,
+    to: LEAD_NOTIFY_TO,
+    replyTo: lead.email ?? undefined,
+    subject: `פנייה חדשה מאתר מגדל הים: ${lead.inquiryType} · ${lead.name}`,
+    text: renderText(lead),
+  };
+
+  let code = "unknown";
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    try {
+      const info = await transporter.sendMail(mail);
+      /* messageId הוא מזהה שנוצר בשליחה — לא PII. זו הראיה בלוג שמייל יצא */
+      const messageId = info.messageId ?? null;
+      console.info("leads: mail sent", { messageId, attempts: attempt });
+      return { ok: true, messageId };
+    } catch (e) {
+      code = errorCode(e);
+      if (attempt < MAX_ATTEMPTS) await sleep(BACKOFF_MS[attempt - 1]);
+    }
   }
+  console.error("leads: mail failed", { code, attempts: MAX_ATTEMPTS });
+  return { ok: false, code };
 }

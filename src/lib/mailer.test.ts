@@ -116,19 +116,46 @@ describe("sendLeadNotification — כשלים", () => {
     }
   });
 
-  it("כשל SMTP: לא זורקת, מחזירה את קוד השגיאה, והלוג בלי PII ובלי הודעת השרת", async () => {
-    sendMail.mockRejectedValue(
-      Object.assign(new Error("Invalid login: lead@example.com 535 BadCredentials"), {
-        code: "EAUTH",
-        responseCode: 535,
-      })
-    );
+  const eauth = () =>
+    Object.assign(new Error("Invalid login: lead@example.com 535 BadCredentials"), {
+      code: "EAUTH",
+      responseCode: 535,
+    });
+
+  /* ה-backoff האמיתי הוא שניות — מריצים אותו על טיימרים מזויפים */
+  async function sendWithFakeTimers(fn: () => Promise<unknown>) {
+    vi.useFakeTimers();
+    try {
+      const pending = fn();
+      await vi.runAllTimersAsync();
+      return await pending;
+    } finally {
+      vi.useRealTimers();
+    }
+  }
+
+  it("דחייה חולפת של Gmail: הניסיון השני מצליח, בלי שורת שגיאה בלוג", async () => {
+    sendMail.mockRejectedValueOnce(eauth()).mockResolvedValueOnce({ messageId: "<retry@test>" });
     const { sendLeadNotification } = await load();
-    const result = await sendLeadNotification(lead);
+    const result = await sendWithFakeTimers(() => sendLeadNotification(lead));
+
+    expect(result).toEqual({ ok: true, messageId: "<retry@test>" });
+    expect(sendMail).toHaveBeenCalledTimes(2);
+    expect(console.error).not.toHaveBeenCalled();
+    expect(JSON.stringify(vi.mocked(console.info).mock.calls)).toContain('"attempts":2');
+  });
+
+  it("כשל SMTP עקבי: 4 ניסיונות, לא זורקת, קוד השגיאה בלבד בלוג — בלי PII ובלי הודעת השרת", async () => {
+    sendMail.mockRejectedValue(eauth());
+    const { sendLeadNotification } = await load();
+    const result = await sendWithFakeTimers(() => sendLeadNotification(lead));
 
     expect(result).toEqual({ ok: false, code: "EAUTH" });
+    expect(sendMail).toHaveBeenCalledTimes(4);
+    expect(console.error).toHaveBeenCalledTimes(1);
     const logged = JSON.stringify(vi.mocked(console.error).mock.calls);
     expect(logged).toContain("EAUTH");
+    expect(logged).toContain('"attempts":4');
     expect(logged).not.toContain("Invalid login");
     for (const pii of [lead.name, lead.phone, lead.email, lead.message]) {
       expect(logged).not.toContain(pii);
@@ -138,7 +165,8 @@ describe("sendLeadNotification — כשלים", () => {
   it("שגיאה בלי code מדווחת כ-unknown", async () => {
     sendMail.mockRejectedValue(new Error("socket hang up"));
     const { sendLeadNotification } = await load();
+    const result = await sendWithFakeTimers(() => sendLeadNotification(lead));
 
-    await expect(sendLeadNotification(lead)).resolves.toEqual({ ok: false, code: "unknown" });
+    expect(result).toEqual({ ok: false, code: "unknown" });
   });
 });
