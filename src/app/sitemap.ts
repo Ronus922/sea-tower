@@ -19,6 +19,7 @@ const PATHS = [
   "/faq",
   "/house-rules",
   "/terms",
+  "/accessibility",
   "/contact",
 ];
 

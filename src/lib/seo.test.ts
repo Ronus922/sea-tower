@@ -33,6 +33,7 @@ const INDEXABLE = [
   "/faq",
   "/house-rules",
   "/terms",
+  "/accessibility",
   "/contact",
 ];
 
@@ -272,6 +273,7 @@ describe("מקור אמת יחיד לפרטי העסק", () => {
       "src/app/(site)/faq/page.tsx",
       "src/app/(site)/faq/faq-data.tsx",
       "src/app/(site)/house-rules/page.tsx",
+      "src/app/(site)/accessibility/page.tsx",
       "src/components/site/Footer.tsx",
       "src/components/site/Header.tsx",
     ];
@@ -298,6 +300,7 @@ describe("אין תוכן זמני או מומצא בייצור", () => {
       "src/app/(site)/about/page.tsx",
       "src/app/(site)/rooms/page.tsx",
       "src/app/(site)/solutions/page.tsx",
+      "src/app/(site)/accessibility/page.tsx",
     ];
     for (const f of files) {
       const src = readFileSync(join(process.cwd(), f), "utf8");
