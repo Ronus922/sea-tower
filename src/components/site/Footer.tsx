@@ -187,14 +187,18 @@ export function Footer() {
             אחרת נוצרים שני קווים צמודים */}
         <div className="mx-auto flex max-w-shell flex-wrap items-center justify-between gap-2.5 pt-4 text-[13px] text-[#6c869a]">
           <span>© 2026 מגדל הים — כל הזכויות שמורות</span>
-          {/* "הצהרת נגישות" ו"מדיניות ביטולים" היו ספאנים מתים שנראו כקישורים.
-              הוסרו עד שיהיו עמודים אמיתיים (SEO-AUDIT B7) */}
-          <span className="flex gap-5">
+          {/* "מדיניות ביטולים" היה ספאן מת שנראה כקישור — הוסר עד שיהיה עמוד
+              אמיתי (SEO-AUDIT B7). "הצהרת נגישות" חזרה כקישור אמיתי ל-/accessibility,
+              לצד ווידג'ט הנגישות (NagishLi) שנטען מתבנית השורש */}
+          <span className="flex flex-wrap gap-5">
             <Link href="/terms" className="transition-colors hover:text-white">
               תקנון האתר
             </Link>
             <Link href="/house-rules" className="transition-colors hover:text-white">
               חוקי הבית
+            </Link>
+            <Link href="/accessibility" className="transition-colors hover:text-white">
+              הצהרת נגישות
             </Link>
           </span>
         </div>
