@@ -48,6 +48,14 @@
   color: #3c5468;
   text-decoration: none;
   transition: color 0.2s;
+  /* אזור מגע 44px (כלל ברזל #6) בלי לשנות את הריווח בין הפריטים: הריפוד
+     משלים את גובה השורה (1lh — 19.6px ברשימה, 22.95px בבלוק העזרה) ל-44px,
+     והשוליים השליליים מבטלים אותו בזרימה, כך שה-gap 9px נשמר. padding ולא
+     min-height, כדי שפריט שנשבר לשתי שורות לא יחפוף לשכנו */
+  display: inline-flex;
+  align-items: center;
+  padding-block: calc((44px - 1lh) / 2);
+  margin-block: calc((1lh - 44px) / 2);
 }
 .tk-toc a:hover {
   color: #2b7fb8;
