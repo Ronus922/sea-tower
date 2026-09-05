@@ -50,6 +50,14 @@ const LINK_COLUMNS: Array<{
   },
 ];
 
+/* קישורי השורה המשפטית: אזור מגע 44px (כלל ברזל #6) בלי לשנות את גובה
+   השורה — אותו דפוס כמו פירורי הלחם (-my-2 py-2), עם ערך מדויק לשורה הזו:
+   תיבת השורה היא 19.5px (13px × line-height 1.5), ההשלמה ל-44px היא 24.5px →
+   12.25px ריפוד לכל צד, והשוליים השליליים מחזירים אותם בזרימה. נמדד: השורה
+   נשארת 19.5px, כל קישור 44px */
+const LEGAL_LINK_CLASS =
+  "-my-[12.25px] inline-flex min-h-11 items-center py-[12.25px] transition-colors hover:text-white";
+
 /* רשימת אייקוני הרשתות — מיקום אחיד בכל העמודים (הנחיית בעלים 2026-08-17):
    בעמודה הראשונה (הימנית ב-RTL), מתחת לתיאור העסק ומעל הקו המפריד — המיקום
    שהיה עד כה בעמוד הבית בלבד. סדר DOM: פייסבוק→לינקדאין, שב-RTL נותן את הסדר
@@ -85,7 +93,12 @@ export function Footer() {
        (70/120px) */
     <footer className="-mt-[70px] text-[#9fb6c8] md:-mt-[120px]">
       <WaveSeparator flow position="bottom" fill="var(--color-navy-950)" />
-      <div className="bg-navy-950 px-5 pt-14 pb-6 sm:px-8 lg:px-14">
+      {/* ריפוד תחתון 6rem (במקום 1.5rem): מפנה את שורת הזכויות מהכפתורים הצפים
+          בגלילה לסוף העמוד. נמדד ב-Playwright, זהה בכל רוחב: וואטסאפ 56px + 20px
+          מהתחתית = 76px, NagishLi 60px + 10px = 70px; ועוד 12.25px של אזור המגע
+          שחורג מתחת לטקסט הקישורים → 88.25px, מעוגל למדרגה 6rem. env() עוקב אחרי
+          ההיסט של כפתור הוואטסאפ במכשירים עם safe-area */}
+      <div className="bg-navy-950 px-5 pt-14 pb-[calc(6rem_+_env(safe-area-inset-bottom))] sm:px-8 lg:px-14">
         <div className="mx-auto grid max-w-shell grid-cols-1 gap-10 border-b border-white/8 pb-10 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1.3fr]">
           <div>
             <div className="mb-4 flex items-center gap-[11px]">
@@ -191,13 +204,13 @@ export function Footer() {
               אמיתי (SEO-AUDIT B7). "הצהרת נגישות" חזרה כקישור אמיתי ל-/accessibility,
               לצד ווידג'ט הנגישות (NagishLi) שנטען מתבנית השורש */}
           <span className="flex flex-wrap gap-5">
-            <Link href="/terms" className="transition-colors hover:text-white">
+            <Link href="/terms" className={LEGAL_LINK_CLASS}>
               תקנון האתר
             </Link>
-            <Link href="/house-rules" className="transition-colors hover:text-white">
+            <Link href="/house-rules" className={LEGAL_LINK_CLASS}>
               חוקי הבית
             </Link>
-            <Link href="/accessibility" className="transition-colors hover:text-white">
+            <Link href="/accessibility" className={LEGAL_LINK_CLASS}>
               הצהרת נגישות
             </Link>
           </span>
