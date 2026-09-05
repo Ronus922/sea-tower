@@ -25,7 +25,7 @@ export const BUSINESS = {
      (metadataBase, robots, sitemap, JSON-LD @id) נגזרים מהשדה הזה בלבד;
      כשה-DNS יעבור לשרת הזה: לעדכן כאן → build+deploy → תעודה + vhost
      ו-301 מ-sea-tower.bios.co.il ב-nginx. */
-  siteUrl: "https://sea-tower.bios.co.il",
+  siteUrl: "https://www.sea-tower.co.il",
 } as const;
 
 /* רשתות חברתיות — כתובות רשמיות שסיפקו הבעלים (2026-08-15). סדר המערך =
