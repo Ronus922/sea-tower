@@ -13,16 +13,16 @@ Sea Tower is a boutique serviced-apartment hotel in Haifa, Israel (Almog buildin
 - צ׳ק-אין מהשעה 14:30 · צ׳ק-אאוט עד 11:00 · אין עישון בדירות · אין מסיבות
 
 ## דפים עיקריים (Main pages)
-- [ראשי / Home](https://sea-tower.bios.co.il/): סקירת המלון, הדירות והיתרונות
-- [אודות / About](https://sea-tower.bios.co.il/about): הסיפור, המיקום והחזון
-- [הדירות / Rooms](https://sea-tower.bios.co.il/rooms): קטלוג הדירות והסוויטות — סוג, גודל, קומה, תפוסה ומיטות
-- [הזמנה / Booking](https://sea-tower.bios.co.il/booking): בדיקת זמינות ומחיר לפי תאריכים ומספר אורחים
-- [פתרונות / Solutions](https://sea-tower.bios.co.il/solutions): נופש, אירוח עסקי, רילוקיישן, השכרה לטווח קצר/ארוך, ניהול דירות
-- [שאלות ותשובות / FAQ](https://sea-tower.bios.co.il/faq): כל המידע לפני ההגעה — צ׳ק-אין, חניה, בריכה, ציוד, שירותים, תשלומים וביטולים
-- [חוקי הבית / House Rules](https://sea-tower.bios.co.il/house-rules): תנאי אירוח, שעות מנוחה, עישון, ציוד ואחריות
-- [תקנון / Terms](https://sea-tower.bios.co.il/terms): תנאי הזמנה, ביטול ושימוש
-- [מאמרים / Articles](https://sea-tower.bios.co.il/articles): מדריכים וטיפים על נופש, אירוח והאזור בחיפה
-- [צור קשר / Contact](https://sea-tower.bios.co.il/contact): פרטי קשר, וואטסאפ, מפה וטופס פנייה
+- [ראשי / Home](https://www.sea-tower.co.il/): סקירת המלון, הדירות והיתרונות
+- [אודות / About](https://www.sea-tower.co.il/about): הסיפור, המיקום והחזון
+- [הדירות / Rooms](https://www.sea-tower.co.il/rooms): קטלוג הדירות והסוויטות — סוג, גודל, קומה, תפוסה ומיטות
+- [הזמנה / Booking](https://www.sea-tower.co.il/booking): בדיקת זמינות ומחיר לפי תאריכים ומספר אורחים
+- [פתרונות / Solutions](https://www.sea-tower.co.il/solutions): נופש, אירוח עסקי, רילוקיישן, השכרה לטווח קצר/ארוך, ניהול דירות
+- [שאלות ותשובות / FAQ](https://www.sea-tower.co.il/faq): כל המידע לפני ההגעה — צ׳ק-אין, חניה, בריכה, ציוד, שירותים, תשלומים וביטולים
+- [חוקי הבית / House Rules](https://www.sea-tower.co.il/house-rules): תנאי אירוח, שעות מנוחה, עישון, ציוד ואחריות
+- [תקנון / Terms](https://www.sea-tower.co.il/terms): תנאי הזמנה, ביטול ושימוש
+- [מאמרים / Articles](https://www.sea-tower.co.il/articles): מדריכים וטיפים על נופש, אירוח והאזור בחיפה
+- [צור קשר / Contact](https://www.sea-tower.co.il/contact): פרטי קשר, וואטסאפ, מפה וטופס פנייה
 
 ## הערות (Notes)
 - זהו מלון דירות (serviced apartments), לא מלון קלאסי: אין חדר אוכל או שירות חדרים; לכל דירה מטבח/מטבחון מאובזר.
