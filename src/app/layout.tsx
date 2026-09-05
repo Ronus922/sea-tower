@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { openSans } from "@/lib/fonts";
 import { BUSINESS } from "@/lib/business";
 import { Analytics } from "@/components/site/Analytics";
@@ -76,6 +77,17 @@ export default function RootLayout({
       <body className="antialiased">
         <Analytics />
         {children}
+        <script
+          id="nagishli-config"
+          dangerouslySetInnerHTML={{
+            __html: 'window.nagishli_config = { language: "he", color: "turquoise" };',
+          }}
+        />
+        <Script
+          src="/nagishli/nagishli_beta.js?v=3.0b"
+          strategy="lazyOnload"
+          charSet="utf-8"
+        />
       </body>
     </html>
   );
