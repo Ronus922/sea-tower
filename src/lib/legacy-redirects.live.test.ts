@@ -64,3 +64,65 @@ describe.skipIf(!baseUrl)("הפניות 301 מול שרת חי", () => {
     },
   );
 });
+
+/**
+ * כללי התבנית אינם חלק מהמפה הסטטית ולכן נבדקים בנפרד. כתובות ה-feed נפתרות בשני
+ * hops במכוון: הכלל הגנרי מקלף את הסיומת, והנתיב שנותר נופל למפה הסטטית.
+ */
+describe.skipIf(!baseUrl)("כללי תבנית מול שרת חי", () => {
+  /** עוקב אחרי שרשרת ההפניות עד 200, ומחזיר את הנתיב הסופי ואת מספר ה-hops */
+  const chase = async (path: string, label: string) => {
+    let current = new URL(`${baseUrl}${path}`);
+    let hops = 0;
+    for (;;) {
+      const response = await fetch(current, { redirect: "manual" });
+      if (response.status === 200) break;
+      expect(response.status, `${label}: ${current.pathname}`).toBe(301);
+      current = new URL(response.headers.get("location") ?? "", baseUrl);
+      hops += 1;
+      expect(hops, `${label}: שרשרת ארוכה מדי`).toBeLessThanOrEqual(4);
+    }
+    return { pathname: decodeURIComponent(current.pathname), hops };
+  };
+
+  it.each([
+    ["/author/de646f9bb8cf4378/page/2", "/articles", 1],
+    ["/author/1a2b3c4d/page/7", "/articles", 1],
+    ["/מאמרים/feed", "/articles", 2],
+    ["/property/feed", "/rooms", 2],
+    ["/חוקי-הבית/feed", "/house-rules", 2],
+    ["/category/בסביבה/feed", "/articles", 2],
+  ] as const)("%s מגיע אל %s בכל צורות הקידוד", async (from, to, expectedHops) => {
+    for (const { label, path } of requestForms(from)) {
+      const { pathname, hops } = await chase(path, label);
+      expect(pathname, `${label}: ${path}`).toBe(to);
+      expect(hops, `${label}: ${path}`).toBe(expectedHops);
+    }
+  });
+
+  /* `:path+` דורש מקטע לפני `/feed`, כך שהשורש עצמו אינו נתפס */
+  it("/feed לבדו אינו מופנה", async () => {
+    const response = await fetch(`${baseUrl}/feed`, { redirect: "manual" });
+    expect(response.status).toBe(404);
+  });
+
+  /* נשאר 404 במכוון — ההפניה היחידה המותרת היא נורמליזציית הסלאש */
+  it.each(["/elementor-1439", "/elementor-1439/"])("%s נשאר 404", async (path) => {
+    let response = await fetch(`${baseUrl}${path}`, { redirect: "manual" });
+    if (response.status === 308) {
+      response = await fetch(new URL(response.headers.get("location") ?? "", baseUrl), {
+        redirect: "manual",
+      });
+    }
+    expect(response.status).toBe(404);
+  });
+
+  /* המסלולים החיים חייבים להמשיך להחזיר 200 — הכלל הגנרי אינו בולע אותם */
+  it.each(["/", "/articles", "/rooms", "/solutions", "/house-rules", "/faq", "/booking"])(
+    "%s נשאר 200",
+    async (path) => {
+      const response = await fetch(`${baseUrl}${path}`, { redirect: "manual" });
+      expect(response.status).toBe(200);
+    },
+  );
+});

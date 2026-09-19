@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
-import { LEGACY_REDIRECTS, toLowercaseEncodedPath } from "./src/lib/legacy-redirects";
+import {
+  LEGACY_PATTERN_REDIRECTS,
+  LEGACY_REDIRECTS,
+  toLowercaseEncodedPath,
+} from "./src/lib/legacy-redirects";
 
 /* גלריית החדרים נשמרת ב-GuestHub ומוגשת משם (/uploads/rooms/...). במקום לחשוף
    את דומיין הבק-אופיס לדפדפן, האתר מגיש אותה מאותו origin דרך rewrite ל-loopback
@@ -29,6 +33,13 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      /* כללי התבנית קודם למפה הסטטית: `/:path+/feed` מקלף את סיומת ה-feed של וורדפרס
+         ומחזיר את הנתיב עצמו, וזה נופל אחר כך לכלל הסטטי המתאים. ASCII בלבד — בלי
+         קידוד אחוזים, שהיה בורח את הנקודתיים של הפרמטר */
+      ...LEGACY_PATTERN_REDIRECTS.flatMap(({ from, to }) => [
+        { source: `${from}/`, destination: to, statusCode: 301 as const },
+        { source: from, destination: to, statusCode: 301 as const },
+      ]),
       /* הפניות 301 מהאתר הישן. לכל נתיב שתי צורות source — עם סלאש נגרר ובלי — שתיהן
          בקידוד אחוזים באותיות קטנות, הצורה שאליה Next מנרמל כל בקשה נכנסת. כך גם URL
          מקודד באותיות גדולות (%D7, מה שדפדפנים שולחים) וגם URL עם יוניקוד גלוי נתפסים
