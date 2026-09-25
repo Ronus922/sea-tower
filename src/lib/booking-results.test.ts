@@ -9,6 +9,7 @@ import type { AvailabilityResult, PublicRoom } from "./booking-api";
 const ROOM_A = "11111111-1111-1111-1111-111111111111";
 const ROOM_B = "22222222-2222-2222-2222-222222222222";
 const ROOM_NO_IMG = "33333333-3333-3333-3333-333333333333";
+const ROOM_S = "55555555-5555-5555-5555-555555555555"; // יחידה קטנה — ל-2 מבוגרים בלבד
 const IMG = (n: string) => `/uploads/rooms/${n}/44444444-4444-4444-4444-44444444444${n[0]}.jpg`;
 
 function room(over: Partial<PublicRoom> & { id: string }): PublicRoom {
@@ -57,13 +58,23 @@ const ROOMS: PublicRoom[] = [
     roomType: { id: "t1", name: "חדר שינה וסלון" },
   }),
   room({ id: ROOM_NO_IMG, roomNumber: "1245", title: "בלי תמונות", images: [] }),
+  room({ id: ROOM_S, roomNumber: "1130", title: "סטודיו", maxOccupancy: 2 }),
 ];
 
-const unit = (suId: string, roomId: string, code: string, totalPrice: number) => ({
+/* יחידה כפי שהיא חוזרת מ-GuestHub עם guests (D195): partyPrices לכל חדר בחיפוש.
+   ברירת המחדל — חדר אחד, והמחיר להרכב הוא totalPrice */
+const unit = (
+  suId: string,
+  roomId: string,
+  code: string,
+  totalPrice: number,
+  partyPrices: Array<number | null> = [totalPrice],
+) => ({
   suId,
   roomId,
   code,
   totalPrice,
+  partyPrices,
 });
 
 function availability(units: ReturnType<typeof unit>[]): Extract<AvailabilityResult, { ok: true }> {
@@ -89,15 +100,19 @@ function availability(units: ReturnType<typeof unit>[]): Extract<AvailabilityRes
   };
 }
 
-const build = (av: Extract<AvailabilityResult, { ok: true }>, rooms = ROOMS) =>
+const build = (
+  av: Extract<AvailabilityResult, { ok: true }>,
+  rooms = ROOMS,
+  guestRooms = [{ adults: 2, children: 0 }],
+) =>
   buildBookingResults({
     availability: av,
     rooms,
-    guestRooms: [{ adults: 2, children: 0 }],
+    guestRooms,
     nights: 2,
     checkIn: "2026-08-04",
     checkOut: "2026-08-06",
-    guestsParam: "2-0",
+    guestsParam: guestRooms.map((r) => `${r.adults}-${r.children}`).join(","),
   });
 
 describe("החיבור בין זמינות לתוכן", () => {
@@ -202,17 +217,82 @@ describe("מי נכנס לתוצאות", () => {
     expect(availableBeforeJoin).toBe(2);
   });
 
-  it("הרכב אורחים שחורג מהתפוסה חוסם את הסוג כולו", () => {
-    const res = buildBookingResults({
-      availability: availability([unit("su-a", ROOM_A, "1102", 1400)]),
-      rooms: ROOMS,
-      guestRooms: [{ adults: 5, children: 1 }], // 6 > maxOccupancy 4
-      nights: 2,
-      checkIn: "2026-08-04",
-      checkOut: "2026-08-06",
-      guestsParam: "6-0",
-    });
-    expect(res.items).toHaveLength(0);
+  it("דירה שאינה מארחת את ההרכב (partyPrices[0] null) לא מקבלת כרטיס — גם כשהסוג מתיר", () => {
+    /* הכרטיס לעולם לא מוביל ל-unit_party_mismatch: הדירה שבוחרים חייבת לארח את חדר 1 */
+    const { items, availableBeforeJoin } = build(
+      availability([unit("su-a", ROOM_A, "1102", 1400, [null]), unit("su-b", ROOM_B, "1237", 1600, [1600])]),
+      ROOMS,
+      [{ adults: 2, children: 2 }],
+    );
+    expect(items.map((i) => i.roomId)).toEqual([ROOM_B]);
+    expect(availableBeforeJoin).toBe(1);
+  });
+
+  it("הסוג לא חוסם: הכשירות היא לפי הדירה, לא לפי maxOccupancy של הסוג (הבאג של 1235)", () => {
+    /* הסוג מצהיר 4 אבל GuestHub תמחר את הדירה ל-5+1 — הדירה מוצגת, במחיר שלה */
+    const { items } = build(
+      availability([unit("su-a", ROOM_A, "1102", 1400, [2600])]),
+      ROOMS,
+      [{ adults: 5, children: 1 }],
+    );
+    expect(items.map((i) => i.roomId)).toEqual([ROOM_A]);
+    expect(items[0].totalPrice).toBe(2600);
+  });
+
+  it("יחידה בלי partyPrices (תשובה בלי guests) לא מקבלת כרטיס — המחיר שלה הוא מחיר 2 המבוגרים הישן", () => {
+    const av = availability([]);
+    av.roomTypes[0].units = [{ suId: "su-a", roomId: ROOM_A, code: "1102", totalPrice: 1400 }];
+    expect(build(av).items).toHaveLength(0);
+  });
+});
+
+describe("מחיר לפי הרכב — partyPrices בלבד (D195)", () => {
+  it("חדר אחד: המחיר ללילה והסה״כ הם partyPrices[0], לא totalPrice", () => {
+    /* totalPrice סוטה בכוונה: אם הכרטיס היה קורא אותו, הבדיקה הייתה נופלת */
+    const { items } = build(
+      availability([unit("su-a", ROOM_A, "1102", 1500, [2700])]),
+      ROOMS,
+      [{ adults: 2, children: 3 }],
+    );
+    expect(items[0].totalPrice).toBe(2700);
+    expect(items[0].pricePerNight).toBe(1350);
+    expect(new URL(items[0].checkoutHref, "https://x.test").searchParams.get("guests")).toBe("2-3");
+  });
+
+  it("רב-חדרי, הרכבים שונים: כרטיס רק לדירה שמארחת את חדר 1; הסה״כ = ההקצאה הזולה מ-partyPrices", () => {
+    /* חדר 1 = 2+2, חדר 2 = 2+0. הסטודיו מתאים רק לחדר 2 */
+    const { items, availableBeforeJoin } = build(
+      availability([
+        unit("su-a", ROOM_A, "1102", 2400, [2400, 1600]),
+        unit("su-b", ROOM_B, "1237", 2400, [2400, 1600]),
+        unit("su-s", ROOM_S, "1130", 1600, [null, 1600]),
+      ]),
+      ROOMS,
+      [{ adults: 2, children: 2 }, { adults: 2, children: 0 }],
+    );
+    expect(items.map((i) => i.roomId).sort()).toEqual([ROOM_A, ROOM_B].sort());
+    expect(availableBeforeJoin).toBe(2);
+    for (const item of items) {
+      expect(item.totalPrice).toBe(2400 + 1600); // חדר 1 בדירה שבכרטיס + הזולה לחדר 2
+      expect(item.pricePerNight).toBe(1200); // 2400 / 2 לילות — הדירה שבכרטיס להרכב 2+2
+      expect(new URL(item.checkoutHref, "https://x.test").searchParams.get("guests")).toBe("2-2,2-0");
+    }
+  });
+
+  it("רב-חדרי: דירה שאין לה שילוב תקין לשאר החדרים לא מקבלת כרטיס", () => {
+    /* חדר 1 = 2+0, חדר 2 = 2+2. הדירה הגדולה זולה יותר ל-2+0, אבל אם היא
+       נלקחת לחדר 1 לא נשאר מי שיארח 2+2 — ולכן הכרטיס הוא לסטודיו, והגדולה
+       הולכת לחדר 2 */
+    const { items } = build(
+      availability([
+        unit("su-a", ROOM_A, "1102", 600, [600, 868]),
+        unit("su-s", ROOM_S, "1130", 926, [926, null]),
+      ]),
+      ROOMS,
+      [{ adults: 2, children: 0 }, { adults: 2, children: 2 }],
+    );
+    expect(items.map((i) => i.roomId)).toEqual([ROOM_S]);
+    expect(items[0].totalPrice).toBe(926 + 868);
   });
 });
 

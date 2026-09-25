@@ -1,13 +1,16 @@
 import { buildApartmentView, hasSpec, type ApartmentView } from "./apartment-view";
-import type { AvailabilityResult, PublicRoom } from "./booking-api";
+import type { AvailabilityResult, GuestRoom, PublicRoom } from "./booking-api";
 import { roomGallery } from "./rooms-view";
+import { assignUnitsToRooms } from "./unit-assignment";
 
 /* חיבור זמינות לתוכן — הלוגיקה שמאחורי כרטיסי /booking.
    פונקציה טהורה בכוונה: זו הנקודה שבה שני מקורות אמת נפגשים, ולכן זו הנקודה
    שצריכה להיות ניתנת לבדיקה בלי דפדפן, בלי רשת ובלי React.
 
    חלוקת הסמכות (D121) — אין שדה שמגיע משני המקורות:
-   • זמינות, מחיר ומזהי ההזמנה → /api/public/availability בלבד
+   • זמינות, מחיר ומזהי ההזמנה → /api/public/availability בלבד. המחיר להרכב
+     האמיתי (תוספות אורחים כלולות) הוא partyPrices של כל דירה (D195) — האתר
+     מסכם, לא מתמחר
    • שם, קופי, תמונות, מתקנים, גודל ומיטות → /api/public/rooms בלבד
    • המפתח המחבר → roomId, מזהה החדר הפיזי. לא מספר חדר, לא שם, לא סוג
      ולא מיקום במערך: כל אחד מאלה משתנה, ושינוי כזה מדביק לדירה אחת את
@@ -57,12 +60,14 @@ export type BookingResults = {
   availableBeforeJoin: number;
 };
 
-export type GuestRoom = { adults: number; children: number };
+export type { GuestRoom };
 
-/* דירה נכנסת לתוצאות רק כשארבעת התנאים מתקיימים: פנויה בתאריכים, מסומנת
+/* דירה מקבלת כרטיס רק כשכל התנאים מתקיימים: פנויה בתאריכים, מארחת את ההרכב
+   של החדר הראשון ויש שילוב תקין לשאר החדרים (partyPrices, D195), מסומנת
    להצגה באתר (‏GuestHub מחזיר רק כאלה), יש לה רשומת תוכן ציבורית, ויש לה
    לפחות תמונה תקפה אחת. חסר אחד מהם — הדירה לא מוצגת, ולא ממציאים לה
-   תמונה או תיאור של דירה אחרת. */
+   תמונה או תיאור של דירה אחרת. כרטיס לעולם לא מוביל ל-unit_party_mismatch:
+   דירה ש-partyPrices[0] שלה null אינה מוצעת כדירה שבוחרים. */
 export function buildBookingResults({
   availability,
   rooms,
@@ -81,17 +86,18 @@ export function buildBookingResults({
   guestsParam: string;
 }): BookingResults {
   const byRoomId = new Map(rooms.map((r) => [r.id, r]));
-  const maxParty = Math.max(...guestRooms.map((r) => r.adults + r.children));
 
   const items: BookingItem[] = [];
   const excluded: ExcludedRoom[] = [];
   let availableBeforeJoin = 0;
 
   for (const type of availability.roomTypes) {
-    /* כשירות ההזמנה נקבעת בזמינות בלבד: מספיק יחידות להרכב, ותפוסה מותרת */
-    if (type.units.length < guestRooms.length || type.maxOccupancy < maxParty) continue;
-
     for (const unit of type.units) {
+      /* כשירות לפי הדירה עצמה, לא לפי maxOccupancy של הסוג (הבאג של 1235):
+         הכרטיס הוא לדירה הזו כחדר 1, ושאר החדרים לפי אותו כלל הקצאה כמו
+         בהזמנה. אין הקצאה תקינה → אין כרטיס */
+      const assignment = assignUnitsToRooms(type.units, guestRooms.length, unit.suId);
+      if (!assignment.ok) continue;
       availableBeforeJoin++;
 
       const room = byRoomId.get(unit.roomId);
@@ -104,13 +110,6 @@ export function buildBookingResults({
         excluded.push({ roomId: unit.roomId, code: unit.code, reason: "no-public-image" });
         continue;
       }
-
-      /* בהזמנה רב-חדרית הסה״כ = הדירה שבכרטיס + הזולות הבאות מאותו סוג.
-         הסכומים נלקחים כמו שהם מ-availability ולא מחושבים מחדש */
-      const others = type.units.filter((u) => u.suId !== unit.suId);
-      const stayTotal =
-        unit.totalPrice +
-        others.slice(0, guestRooms.length - 1).reduce((s, u) => s + u.totalPrice, 0);
 
       const qs = new URLSearchParams({
         type: type.roomTypeId,
@@ -125,8 +124,10 @@ export function buildBookingResults({
         roomId: room.id,
         roomTypeId: type.roomTypeId,
         suId: unit.suId,
-        pricePerNight: Math.round(unit.totalPrice / nights),
-        totalPrice: Math.round(stayTotal),
+        /* המחירים כמו שהם מ-partyPrices: ללילה — הדירה שבכרטיס להרכב של חדר 1;
+           סה״כ — כל החדרים לפי ההקצאה, אותו סכום ש-GuestHub יחשב בהזמנה */
+        pricePerNight: Math.round(assignment.prices[0] / nights),
+        totalPrice: Math.round(assignment.total),
         checkoutHref: `/booking/checkout?${qs}`,
         apartment,
         hasSpec: hasSpec(apartment),

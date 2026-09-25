@@ -123,13 +123,16 @@ export async function POST(req: NextRequest) {
   const messages: Record<string, string> = {
     no_availability: "הדירה כבר אינה זמינה בתאריכים שנבחרו. חזרו לחיפוש ובחרו מחדש.",
     price_changed: "המחיר התעדכן מאז הצגת ההצעה. אשרו את המחיר החדש והמשיכו.",
+    unit_party_mismatch:
+      "הדירה שנבחרה אינה מתאימה להרכב האורחים שביקשתם. חזרו לחיפוש ובחרו דירה שמתאימה להרכב.",
     invalid_card: result.message ?? "פרטי הכרטיס אינם תקינים",
     validation: result.message ?? "חלק מהפרטים חסרים או שגויים",
     card_vault_unavailable: "שירות ההזמנות אינו זמין כרגע. התקשרו אלינו ונשמח לעזור.",
     rate_limited: "יותר מדי בקשות. נסו שוב בעוד רגע.",
   };
   const status =
-    result.code === "no_availability" || result.code === "price_changed" ? 409
+    result.code === "no_availability" || result.code === "price_changed" ||
+    result.code === "unit_party_mismatch" ? 409
     : result.code === "invalid_card" || result.code === "validation" ? 422
     : 503;
   return NextResponse.json(

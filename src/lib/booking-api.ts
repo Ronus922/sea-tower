@@ -6,8 +6,15 @@ export type AvailableUnit = {
   suId: string; // מזהה היחידה למכירה — מה שההזמנה נסגרת עליו
   roomId: string; // מזהה החדר הפיזי — המפתח היחיד לחיבור לתוכן מ-/api/public/rooms
   code: string; // מספר הדירה (room_number ב-GuestHub)
-  totalPrice: number; // לכל השהות, לדירה זו
+  totalPrice: number; // לכל השהות — המחיר לחדר הראשון בחיפוש שהדירה יכולה לארח
+  /* D195: מחיר המנוע של GuestHub לדירה הזו לכל חדר בחיפוש, מיושר לרשימת guests
+     (partyPrices[i] ↔ החדר ה-i). null = הדירה אינה יכולה לארח את ההרכב של אותו
+     חדר. זה המקור היחיד למחיר באתר — האתר לא מחשב תוספות אורחים בעצמו */
+  partyPrices?: Array<number | null>;
 };
+
+/* הרכב חדר אחד בחיפוש — מבוגרים 1–6, ילדים 0–4 (הגבולות של GuestHub) */
+export type GuestRoom = { adults: number; children: number };
 
 export type RoomTypeAvailability = {
   roomTypeId: string;
@@ -28,6 +35,8 @@ export type AvailabilityResult =
       checkOut: string;
       nights: number;
       currency: string;
+      /* הד של guests בצורתו הקנונית; null כשהחיפוש נשלח בלי הרכב */
+      guests?: string | null;
       roomTypes: RoomTypeAvailability[];
     }
   | { ok: false; code: string; message?: string };
@@ -123,11 +132,20 @@ async function guesthubFetch<T>(
   }
 }
 
+/* זמינות ומחיר להרכב האמיתי (D195): guests בפורמט "2-0,2-1" — חדר לכל פסיק,
+   מבוגרים-ילדים לחדר. GuestHub מתמחר כל דירה במנוע לכל חדר (partyPrices) —
+   כולל תוספות אורחים לפי ההגדרות ב-/rooms — ולכן המחיר שמוצג הוא המחיר
+   שההזמנה תיסגר עליו */
 export async function fetchAvailability(
   checkIn: string,
   checkOut: string,
+  rooms: GuestRoom[],
 ): Promise<AvailabilityResult | null> {
-  const qs = new URLSearchParams({ check_in: checkIn, check_out: checkOut });
+  const qs = new URLSearchParams({
+    check_in: checkIn,
+    check_out: checkOut,
+    guests: rooms.map((r) => `${r.adults}-${r.children}`).join(","),
+  });
   return guesthubFetch<AvailabilityResult>(`/api/public/availability?${qs}`);
 }
 

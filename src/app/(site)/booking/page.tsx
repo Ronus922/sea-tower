@@ -63,7 +63,7 @@ export default async function Booking({ searchParams }: { searchParams: SearchPa
      תמונות או שינוי תיאור במערכת הניהול מופיעים כאן בחיפוש הבא — אין ISR,
      אין קטלוג סטטי ואין נתוני דמו שמחליפים נתונים אמיתיים */
   const [availability, catalog] = await Promise.all([
-    fetchAvailability(checkIn, checkOut),
+    fetchAvailability(checkIn, checkOut, rooms),
     fetchWebsiteRooms(true),
   ]);
 

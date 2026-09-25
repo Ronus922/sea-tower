@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { fetchAvailability, fetchWebsiteRooms } from "@/lib/booking-api";
+import { assignUnitsToRooms } from "@/lib/unit-assignment";
 import { apartmentTitle } from "@/lib/apartment-view";
 import { roomCoverImage } from "@/lib/rooms-view";
 import { pageMeta } from "@/lib/seo";
@@ -59,24 +60,20 @@ export default async function Checkout({ searchParams }: { searchParams: SearchP
   const backHref = `/booking?checkin=${checkIn}&checkout=${checkOut}&guests=${guestsParam(rooms)}#results`;
 
   const [availability, catalog] = await Promise.all([
-    fetchAvailability(checkIn, checkOut),
+    fetchAvailability(checkIn, checkOut, rooms),
     fetchWebsiteRooms(true),
   ]);
   if (!availability?.ok) redirect(backHref);
   const type = availability.roomTypes.find((t) => t.roomTypeId === roomTypeId);
-  const maxParty = Math.max(...rooms.map((r) => r.adults + r.children));
-  if (!type || type.units.length < rooms.length || type.maxOccupancy < maxParty) {
-    redirect(backHref);
-  }
+  if (!type) redirect(backHref);
 
-  /* אותו סדר בחירה כמו בשרת ההזמנות: הדירה שנבחרה קודם, השאר מהזול ליקר */
-  const preferred = unitId ? type.units.find((u) => u.suId === unitId) : type.units[0];
-  if (!preferred) redirect(backHref);
-  const picked = [preferred, ...type.units.filter((u) => u.suId !== preferred.suId)].slice(
-    0,
-    rooms.length,
-  );
-  const total = Math.round(picked.reduce((s, u) => s + u.totalPrice, 0));
+  /* אותו כלל הקצאה כמו בשרת ההזמנות (D195): הדירה שנבחרה → חדר 1, שאר החדרים
+     השילוב התקין הזול ביותר; כל מחיר מ-partyPrices. הדירה שנבחרה לא מארחת את
+     ההרכב, או שאין שילוב — חזרה לחיפוש, לא הצעת מחיר שההזמנה תדחה */
+  const assignment = assignUnitsToRooms(type.units, rooms.length, unitId || null);
+  if (!assignment.ok) redirect(backHref);
+  const preferred = assignment.units[0];
+  const total = Math.round(assignment.total);
   const nights = nightsBetween(checkIn, checkOut);
 
   /* שם ותמונה מקטלוג התוכן, מחוברים לפי מזהה החדר הפיזי — אותה דירה בדיוק
@@ -92,7 +89,7 @@ export default async function Checkout({ searchParams }: { searchParams: SearchP
     checkOut,
     nights,
     rooms,
-    pricePerNight: Math.round(preferred.totalPrice / nights),
+    pricePerNight: Math.round(assignment.prices[0] / nights),
     total,
     backHref,
   };
