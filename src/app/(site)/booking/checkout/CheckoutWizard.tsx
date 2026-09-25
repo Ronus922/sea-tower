@@ -456,7 +456,11 @@ export function CheckoutWizard({ quote }: { quote: CheckoutQuote }) {
       setTotal(data.newTotal);
       return { message: `${data.error ?? "המחיר התעדכן"} — הסכום המעודכן: ${fmt(data.newTotal)}` };
     }
-    return { message: data.error ?? "אירעה שגיאה, נסו שוב", backToSearch: data.code === "no_availability" };
+    /* אין דירה או שהדירה לא מתאימה להרכב — הדרך היחידה קדימה היא בחירה מחדש */
+    return {
+      message: data.error ?? "אירעה שגיאה, נסו שוב",
+      backToSearch: data.code === "no_availability" || data.code === "unit_party_mismatch",
+    };
   };
 
   return (
