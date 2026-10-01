@@ -77,6 +77,25 @@ describe("sendLeadNotification — קונפיגורציית החיבור", () =>
     });
   });
 
+  it("שם EHLO: בלי SMTP_EHLO_NAME — FQDN קבוע, לעולם לא [127.0.0.1]", async () => {
+    vi.stubEnv("SMTP_EHLO_NAME", "");
+    const { sendLeadNotification } = await load();
+    await sendLeadNotification(lead);
+
+    const name = transportOptions().name;
+    expect(name).toBe("vps-ad565027.vps.ovh.net");
+    expect(name).toContain(".");
+    expect(name).not.toContain("127.0.0.1");
+  });
+
+  it("שם EHLO: SMTP_EHLO_NAME מה-env גובר על ברירת המחדל", async () => {
+    vi.stubEnv("SMTP_EHLO_NAME", "mail.example.test");
+    const { sendLeadNotification } = await load();
+    await sendLeadNotification(lead);
+
+    expect(transportOptions().name).toBe("mail.example.test");
+  });
+
   it("SMTP_SECURE=true — TLS מלא, בלי requireTLS", async () => {
     vi.stubEnv("SMTP_PORT", "465");
     vi.stubEnv("SMTP_SECURE", "true");
