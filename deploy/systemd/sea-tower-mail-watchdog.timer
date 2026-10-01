@@ -1,0 +1,12 @@
+# מריץ את שומר המייל כל 15 דקות (עם פיזור אקראי של עד דקה).
+[Unit]
+Description=Run Sea Tower mail watchdog every 15 minutes
+
+[Timer]
+OnCalendar=*:0/15
+RandomizedDelaySec=60
+Persistent=true
+Unit=sea-tower-mail-watchdog.service
+
+[Install]
+WantedBy=timers.target
