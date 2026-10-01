@@ -76,6 +76,10 @@ function getTransporter(cfg: SmtpConfig): Transporter {
     host: cfg.host,
     port: cfg.port,
     secure: cfg.secure,
+    /* שם ה-EHLO. שם המכונה (vps-ad565027) בלי נקודה, ולכן nodemailer מציג
+       [127.0.0.1] — וה-relay דוחה אותו ב-421 מאז 9.9.2026. ה-fallback נשאר
+       כדי ש-env חסר לא יחזיר את הכשל */
+    name: process.env.SMTP_EHLO_NAME || "vps-ad565027.vps.ovh.net",
     /* בלי TLS מלא — STARTTLS חובה. לעולם לא שליחה בטקסט פתוח */
     ...(cfg.secure ? {} : { requireTLS: true }),
     ...(cfg.pass ? { auth: { user: cfg.user, pass: cfg.pass } } : {}),
