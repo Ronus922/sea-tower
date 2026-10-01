@@ -16,6 +16,9 @@
 # next.js
 /.next/
 /out/
+# גיבוי ה-.next הקודם ש-scripts/deploy-worktree.sh מייצר בהחלפה האטומית — נתיב
+# השחזור של הפריסה האחרונה. נשאר על הדיסק בעץ הפרודקשן, ואינו נכנס לגיט
+/.next.rollback/
 
 # production
 /build
