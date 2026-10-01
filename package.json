@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "test:redirects": "vitest run legacy-redirects.live"
+    "test:redirects": "REDIRECT_BASE_URL=${REDIRECT_BASE_URL:-https://www.sea-tower.co.il} vitest run legacy-redirects.live"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
