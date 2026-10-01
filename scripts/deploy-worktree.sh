@@ -30,6 +30,16 @@ say "  ✓ הענף מכיל את origin/main ($(git rev-parse --short HEAD))"
 [ -d "$PROD_DIR" ] || die "עץ הפרודקשן לא נמצא: $PROD_DIR"
 [ -f .env.local ] || die "חסר .env.local ב-worktree — משתני NEXT_PUBLIC_* נצרבים בזמן בנייה"
 
+# ── deps: node_modules חייב לתאום את package-lock.json ─────────────────────
+# בלי זה הבנייה רצה מול node_modules ישן. חבילה שנוספה ל-package.json אבל מעולם
+# לא הותקנה ב-worktree מפילה את הבילד על Module not found — כך נפלה פריסה בגלל
+# nodemailer. `npm ci` מתקין בדיוק את מה שנעול ב-lockfile ומוחק התקנה חלקית
+# קודמת, ולכן הוא הצורה הנכונה כאן ולא `npm install`.
+say "→ deps"
+[ -f package-lock.json ] || die "חסר package-lock.json — npm ci דורש lockfile"
+npm ci || die "התקנת התלויות נכשלה — נעצר לפני הבנייה, הפרודקשן לא נגע"
+say "  ✓ תלויות מותקנות מ-package-lock.json"
+
 # ── build ──────────────────────────────────────────────────────────────────
 say "→ build"
 rm -rf .next
