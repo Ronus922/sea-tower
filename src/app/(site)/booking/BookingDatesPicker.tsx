@@ -1,13 +1,17 @@
 "use client";
 
-import { useState, type RefObject } from "react";
+import { useEffect, useState, type RefObject } from "react";
 import { DateRangePicker, type DateRange } from "@/components/date-range-picker";
 import { todayInIsrael } from "./dates";
 
 /* מתאם דק בין פס החיפוש לבורר של סקיל datePicker. שומר על החוזה הקיים:
    "סגור" → onClose(arrival, departure); ביטול / X / רקע / Esc / לחיצה בחוץ → onClose(null, null).
    הטווח בזמן הבחירה נשמר כאן (draft) ולא בפס החיפוש — הפס מתעדכן רק בסגירה.
-   הכפתור בפס החיפוש הוא הטריגר (anchorRef); הבורר לא מרנדר שדה משלו. */
+   הכפתור בפס החיפוש הוא הטריגר (anchorRef); הבורר לא מרנדר שדה משלו.
+   בזמן שהבורר פתוח ל-body נוסף OPEN_CLASS, שמסתיר את NagishLi ואת כפתור ה-WhatsApp הצפים
+   (booking.css) — אחרת הם מכסים את "ביטול" ואת הפוטר. מוסר בסגירה וב-unmount. */
+
+export const OPEN_CLASS = "stm-drp-open";
 
 type Props = {
   open: boolean;
@@ -32,6 +36,12 @@ export function BookingDatesPicker({
     setWasOpen(open);
     if (open) setDraft({ start: initialArrival, end: initialDeparture });
   }
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.classList.add(OPEN_CLASS);
+    return () => document.body.classList.remove(OPEN_CLASS);
+  }, [open]);
 
   const today = todayInIsrael();
 

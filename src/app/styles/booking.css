@@ -8,8 +8,10 @@
    ============================================================ */
 
 .drp-root.stm-drp {
-  --drp-primary: var(--color-ocean-400); /* .sel — יום נבחר */
+  --drp-primary: var(--color-ocean-400); /* מבטא: פוקוס, טבעות, טקסט כחול */
   --drp-primary-hover: var(--color-navy-800); /* hover של כפתורי הניווט */
+  /* מילוי מתחת לטקסט לבן (יום נבחר, "סגור"): ocean-400 נותן 4.35:1, ocean-600 נותן 7.49:1 (AA) */
+  --drp-primary-strong: var(--color-ocean-600);
   --drp-primary-disabled: rgba(43, 127, 184, 0.32); /* ניווט מושבת: opacity .32 */
   --drp-primary-ring: rgba(43, 127, 184, 0.12); /* .stm-dp-seg.on */
   --drp-primary-shadow: rgba(43, 127, 184, 0.2);
@@ -105,4 +107,11 @@
   .stm-drawer {
     animation: none;
   }
+}
+
+/* בורר התאריכים פתוח (BookingDatesPicker מוסיף את ה-class ל-body): הכפתורים הצפים
+   של NagishLi ו-WhatsApp מכסים את הפוטר שלו, לכן מוסתרים עד הסגירה */
+body.stm-drp-open > nagishli,
+body.stm-drp-open > a[href^="https://wa.me/"] {
+  display: none !important;
 }

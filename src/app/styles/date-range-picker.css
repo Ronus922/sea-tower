@@ -10,6 +10,7 @@
   --drp-primary: #2540C8;
   --drp-primary-hover: #1C2E9A;
   --drp-primary-disabled: #C7CEE8;
+  --drp-primary-strong: var(--drp-primary); /* מילוי מתחת לטקסט לבן: יום נבחר, "סגור" */
   /* טבעת הפוקוס של השדה/שדה הלילות, וצל היום הנבחר והכפתור הראשי — גוונים של primary */
   --drp-primary-ring: rgba(37, 64, 200, 0.12);
   --drp-primary-shadow: rgba(37, 64, 200, 0.2);
@@ -450,7 +451,7 @@
 .drp-d.drp-sel,
 .drp-d.drp-sel:hover,
 .drp-d.drp-sel[aria-disabled='true'] {
-  background: var(--drp-primary);
+  background: var(--drp-primary-strong);
   color: #fff;
   font-weight: 800;
   text-decoration: none;
@@ -476,7 +477,7 @@
   padding: 0 24px;
   border: none;
   border-radius: 12px;
-  background: var(--drp-primary);
+  background: var(--drp-primary-strong);
   color: #fff;
   font-family: inherit;
   font-size: 15px;

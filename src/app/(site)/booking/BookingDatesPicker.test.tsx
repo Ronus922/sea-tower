@@ -3,7 +3,7 @@ import { cleanup, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRef, useState } from "react";
 import { setViewportWidth } from "@/test/viewport";
-import { BookingDatesPicker } from "./BookingDatesPicker";
+import { BookingDatesPicker, OPEN_CLASS } from "./BookingDatesPicker";
 
 /* "היום" = 2026-07-04 בישראל (12:00 UTC = 15:00 בישראל) */
 vi.mock("./dates", async (orig) => ({
@@ -43,6 +43,21 @@ beforeEach(() => setViewportWidth(1280));
 afterEach(() => cleanup());
 
 describe("BookingDatesPicker — החוזה מול פס החיפוש", () => {
+  it("מוסיף class ל-body בפתיחה ומסיר בסגירה וב-unmount", async () => {
+    const user = userEvent.setup();
+    const { unmount } = render(<Bar onClose={vi.fn()} />);
+    const bodyHas = () => document.body.classList.contains(OPEN_CLASS);
+    expect(bodyHas()).toBe(false);
+    await user.click(screen.getByRole("button", { name: "תאריכים" }));
+    expect(bodyHas()).toBe(true);
+    await user.keyboard("{Escape}");
+    expect(bodyHas()).toBe(false);
+    await user.click(screen.getByRole("button", { name: "תאריכים" }));
+    expect(bodyHas()).toBe(true);
+    unmount();
+    expect(bodyHas()).toBe(false);
+  });
+
   it("נפתח מהטריגר החיצוני, בלי שדה ובלי סטפר משלו", async () => {
     const user = userEvent.setup();
     render(<Bar onClose={vi.fn()} />);
