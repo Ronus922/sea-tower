@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { DateRangePicker } from "./DateRangePicker";
+import { BookingDatesPicker } from "./BookingDatesPicker";
 import { GuestsPopover } from "./GuestsPopover";
 import { fmtRange, guestsParam, guestsSummary, type RoomParty } from "./dates";
 
@@ -22,6 +22,7 @@ export function BookingSearchBar({ checkIn, checkOut, rooms: initialRooms }: Pro
   const [rooms, setRooms] = useState<RoomParty[]>(initialRooms);
   const [datesOpen, setDatesOpen] = useState(false);
   const [guestsOpen, setGuestsOpen] = useState(false);
+  const datesBtnRef = useRef<HTMLButtonElement>(null);
 
   const submit = () => {
     const qs = new URLSearchParams({
@@ -39,7 +40,10 @@ export function BookingSearchBar({ checkIn, checkOut, rooms: initialRooms }: Pro
         className="flex items-stretch overflow-hidden rounded-[18px] border border-chip bg-white shadow-[0_22px_55px_rgba(14,37,64,0.16)] max-md:flex-col"
       >
         <button
+          ref={datesBtnRef}
           type="button"
+          aria-haspopup="dialog"
+          aria-expanded={datesOpen}
           onClick={() => setDatesOpen(true)}
           className="flex flex-[1.5] items-center justify-between gap-3.5 border-l border-chip px-6 py-[18px] text-right max-md:border-l-0 max-md:border-b"
         >
@@ -94,8 +98,9 @@ export function BookingSearchBar({ checkIn, checkOut, rooms: initialRooms }: Pro
         </button>
       </div>
 
-      <DateRangePicker
+      <BookingDatesPicker
         open={datesOpen}
+        anchorRef={datesBtnRef}
         initialArrival={arrival}
         initialDeparture={departure}
         onClose={(a, d) => {
