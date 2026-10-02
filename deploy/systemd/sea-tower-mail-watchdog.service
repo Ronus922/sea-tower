@@ -1,7 +1,7 @@
 # שומר המייל של מגדל הים — סריקה אחת של ה-journal ושליחת התראת WhatsApp במידת הצורך.
 # מופעל ע"י sea-tower-mail-watchdog.timer. התקנה: ראו README.md בתיקייה הזו.
 [Unit]
-Description=Sea Tower mail watchdog (WhatsApp alert on repeated lead-mail failures)
+Description=Sea Tower mail watchdog (WhatsApp alert on repeated lead mail/WhatsApp failures)
 Documentation=file:///var/www/sea-tower/deploy/systemd/README.md
 After=network-online.target
 Wants=network-online.target
@@ -15,8 +15,12 @@ SupplementaryGroups=systemd-journal
 # אותו קובץ env של האתר — משם מגיעים GREEN_API_* ו-ALERT_WHATSAPP_CHAT_ID
 EnvironmentFile=/etc/sea-tower/sea-tower.env
 # /var/lib/sea-tower נוצר אוטומטית בבעלות User; הסקריפט כותב לשם את watchdog.state
+# ואת watchdog-whatsapp.state
 StateDirectory=sea-tower
-ExecStart=/var/www/sea-tower/scripts/mail-watchdog.sh
+# שני ערוצים, ברצף. אם שליחת התראת המייל נכשלה (exit 1) ערוץ ה-WhatsApp לא נסרק
+# בסיבוב הזה — שניהם שולחים דרך אותו Green API, והסריקה הבאה משלימה
+ExecStart=/var/www/sea-tower/scripts/mail-watchdog.sh --channel mail
+ExecStart=/var/www/sea-tower/scripts/mail-watchdog.sh --channel whatsapp
 
 # הקשחה: קריאה בלבד מלבד תיקיית ה-state
 NoNewPrivileges=yes

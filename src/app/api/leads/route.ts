@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { INQUIRY_TYPES } from "@/lib/business";
-import { sendLeadNotification } from "@/lib/mailer";
+import { sendLeadNotification, type LeadNotification } from "@/lib/mailer";
+import { sendLeadWhatsApp } from "@/lib/whatsapp";
 
 /* קליטת לידים מטופס צור קשר: אימות, סניטציה, honeypot, rate-limit,
    מניעת כפילויות, ושמירה ב-sea_tower.leads דרך service_role בלבד */
@@ -158,11 +159,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  /* התראה במייל — רק על פנייה שאינה ספאם, ורק אחרי שהשמירה הצליחה.
-     לא ממתינים לה: הפנייה כבר ב-DB, וכשל SMTP לא מעכב ולא שובר את התשובה
-     למשתמש. הפונקציה לא זורקת ומתעדת קוד שגיאה בלבד */
+  /* התראות במייל וב-WhatsApp — רק על פנייה שאינה ספאם, ורק אחרי שהשמירה
+     הצליחה. לא ממתינים להן: הפנייה כבר ב-DB, וכשל באחד הערוצים (או בשניהם) לא
+     מעכב ולא שובר את התשובה למשתמש. שתי הפונקציות לא זורקות ומתעדות קוד
+     שגיאה בלבד */
   if (!spam) {
-    void sendLeadNotification({
+    const lead: LeadNotification = {
       name,
       phone: phoneRaw,
       email: email || null,
@@ -172,7 +174,9 @@ export async function POST(req: NextRequest) {
       guests,
       message: message || null,
       source,
-    });
+    };
+    void sendLeadNotification(lead);
+    void sendLeadWhatsApp(lead);
   }
 
   rateHits.set(ip, [...hits, now]);

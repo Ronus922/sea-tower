@@ -35,6 +35,17 @@ vi.mock("@/lib/mailer", () => ({
   },
 }));
 
+/* ה-WhatsApp מזויף באותו אופן — אחרת המודול האמיתי היה קורא env בטעינה */
+const whatsapped: unknown[][] = [];
+let whatsappResult: { ok: boolean; code?: string; idMessage?: string } = { ok: true, idMessage: "test" };
+
+vi.mock("@/lib/whatsapp", () => ({
+  sendLeadWhatsApp: (...a: unknown[]) => {
+    whatsapped.push(a);
+    return Promise.resolve(whatsappResult);
+  },
+}));
+
 const { POST } = await import("./route");
 
 /* ה-headers היחידים שהראוט קורא הם x-forwarded-for ו-user-agent */
@@ -73,6 +84,8 @@ beforeEach(() => {
   insertError = null;
   sent.length = 0;
   mailResult = { ok: true, messageId: "test" };
+  whatsapped.length = 0;
+  whatsappResult = { ok: true, idMessage: "test" };
   process.env.NEXT_PUBLIC_SUPABASE_URL = "https://db.example.test";
   process.env.SUPABASE_SERVICE_ROLE_KEY = "service-key";
   vi.restoreAllMocks();
@@ -158,6 +171,7 @@ describe("POST /api/leads — honeypot", () => {
 
     expect(inserts[0].is_spam).toBe(true);
     expect(sent).toHaveLength(0);
+    expect(whatsapped).toHaveLength(0);
   });
 });
 
@@ -216,6 +230,33 @@ describe("POST /api/leads — התראה במייל", () => {
   it("כשל בשליחת המייל לא משנה את התשובה למשתמש", async () => {
     mailResult = { ok: false, code: "EAUTH" };
     const res = await POST(request(validBody(), "203.0.113.33"));
+
+    expect(res.status).toBe(200);
+    await expect(res.json()).resolves.toEqual({ ok: true });
+    expect(inserts).toHaveLength(1);
+  });
+});
+
+describe("POST /api/leads — התראה ב-WhatsApp", () => {
+  it("פנייה רגילה מפעילה מייל ו-WhatsApp עם אותם פרטים", async () => {
+    await POST(request(validBody(), "203.0.113.40"));
+
+    expect(whatsapped).toHaveLength(1);
+    expect(whatsapped[0][0]).toEqual(sent[0][0]);
+  });
+
+  it("כשל insert לא שולח WhatsApp", async () => {
+    insertError = { message: "boom" };
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await POST(request(validBody(), "203.0.113.41"));
+
+    expect(whatsapped).toHaveLength(0);
+  });
+
+  it("כשל בשני הערוצים — הפנייה נשמרת והמשתמש מקבל 200", async () => {
+    mailResult = { ok: false, code: "EAUTH" };
+    whatsappResult = { ok: false, code: "HTTP_401" };
+    const res = await POST(request(validBody(), "203.0.113.42"));
 
     expect(res.status).toBe(200);
     await expect(res.json()).resolves.toEqual({ ok: true });

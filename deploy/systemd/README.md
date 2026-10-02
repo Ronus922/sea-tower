@@ -2,7 +2,9 @@
 
 `scripts/mail-watchdog.sh` סורק את ה-journal של `sea-tower.service` כל 15 דקות ושולח
 הודעת WhatsApp (Green API) אחרי 3 כשלים רצופים של `leads: mail failed`, ושוב כשהמייל
-חוזר לעבוד. הוא לא נוגע באפליקציה. פירוט מלא של הכללים — בכותרת הסקריפט.
+חוזר לעבוד. אותו כלל, עם state נפרד, חל על `leads: whatsapp failed` (התראת ה-WhatsApp
+על ליד, `src/lib/whatsapp.ts`) — ה-service מריץ `--channel mail` ואחריו
+`--channel whatsapp`. הוא לא נוגע באפליקציה. פירוט מלא של הכללים — בכותרת הסקריפט.
 
 ## דרישות
 
@@ -24,6 +26,15 @@ systemctl list-timers sea-tower-mail-watchdog.timer --no-pager
 מעתיקים ולא מקשרים (symlink): `systemctl enable` לא עובד על יחידות מקושרות מחוץ
 ל-`/etc`, ושינוי בריפו צריך לעבור דרך `cp` + `daemon-reload` במודע.
 
+## עדכון יחידה קיימת
+
+אחרי שינוי ב-`deploy/systemd/` (למשל הוספת ערוץ ה-WhatsApp) — אותה העתקה, בלי enable מחדש:
+
+```bash
+sudo cp /var/www/sea-tower/deploy/systemd/sea-tower-mail-watchdog.service /etc/systemd/system/
+sudo systemctl daemon-reload
+```
+
 ## הפעלה ידנית ובדיקה
 
 ```bash
@@ -37,7 +48,7 @@ sudo systemd-run --wait --collect --pipe --uid=ubuntu --gid=devops-www \
   /var/www/sea-tower/scripts/mail-watchdog.sh --test-send
 
 # מצב נוכחי
-cat /var/lib/sea-tower/watchdog.state
+cat /var/lib/sea-tower/watchdog.state /var/lib/sea-tower/watchdog-whatsapp.state
 ```
 
 ללוג יוצאים רק קוד HTTP ו-`idMessage`. הטוקן לא מודפס לעולם.
@@ -64,5 +75,6 @@ sudo rm -rf /var/lib/sea-tower   # ה-state בלבד; אין בו סודות
 אם רוצים שהסריקה הבאה תתחיל מחדש (24 שעות אחורה, בלי זיכרון של התראות):
 
 ```bash
-sudo rm /var/lib/sea-tower/watchdog.state
+sudo rm /var/lib/sea-tower/watchdog.state            # מייל
+sudo rm /var/lib/sea-tower/watchdog-whatsapp.state   # WhatsApp
 ```

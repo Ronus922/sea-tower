@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-# שומר המייל של מגדל הים — התראת WhatsApp על כשל חוזר בשליחת מייל הלידים.
+# שומר המייל של מגדל הים — התראת WhatsApp על כשל חוזר בשליחת התראות הלידים (מייל ו-WhatsApp).
 #
 # רקע: ה-mailer (src/lib/mailer.ts) נכשל בשקט שלושה שבועות (9.9–1.10.2026) כי אף אחד
 # לא קרא את ה-journal. השומר רץ מ-systemd timer כל 15 דקות, סורק את ה-journal של
 # sea-tower.service מאז הסריקה הקודמת, ושולח הודעת WhatsApp (Green API) אחרי 3 כשלים
 # רצופים — ושוב כשהמייל חוזר לעבוד. הוא לא נוגע באפליקציה ולא ב-mailer.ts.
 #
-# שורות שהוא מזהה (מודפסות ע"י mailer.ts; ההודעה של "sent" נשברת לכמה שורות ב-journal):
+# ערוצים (--channel): כל ריצה סורקת ערוץ אחד, עם state משלה. ה-service מריץ את שניהם.
+#   mail      (ברירת מחדל) — mailer.ts. state: watchdog.state
+#   whatsapp  — whatsapp.ts (התראת WhatsApp על ליד). state: watchdog-whatsapp.state
+#   אותו כלל ואותה השתקה בשני הערוצים. ההתראה על כשל WhatsApp יוצאת גם היא ב-WhatsApp
+#   (curl נפרד מהאפליקציה); אם Green API כולו מת — רואים את זה במייל, שממשיך לעבוד.
+#
+# שורות שהוא מזהה (<channel> = mail / whatsapp; ההודעה של "sent" נשברת לכמה שורות ב-journal):
 #   leads: mail sent { messageId: '...', attempts: 1 }
 #   leads: mail failed { code: 'ECONNECTION', attempts: 4 }
 #   leads: mail skipped { code: 'ENV_MISSING' }      ← נספר ככשל: המייל לא יצא
+#   leads: whatsapp sent { idMessage: '...' }
+#   leads: whatsapp failed { code: 'HTTP_401' }
+#   ("leads: whatsapp disabled" מודפס פעם אחת בטעינה כשחסר env, לא לכל ליד — ולא נספר)
 #
 # מכונת המצבים (נשמרת כ-JSON בקובץ ה-state):
 #   failed → consecutive+1; אם לא alerted ו-consecutive הגיע לסף → התראה אחת, alerted=true
@@ -25,6 +34,7 @@
 #
 # שימוש:
 #   mail-watchdog.sh                    סריקה (ברירת מחדל — כך ה-timer מריץ)
+#   mail-watchdog.sh --channel whatsapp סריקת ערוץ ה-WhatsApp (ברירת מחדל: mail)
 #   mail-watchdog.sh --test-send        הודעת בדיקה אחת ל-WhatsApp, בלי לגעת ב-state
 #   mail-watchdog.sh --journal-file F   קלט journal מקובץ (שורות JSON כמו journalctl -o json)
 #   mail-watchdog.sh --state-file F     קובץ state חלופי
@@ -33,7 +43,7 @@
 #
 # סביבה (בייצור מ-/etc/sea-tower/sea-tower.env דרך EnvironmentFile=):
 #   GREEN_API_URL  GREEN_API_ID_INSTANCE  GREEN_API_TOKEN_INSTANCE  ALERT_WHATSAPP_CHAT_ID
-# אופציונלי: WATCHDOG_UNIT WATCHDOG_STATE_FILE WATCHDOG_THRESHOLD WATCHDOG_SITE_NAME
+# אופציונלי: WATCHDOG_CHANNEL WATCHDOG_UNIT WATCHDOG_STATE_FILE WATCHDOG_THRESHOLD WATCHDOG_SITE_NAME
 #   WATCHDOG_JOURNAL_FILE WATCHDOG_SEND_CMD WATCHDOG_FIRST_RUN_SINCE
 #
 # תלויות: bash, journalctl, curl, jq, flock. בלי node.
@@ -42,7 +52,8 @@ set +x  # גם אם הופעל עם bash -x — הטוקן לא יוצא ל-trac
 
 UNIT="${WATCHDOG_UNIT:-sea-tower.service}"
 SITE_NAME="${WATCHDOG_SITE_NAME:-מגדל הים}"
-STATE_FILE="${WATCHDOG_STATE_FILE:-${STATE_DIRECTORY:-/var/lib/sea-tower}/watchdog.state}"
+CHANNEL="${WATCHDOG_CHANNEL:-mail}"
+STATE_FILE="${WATCHDOG_STATE_FILE:-}"
 JOURNAL_FILE="${WATCHDOG_JOURNAL_FILE:-}"
 SEND_CMD="${WATCHDOG_SEND_CMD:-}"
 THRESHOLD="${WATCHDOG_THRESHOLD:-3}"
@@ -60,6 +71,7 @@ usage() {
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
+    --channel)      CHANNEL="${2:?--channel needs mail|whatsapp}"; shift 2 ;;
     --journal-file) JOURNAL_FILE="${2:?--journal-file needs a path}"; shift 2 ;;
     --state-file)   STATE_FILE="${2:?--state-file needs a path}"; shift 2 ;;
     --send-cmd)     SEND_CMD="${2:?--send-cmd needs a command}"; shift 2 ;;
@@ -69,6 +81,14 @@ while [[ $# -gt 0 ]]; do
     *) die "unknown argument: $1 (see --help)" ;;
   esac
 done
+
+# ה-state של mail נשאר בשם המקורי — התקנה קיימת ממשיכה בלי מיגרציה
+case "$CHANNEL" in
+  mail)     CHANNEL_LABEL="מייל";    CHANNEL_DEF="המייל";    STATE_NAME="watchdog.state" ;;
+  whatsapp) CHANNEL_LABEL="וואטסאפ"; CHANNEL_DEF="הוואטסאפ"; STATE_NAME="watchdog-whatsapp.state" ;;
+  *) die "unknown channel: $CHANNEL (mail|whatsapp)" ;;
+esac
+STATE_FILE="${STATE_FILE:-${STATE_DIRECTORY:-/var/lib/sea-tower}/${STATE_NAME}}"
 
 for tool in jq curl; do
   command -v "$tool" >/dev/null 2>&1 || die "missing dependency: $tool"
@@ -144,13 +164,13 @@ il_time() {  # $1 = epoch seconds → "01.10.2026 19:42"
 alert_message() {  # $1 = מספר כשלים, $2 = קוד שגיאה, $3 = epoch הצלחה אחרונה או ריק
   local last_ok
   if [[ -n ${3:-} ]]; then last_ok="$(il_time "$3") (שעון ישראל)"; else last_ok="לא ידועה (אין הצלחה בטווח הסריקה)"; fi
-  printf '🔴 %s — כשל בשליחת מייל לידים\n%s כשלים רצופים בשליחת התראת המייל על פנייה חדשה.\nשגיאה אחרונה: %s\nהצלחה אחרונה: %s\nלבדיקה: journalctl -u %s -n 200\n' \
-    "$SITE_NAME" "$1" "$2" "$last_ok" "$UNIT"
+  printf '🔴 %s — כשל בשליחת %s לידים\n%s כשלים רצופים בשליחת התראת %s על פנייה חדשה.\nשגיאה אחרונה: %s\nהצלחה אחרונה: %s\nלבדיקה: journalctl -u %s -n 200\n' \
+    "$SITE_NAME" "$CHANNEL_LABEL" "$1" "$CHANNEL_DEF" "$2" "$last_ok" "$UNIT"
 }
 
 recovery_message() {  # $1 = מספר כשלים לפני ההחלמה, $2 = epoch ההצלחה
-  printf '🟢 %s — מייל הלידים חזר לעבוד\nנשלח בהצלחה ב-%s (שעון ישראל), אחרי %s כשלים רצופים.\nלבדיקה: journalctl -u %s -n 200\n' \
-    "$SITE_NAME" "$(il_time "$2")" "$1" "$UNIT"
+  printf '🟢 %s — %s הלידים חזר לעבוד\nנשלח בהצלחה ב-%s (שעון ישראל), אחרי %s כשלים רצופים.\nלבדיקה: journalctl -u %s -n 200\n' \
+    "$SITE_NAME" "$CHANNEL_LABEL" "$(il_time "$2")" "$1" "$UNIT"
 }
 
 if [[ $MODE == "test-send" ]]; then
@@ -219,12 +239,12 @@ fi
 
 # MESSAGE רב-שורתי מגיע כמחרוזת; גרסאות ישנות מחזירות מערך בתים — מטופל.
 # קוד השגיאה מוגבל ל-[A-Za-z0-9_-]{1,40} — זה כל מה שמגיע להודעה.
-jq -r '
+jq -r --arg p "leads: ${CHANNEL} " '
   def msg: (.MESSAGE // "") | if type == "array" then implode else tostring end;
   msg as $m
-  | (if   ($m | startswith("leads: mail sent"))    then "sent"
-     elif ($m | startswith("leads: mail failed"))  then "failed"
-     elif ($m | startswith("leads: mail skipped")) then "failed"
+  | (if   ($m | startswith($p + "sent"))    then "sent"
+     elif ($m | startswith($p + "failed"))  then "failed"
+     elif ($m | startswith($p + "skipped")) then "failed"
      else "other" end) as $kind
   | (if $kind == "failed"
        then ([$m | capture("code: [^A-Za-z0-9_-](?<c>[A-Za-z0-9_-]{1,40})[^A-Za-z0-9_-]")] | if length > 0 then .[0].c else "unknown" end)
@@ -289,4 +309,4 @@ done <"$workdir/events.tsv"
 
 cursor="$prev_cursor"
 write_state
-log "scan ok: entries=${events} sent=${sent_seen} failed=${failed_seen} consecutive=${consecutive} alerted=${alerted}"
+log "scan ok (${CHANNEL}): entries=${events} sent=${sent_seen} failed=${failed_seen} consecutive=${consecutive} alerted=${alerted}"

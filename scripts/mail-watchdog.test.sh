@@ -13,7 +13,8 @@ BASE_TS=1790800000   # 2026-10-01 ~ 06:26 UTC
 run_no=0
 fails=0
 
-# fixture F S K O ... > file   (F=failed, S=sent רב-שורתי, K=skipped, O=שורה לא רלוונטית)
+# fixture F S K O W V ... > file   (F=failed, S=sent רב-שורתי, K=skipped, O=שורה לא רלוונטית,
+#                                  W=whatsapp failed, V=whatsapp sent)
 fixture() {
   run_no=$((run_no + 1))
   local i=0 tok m
@@ -24,6 +25,8 @@ fixture() {
       K) m="leads: mail skipped { code: 'ENV_MISSING' }" ;;
       S) m="leads: mail sent {"$'\n'"  messageId: '<redacted@sea-tower.bios.co.il>',"$'\n'"  attempts: 1"$'\n'"}" ;;
       O) m="GET /api/leads 200 in 42ms" ;;
+      W) m="leads: whatsapp failed { code: 'HTTP_401' }" ;;
+      V) m="leads: whatsapp sent { idMessage: 'BAE5F4886AD7B1A1' }" ;;
       *) echo "bad token $tok" >&2; exit 2 ;;
     esac
     jq -cn --arg m "$m" --arg c "s=run${run_no};i=${i}" \
@@ -32,11 +35,11 @@ fixture() {
   done
 }
 
-# check NAME EXPECTED_ALERTS EXPECTED_RECOVERIES EXPECTED_RC SEND_CMD JOURNAL_FILE
+# check NAME EXPECTED_ALERTS EXPECTED_RECOVERIES EXPECTED_RC SEND_CMD JOURNAL_FILE [CHANNEL]
 check() {
-  local name="$1" exp_a="$2" exp_r="$3" exp_rc="$4" sendcmd="$5" journal="$6"
+  local name="$1" exp_a="$2" exp_r="$3" exp_rc="$4" sendcmd="$5" journal="$6" channel="${7:-mail}"
   local out rc=0
-  out="$("$WD" --journal-file "$journal" --state-file "$STATE" --send-cmd "$sendcmd" 2>"$TMP/stderr")" || rc=$?
+  out="$("$WD" --channel "$channel" --journal-file "$journal" --state-file "$STATE" --send-cmd "$sendcmd" 2>"$TMP/stderr")" || rc=$?
   local alerts recov state verdict="PASS"
   alerts="$(grep -c '^🔴' <<<"$out" || true)"
   recov="$(grep -c '^🟢' <<<"$out" || true)"
@@ -46,6 +49,7 @@ check() {
   fi
   printf '\n### %s  [%s]\n    alerts=%s (צפוי %s)  recovered=%s (צפוי %s)  rc=%s (צפוי %s)\n    state: %s\n' \
     "$name" "$verdict" "$alerts" "$exp_a" "$recov" "$exp_r" "$rc" "$exp_rc" "$state"
+  out_last="$out"
   if [[ -n $out ]]; then
     while IFS= read -r line; do printf '    │ %s\n' "$line"; done <<<"$out"
   fi
@@ -75,6 +79,33 @@ echo; echo "=== D. שורות אחרות, skipped כ-כשל, sent רב-שורת�
 fresh
 fixture O K F O F S O > "$TMP/d.json";                check "D1: O K F O F S O → התראה + חזר לעבוד" 1 1 0 echo "$TMP/d.json"
 fixture O O > "$TMP/d2.json";                         check "D2: בלי אירועים — שקט, cursor מתקדם" 0 0 0 echo "$TMP/d2.json"
+
+echo; echo "=== E. ערוץ whatsapp: אותו כלל, state נפרד, כל ערוץ מתעלם מהשורות של השני ==="
+fresh
+fixture W F W F W > "$TMP/e1.json";                  check "E1: whatsapp — 3 W (עם F ביניהם) → התראה אחת" 1 0 0 echo "$TMP/e1.json" whatsapp
+if grep -q 'וואטסאפ' <<<"$out_last" && ! grep -q 'מייל' <<<"$out_last"; then echo "    E1 text: PASS"; else echo "    E1 text: FAIL"; fails=$((fails + 1)); fi
+fixture V S > "$TMP/e2.json";                         check "E2: whatsapp — V → חזר לעבוד" 0 1 0 echo "$TMP/e2.json" whatsapp
+fresh
+                                                      check "E3: mail על אותו journal — 2 F בלבד, שקט" 0 0 0 echo "$TMP/e1.json" mail
+fixture V V V > "$TMP/e4.json";                       check "E4: אחרי E3 — whatsapp sent לא מאפס את mail" 0 0 0 echo "$TMP/e4.json" mail
+if [[ $(jq -r .consecutive "$STATE") == 2 ]]; then echo "    E4 consecutive=2: PASS"; else echo "    E4 consecutive: FAIL"; fails=$((fails + 1)); fi
+
+echo; echo "=== F. שם ה-state לפי ערוץ (בלי --state-file) ==="
+SD="$TMP/sd"; mkdir -p "$SD"
+STATE_DIRECTORY="$SD" "$WD" --journal-file "$TMP/e4.json" --send-cmd echo 2>/dev/null
+STATE_DIRECTORY="$SD" "$WD" --channel whatsapp --journal-file "$TMP/e4.json" --send-cmd echo 2>/dev/null
+if [[ -s $SD/watchdog.state && -s $SD/watchdog-whatsapp.state ]] \
+   && [[ $(jq -r .last_success_ts "$SD/watchdog.state") == null ]] \
+   && [[ $(jq -r .last_success_ts "$SD/watchdog-whatsapp.state") != null ]]; then
+  echo "    F1: watchdog.state + watchdog-whatsapp.state, נפרדים  [PASS]"
+else
+  echo "    F1: [FAIL]"; fails=$((fails + 1))
+fi
+if "$WD" --channel sms --journal-file "$TMP/e4.json" --send-cmd echo 2>/dev/null; then
+  echo "    F2: ערוץ לא מוכר נדחה  [FAIL]"; fails=$((fails + 1))
+else
+  echo "    F2: ערוץ לא מוכר נדחה  [PASS]"
+fi
 
 echo
 if [[ $fails -eq 0 ]]; then echo "ALL PASS"; else echo "FAILED: $fails"; exit 1; fi
