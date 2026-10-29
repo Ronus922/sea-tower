@@ -192,9 +192,11 @@ if [[ -s $STATE_FILE ]]; then
   if state_lines="$(jq -r '
         (.cursor // ""), (.consecutive // 0), (if .alerted == true then "true" else "false" end),
         (.last_success_ts // "" | tostring), (.last_error_code // "")' "$STATE_FILE" 2>/dev/null)"; then
+    # $(...) מקצץ שורות ריקות בסוף: last_error_code ריק (ולפעמים גם last_success_ts)
+    # מגיעים כשדות חסרים, ו-set -u מפיל על ${fields[N]} בלי ברירת מחדל
     mapfile -t fields <<<"$state_lines"
-    cursor="${fields[0]}"; consecutive="${fields[1]}"; alerted="${fields[2]}"
-    last_success_ts="${fields[3]}"; last_error_code="${fields[4]}"
+    cursor="${fields[0]:-}"; consecutive="${fields[1]:-0}"; alerted="${fields[2]:-false}"
+    last_success_ts="${fields[3]:-}"; last_error_code="${fields[4]:-}"
     [[ $consecutive =~ ^[0-9]+$ ]] || consecutive=0
     [[ $last_success_ts =~ ^[0-9]+$ ]] || last_success_ts=""
   else

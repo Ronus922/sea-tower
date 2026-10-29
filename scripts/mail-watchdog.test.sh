@@ -107,5 +107,15 @@ else
   echo "    F2: ערוץ לא מוכר נדחה  [PASS]"
 fi
 
+echo; echo "=== G. קריאת state עם שדות ריקים בסוף (last_error_code ריק → שורה ריקה ש-\$(...) מקצץ) ==="
+# הצורה ש-write_state כותב אחרי סריקה ללא כשלים: last_success_ts=null, last_error_code=""
+fresh
+printf '{"cursor":"","consecutive":0,"alerted":false,"last_success_ts":null,"last_error_code":"","updated_at":"2026-10-21T21:00:43Z"}\n' > "$STATE"
+fixture O > "$TMP/g1.json";                           check "G1: state עם שני השדות הריקים" 0 0 0 echo "$TMP/g1.json"
+# הצורה ב-watchdog-whatsapp.state בייצור: last_success_ts=0, last_error_code=""
+fresh
+printf '{"cursor":"","consecutive":0,"alerted":false,"last_success_ts":0,"last_error_code":"","updated_at":"2026-10-21T21:00:43Z"}\n' > "$STATE"
+fixture O > "$TMP/g2.json";                           check "G2: state עם last_success_ts=0 ו-last_error_code ריק" 0 0 0 echo "$TMP/g2.json" whatsapp
+
 echo
 if [[ $fails -eq 0 ]]; then echo "ALL PASS"; else echo "FAILED: $fails"; exit 1; fi
