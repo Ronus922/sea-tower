@@ -8,6 +8,9 @@
 העובדות נאספו ב-29/10/2026 בקריאה בלבד: קוד מ-`origin/main`, יחידות systemd, קובצי nginx, לוג nginx,
 journal של השירות, בקשות GET ציבוריות. לא בוצעה התחברות ל-DB ולא נקראו ערכי סודות.
 
+עודכן באותו יום, אחרי תיקוני חלק ב': תיקון שומר המייל ו-`OnFailure=` ליחידה שלו (PR #59), ואישור ה-relay של
+Google Workspace לכתובת החדשה של השרת. הסעיפים "ניטור" ו"תקלות מוכרות" משקפים את המצב אחרי התיקון.
+
 ## זהות
 
 - דומיין קנוני: <https://www.sea-tower.co.il>. nginx מסיים TLS (Let's Encrypt, Certbot). התעודה של `www` תקפה עד
@@ -26,7 +29,8 @@ journal של השירות, בקשות GET ציבוריות. לא בוצעה הת
     פעיל מ-22/10/2026 03:28 UTC, `NRestarts=0` (נבדק 29/10/2026). אין `OnFailure=` ואין הגבלת זיכרון.
     קובץ היחידה מותקן בשרת בלבד ואינו בגיט.
   - `sea-tower-mail-watchdog.timer`: כל 15 דקות (`OnCalendar=*:0/15`, השהיה אקראית עד דקה, `Persistent=true`).
-    מפעיל את `sea-tower-mail-watchdog.service`. הקבצים ב-`deploy/systemd/` והמותקנים זהים להם (נבדק 29/10/2026).
+    מפעיל את `sea-tower-mail-watchdog.service`. הקבצים ב-`deploy/systemd/` והמותקנים זהים להם מבחינה
+    פונקציונלית; ההבדל היחיד הוא שתי שורות הערה שקיימות בריפו ולא ביחידה המותקנת (נבדק 29/10/2026).
     פירוט: "ניטור" ו-`deploy/systemd/README.md`.
   - `site-health.timer`: משותף לכל האתרים בשרת. בודק את האתר מקומית ומאתחל את `sea-tower.service` (ראה "ניטור").
   - אין worker נפרד ואין cron של האתר (לא נמצאו הפניות ל-sea-tower בתיקיות ה-cron של המערכת וב-crontab של המשתמש).
@@ -51,14 +55,20 @@ journal של השירות, בקשות GET ציבוריות. לא בוצעה הת
   `UptimeRobot/2.0` בתשובה 200, במרווח של כ-5 דקות. שם המוניטור ואנשי הקשר: לא מתועדים.
   המוניטור בודק רק שהדף הראשי עונה. הוא לא בודק את טופס הלידים, את ה-DB או את GuestHub.
 - Sentry: אין. Renovate: אין. CI: אין (`.github` לא קיים). ל-`main` יש ruleset עם PR חובה, בלי checks נדרשים.
-- `site-health` (watchdog מקומי, משותף): בודק את האתר כל דקה ומאתחל את `sea-tower.service` אחרי כשלים רצופים.
-  בלוג מופיע `strike N/2` (`journalctl -t site-health`). ההגדרה נמצאת בקובץ התצורה של השרת, לא בגיט.
-  סף ההתרעה ב-WhatsApp ותדירות ה-restart: לפי ה-RUNBOOK של guesthub (אותו סקריפט), ולא אומתו ל-sea-tower.
+- `site-health` (watchdog מקומי, משותף): בודק את הדף הראשי מקומית כל דקה (קודי תשובה תקינים: 200 ו-307) ומאתחל את
+  `sea-tower.service` אחרי 2 כשלים רצופים. בלוג מופיע `strike N/2` (`journalctl -t site-health`). ההגדרה נמצאת בקובץ
+  התצורה של השרת, לא בגיט. מהסקריפט המשותף (נקרא 29/10/2026): מרווח מינימלי של 15 דקות בין אתחולים של אותו אתר,
+  ו-30 דקות בין התרעות חוזרות. ההתרעה יוצאת ב-WhatsApp כשהערוץ מוגדר, ואחרת נכתבת ללוג בלבד; האם הערוץ מוגדר
+  בפועל: לא אומת. כשל של `site-health.service` עצמו לא מתריע (אין לו `OnFailure=`).
 - שומר המייל: `scripts/mail-watchdog.sh`, רץ מ-`sea-tower-mail-watchdog.service`. סורק את ה-journal של
   `sea-tower.service` בשני ערוצים, ברצף, ושולח הודעת WhatsApp (Green API) אחרי 3 כשלים רצופים, ושוב כשהערוץ חוזר.
   - הערוץ `mail` מזהה `leads: mail failed` ו-`leads: mail skipped`. הערוץ `whatsapp` מזהה `leads: whatsapp failed`.
   - ההודעה כוללת רק את שם האתר, מספר הכשלים, קוד שגיאה, מועד ההצלחה האחרונה ופקודת `journalctl`. בלי תוכן ליד.
-  - ליחידה אין `OnFailure=`, ולכן כשהיא עצמה נכשלת אין התרעה. ראה "תקלות מוכרות".
+  - ליחידה יש `OnFailure=` לתבנית ההתרעה המשותפת של השרת (`billing-alert@…`, אותה תבנית של גיבויי rentbook
+    ו-guesthub, לפי הערה ביחידה). נוסף ב-29/10/2026 (PR #59) ואומת ב-`systemctl show`. אחרי שבוע של כשלים שקטים
+    (ראה "תקלות מוכרות") כשל של השומר עצמו אמור להתריע. האם ההתרעה נבדקה בירי מבוקר: לא אומת.
+  - המצב נשמר בקובצי state של השירות. ערוץ `mail` שהגיע ל-`alerted=true` חוזר ל-`alerted=false` רק אחרי ליד שנשלח
+    בהצלחה ונרשם ב-journal כ-`leads: mail sent`, ולא ממייל בדיקה שנשלח מחוץ לאפליקציה.
 - לוגים:
   - האפליקציה: journald, `journalctl -u sea-tower.service`. אין קובצי לוג. מדיניות השמירה של journald: ברירת מחדל
     של המערכת, לא הוגדרה ייעודית.
@@ -73,6 +83,8 @@ journal של השירות, בקשות GET ציבוריות. לא בוצעה הת
   התנהגות האתר כש-GuestHub לא עונה: לא אומת.
 - Gmail SMTP: מייל התראה על ליד (`src/lib/mailer.ts`, עד 4 ניסיונות). משתנים: `GMAIL_USER`, `GMAIL_APP_PASSWORD`,
   `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`, `SMTP_EHLO_NAME`. שם ה-EHLO מפורש כי ה-relay דחה את שם ברירת המחדל (כתובת loopback) ב-421.
+  ה-relay הוא ה-SMTP relay של Google Workspace, והוא מאשר שולחים לפי כתובת ה-IP הציבורית של השרת. הקמה מחדש של
+  השרת או שינוי כתובת מחייבים עדכון הרשימה בקונסולת Google Workspace, אחרת כל מייל ליד נדחה (ראה "תקלות מוכרות").
 - Green API (WhatsApp): התראה על כל ליד (`src/lib/whatsapp.ts`) והתראות ה-watchdog. משתנים: `GREEN_API_URL`,
   `GREEN_API_ID_INSTANCE`, `GREEN_API_TOKEN_INSTANCE`, `ALERT_WHATSAPP_CHAT_ID`. הטוקן לא מודפס ללוג.
 - Google Tag Manager ואימות אתר: `NEXT_PUBLIC_GTM_ID`, `GOOGLE_SITE_VERIFICATION`, `BING_SITE_VERIFICATION`.
@@ -133,16 +145,23 @@ journal של השירות, בקשות GET ציבוריות. לא בוצעה הת
   שומר המייל. הסיבה לאותו כשל: ה-relay דחה את שם ה-EHLO שנבחר כברירת מחדל (כתובת loopback) ב-421, ולכן נוסף `SMTP_EHLO_NAME`.
 - **פריסה שנפלה על `Module not found` (nodemailer):** `node_modules` ב-worktree לא תאם ל-`package-lock.json`.
   הסקריפט מריץ עכשיו `npm ci` לפני הבנייה ועוצר בכשל.
-- **מצב נצפה ב-29/10/2026, מייל לידים:** שלושת הלידים האחרונים בלוג של 5 ימים (25/10, ו-28/10 פעמיים) הסתיימו
-  ב-`leads: mail failed { code: 'EENVELOPE', attempts: 4 }`, כשהתראת ה-WhatsApp על אותם לידים נשלחה
-  (`leads: whatsapp sent`). `EENVELOPE` הוא קוד שגיאה של nodemailer. הסיבה: לא אומת.
-- **מצב נצפה ב-29/10/2026, שומר המייל נכשל:** ‏`sea-tower-mail-watchdog.service` במצב `failed`, וכל חמש הריצות
-  בין 04:15 ל-05:15 UTC הסתיימו בקוד 1 עם
-  `mail-watchdog.sh: line 197: fields[4]: unbound variable`.
-  - הריצה הראשונה ביחידה (`--channel mail`) מדפיסה `scan ok (mail): … consecutive=3 alerted=true` ומסתיימת, והשנייה נופלת.
-  - הסבר סביר מקריאת הקוד: הסקריפט רץ עם `set -u`, ושורה 197 קוראת את השדה החמישי מתוך `mapfile` של פלט `jq`. כשקוד
-    השגיאה האחרון ב-state ריק, `mapfile` מחזיר ארבע שורות בלבד. לא אומת מול תוכן קובץ ה-state, שלא נקרא.
-  - לא טופל. אין התרעה על הכשל הזה, כי ליחידה אין `OnFailure=`.
+- **מייל לידים נדחה ב-`EENVELOPE` (נצפה ב-29/10/2026, אושר ותוקן באותו יום):** שלושת הלידים האחרונים בלוג של 5 ימים
+  (25/10, ו-28/10 פעמיים) הסתיימו ב-`leads: mail failed { code: 'EENVELOPE', attempts: 4 }`, כשהתראת ה-WhatsApp על
+  אותם לידים נשלחה (`leads: whatsapp sent`). `EENVELOPE` הוא קוד שגיאה של nodemailer.
+  - הסיבה (אומתה בבדיקת מעטפה מול ה-relay: EHLO, MAIL FROM, RCPT TO, בלי DATA): ה-relay של Google Workspace דחה
+    את השולח עם `550 5.7.1 Invalid credentials for relay`. השרת הוקם מחדש ב-21/10/2026 וכתובת ה-IP הציבורית שלו
+    השתנתה, אבל הרשימה ב-Google עדיין כללה את הכתובת הישנה.
+  - התיקון: עדכון הרשימה בקונסולת Google Workspace (ידני, בוצע על ידי הבעלים ב-29/10/2026). בדיקת המעטפה
+    החזירה 250 (MAIL ו-RCPT) בסביבות 18:00 UTC, ומייל בדיקה אחד נשלח לכתובת הבעלים בסקריפט, לא דרך האפליקציה.
+  - **עדיין לא אומת עם ליד אמיתי:** בלוג של `sea-tower.service` אין שורת `leads: mail …` אחרי התיקון. עד שיגיע ליד
+    ויירשם `leads: mail sent`, שומר המייל ממשיך להציג `consecutive=3 alerted=true` (נצפה ב-19:45 UTC). זה צפוי ולא תקלה.
+- **שומר המייל נכשל בשקט כשבוע (21/10 עד 29/10/2026, תוקן ב-PR #59):** ‏`sea-tower-mail-watchdog.service` הסתיים בקוד 1
+  בכל ריצה של 15 דקות, החל מ-21/10/2026 21:15 UTC, עם `mail-watchdog.sh: line 197: fields[N]: unbound variable`
+  (נצפו `fields[3]` ב-21/10 ו-`fields[4]` ב-29/10). הכשל לא התחיל ב-29/10; הוא רק התגלה אז.
+  - הסיבה: הסקריפט רץ עם `set -u`, וקרא שדות מתוך `mapfile` של פלט `jq`. כשקוד השגיאה האחרון או מועד ההצלחה האחרונה
+    ב-state ריקים, מספר השורות קטן ממספר השדות והגישה לשדה החסר קורסת. אומת בשחזור (29/10/2026).
+  - התיקון: ‏`${fields[N]:-}` בשורה 199, ו-`OnFailure=` ליחידה (PR #59). מאז התיקון כל הריצות מסתיימות ב-`Result=success`
+    (נבדק 29/10/2026 עד 19:45 UTC). התראה על כשל שלו לא הייתה אז אפשרית, כי ליחידה לא היה `OnFailure=`.
 - **הודעת `[booking] … הוסתרו מ-/booking` ב-journal:** הודעה צפויה. דירה פנויה שאין לה תמונה ציבורית פעילה לא
   מוצגת, והתיקון הוא להעלות ב-GuestHub תמונה פעילה אחת לפחות.
 - **מוני rate-limit ומניעת כפילויות ב-`/api/leads`:** נשמרים בזיכרון התהליך (instance יחיד) ומתאפסים בכל restart.
