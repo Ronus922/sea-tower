@@ -5,6 +5,10 @@ Description=Sea Tower mail watchdog (WhatsApp alert on repeated lead mail/WhatsA
 Documentation=file:///var/www/sea-tower/deploy/systemd/README.md
 After=network-online.target
 Wants=network-online.target
+# שומר שנכשל בשקט שווה לאין-שומר (21–29.10.2026: 700+ כשלים רצופים בלי אף התראה).
+# ההתראה (מייל + WhatsApp) היא התבנית הקיימת של billing, המותקנת בשרת ב-
+# /etc/systemd/system/billing-alert@.service, והיא אותה התבנית של גיבויי rentbook ו-guesthub
+OnFailure=billing-alert@%n.service
 
 [Service]
 Type=oneshot

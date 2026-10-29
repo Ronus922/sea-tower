@@ -13,6 +13,9 @@
   `GREEN_API_URL`, `GREEN_API_ID_INSTANCE`, `GREEN_API_TOKEN_INSTANCE`,
   `ALERT_WHATSAPP_CHAT_ID` (בפורמט `972XXXXXXXXX@c.us`).
   הקובץ הוא `root:root 600` — עורכים ב-`sudoedit`, לא מעתיקים ערכים לשום מקום אחר.
+- היחידה `billing-alert@.service` מותקנת בשרת (התבנית של billing). ליחידת השומר יש
+  `OnFailure=billing-alert@%n.service`, כך שכשל של השומר עצמו (לא של האתר) מתריע במייל
+  וב-WhatsApp ולא נשאר שקט. בלי התבנית ההתראה לא תישלח, אבל השומר ימשיך לרוץ.
 
 ## התקנה (פעם אחת, אחרי מיזוג ל-main ו-`git pull` בעץ הפרודקשן)
 
